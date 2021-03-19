@@ -1,6 +1,5 @@
 (executables
  (names main)
- (libraries yojson)
  (modes byte)
  (preprocess
   (pps js_of_ocaml-ppx)))
@@ -8,11 +7,12 @@
 (rule
  (targets main.js)
  (action
-  (run %{bin:js_of_ocaml} --source-map %{dep:main.bc} -o %{targets} --pretty)))
+  (run %{bin:js_of_ocaml} --source-map %{dep:main.bc} -o %{targets})))
 
 (alias
  (name default)
  (deps
   main.js
   index.html
+  style.css
   (glob_files sprites/*.{png})))

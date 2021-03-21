@@ -1,3 +1,37 @@
+type road = {
+  cost : int;
+  x_cord : int;
+  y_cord : int;
+}
+
+type resource = {
+  amount : int;
+  name : string;
+}
+
+type building = {
+  name : string;
+  cost : int;
+  maintenance : int;
+  output : resource;
+  tax : int;
+  defense : int;
+  building_dependency : building list;
+  resource_dependency : resource list;
+}
+
+type game_structure =
+  | Building of building
+  | Road of road
+  | None
+
+type cell_config = {
+  game_structure : game_structure;
+  width : float;
+  height : float;
+  fill_style : string;
+}
+
 type canvas_config = {
   width : float;
   height : float;
@@ -14,71 +48,70 @@ type gui_config = {
   cell_config : cell_config;
 }
 
-type cell_config = {
-  (** tile is commented out because other existing functions are not fixed for the updated cell_config type. *)
-  (* tile : tile; *)
-  width : float;
-  height : float;
-  fill_style : string;
-}
+type camel = { food : int }
 
-type tile =
-  | Building of building
-  | Road of road
-  | None
+type stockpile = { resources : resource list }
 
-type building = {
-  name : string;
-  cost : int;
-  maintenance : int;
-  output : int;
-  defense : int;
-  building_dependency : building list;
-  resource_dependency : resource list;
-}
+type game_state = { gui : gui_config }
 
-type road = {
-  cost : int;
-  x_cord : int;
-  y_cord : int;
-}
+let house =
+  {
+    name = "house";
+    cost = 0;
+    maintenance = 0;
+    output = { amount = 0; name = "" };
+    tax = 0;
+    defense = 0;
+    building_dependency = [];
+    resource_dependency = [];
+  }
 
-type resource = {
-  amount : int;
-  name : string;
-}
+let oat = { amount = 0; name = "oat" }
 
-type camel = {
-  food : int;
-}
+let oats_plantation =
+  {
+    name = "oats planation";
+    cost = 0;
+    maintenance = 0;
+    output = oat;
+    tax = 0;
+    defense = 0;
+    building_dependency = [];
+    resource_dependency = [];
+  }
 
-type stockpile = {
-  resources : resource list;
-}
+let electricity = { amount = 0; name = "electricity" }
 
-type game_state = {
-  gui : gui_config;
-}
+let power_plant =
+  {
+    name = "power plant";
+    cost = 0;
+    maintenance = 0;
+    output = electricity;
+    tax = 0;
+    defense = 0;
+    building_dependency = [];
+    resource_dependency = [];
+  }
 
-type game_state = { config : gui_config }
-
-let house = failwith "unimplemented"
-
-let oats_planation = failwith "unimplemented"
-
-let oat = failwith "unimplemented"
-
-let power_plant = failwith "unimplemented"
-
-let electricity = failwith "unimplemented"
-
-let barrack = failwith "unimplemented"
+let barrack =
+  {
+    name = "power plant";
+    cost = 0;
+    maintenance = 0;
+    output = { amount = 0; name = "" };
+    tax = 0;
+    defense = 0;
+    building_dependency = [];
+    resource_dependency = [];
+  }
 
 let new_config x y m_x m_y c_x c_y fill_style =
   {
     canvas_config = { width = x; height = y };
     map_config = { width = m_x; height = m_y };
-    cell_config = { width = c_x; height = c_y; fill_style };
+    cell_config =
+      { game_structure = None; width = c_x; height = c_y; fill_style };
   }
 
 let canvas_width config = config.canvas_config.width

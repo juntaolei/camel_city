@@ -1,21 +1,21 @@
-(** *)
+(** The type [canvas_config] records the width and height of the HTML
+    canvas. *)
 type canvas_config
 
-(** *)
+(** The type [map_config] records the width and height of the game map. *)
 type map_config
 
-(** *)
-type gui_config
-
-(** *)
+(** The type [cell_config] records the width and height of a cell, as
+    well as its fillstyle and the type of game structure it contains. *)
 type cell_config
 
-(** The type [tiles] represents the most basic unit in construction that holds
-    either a building, a road, or nothing. *)
-type tile =
-  | Building of building
-  | Road of road
-  | None
+(** The type [gui_config] records the [canvas_config], [map_config], and
+    [cell_config]. *)
+type gui_config
+
+(** The type [game_structure] represents the most basic unit in
+    construction that holds either a building, a road, or nothing. *)
+type game_structure
 
 (** The type of buildings. *)
 type building
@@ -29,16 +29,15 @@ type resource
 (** The type of camel residents. *)
 type camel
 
-(** The type [stockpile] records amounts of resources at a certain game 
+(** The type [stockpile] records amounts of resources at a certain game
     state. *)
 type stockpile
 
-(** The type [game_state] records condition of the game at a certain instance
-    of time. *)
+(** The type [game_state] records condition of the game at a certain
+    instance of time. *)
 type game_state
 
-(** [new_config] initializes a new [gui_config].
-    Requires:  *)
+(** [new_config] initializes a new [gui_config]. Requires: *)
 val new_config :
   float -> float -> int -> int -> float -> float -> string -> gui_config
 
@@ -47,6 +46,8 @@ val house : building
 val oats_plantation : building
 
 val power_plant : building
+
+val barrack : building
 
 val canvas_width : gui_config -> float
 

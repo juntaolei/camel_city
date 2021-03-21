@@ -10,6 +10,8 @@ opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx ounit yojs
   
 Compiling to JavaScript:
 
+For development: 
+
 ```bash
 make build
 ```

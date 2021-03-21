@@ -8,7 +8,15 @@ type map_config = {
   height : int;
 }
 
+type road = {
+  cost : int;
+  x_cord : int;
+  y_cord : int;
+}
+
 type cell_config = {
+  (** tile is commented out because other existing functions are not fixed for the updated cell_config type. *)
+  (* tile : tile; *)
   width : float;
   height : float;
   fill_style : string;
@@ -19,6 +27,50 @@ type gui_config = {
   map_config : map_config;
   cell_config : cell_config;
 }
+
+type resource = {
+  amount : int;
+  name : string;
+}
+
+type stockpile = {
+  resources : resource list;
+}
+
+type building = {
+  cost : int;
+  maintenance : int;
+  output : int;
+  defense : int;
+  name : string;
+  building_dependency : building list;
+  resource_dependency : resource list;
+}
+
+type camel = {
+  food : int;
+}
+
+type tile =
+  | Building of building
+  | Road of road
+  | None
+
+type game_state = {
+  gui : gui_config;
+}
+
+let house = failwith "unimplemented"
+
+let oats_planation = failwith "unimplemented"
+
+let power_plant = failwith "unimplemented"
+
+let barrack = failwith "unimplemented"
+
+let oat = failwith "unimplemented"
+
+type game_state = { config : gui_config }
 
 let new_config x y m_x m_y c_x c_y fill_style =
   {

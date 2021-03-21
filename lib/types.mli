@@ -1,5 +1,11 @@
 type gui_config
 
+type building
+
+type road
+
+type resource
+
 val new_config :
   float -> float -> int -> int -> float -> float -> string -> gui_config
 

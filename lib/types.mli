@@ -9,9 +9,9 @@ type map_config
     well as its fillstyle and the type of game structure it contains. *)
 type cell_config
 
-(** The type [cell_list] records the collection of all [cell_config] presented 
-    in the game map. *)
-type cell_list
+(** The type [cell] records game structure of a cell present in the game
+    map. *)
+type cell
 
 (** The type [gui_config] records the [canvas_config], [map_config], and
     [cell_config]. *)
@@ -63,11 +63,12 @@ val iron : resource
 
 val money : resource
 
-(** [creat_building building x_index y_index] is the updated [cell_list] after
-    placing building [building] in location ([x_index], [y_index]). *)
-val create_building : building -> int -> int -> cell_list
+(** [creat_building building x_index y_index] is the updated [cell_list]
+    after placing building [building] in location ([x_index],
+    [y_index]). *)
+val create_building : building -> int -> int -> cell list
 
-val collect_tax : cell_list -> cell_list
+val collect_tax : cell list -> cell list
 
 val canvas_width : gui_config -> float
 

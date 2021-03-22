@@ -8,6 +8,9 @@ val draw_cell :
   Types.gui_config ->
   unit
 
+val add_event_listeners :
+  Js_of_ocaml.Dom_html.canvasElement Js_of_ocaml.Js.t -> unit
+
 (** [draw_map ctx c] modifies ctx to draw a map according to the
     parameters defined in the GUI config [c]. *)
 val draw_map :

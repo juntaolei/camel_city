@@ -16,6 +16,8 @@ let draw_cell (ctx : Dom_html.canvasRenderingContext2D Js.t) x y config
   ctx##.fillStyle := Js.string fill_style;
   ctx##fill
 
+let add_event_listeners (canvas : Dom_html.canvasElement Js.t) = ()
+
 let draw_map (ctx : Dom_html.canvasRenderingContext2D Js.t) config =
   for i = 0 to map_width config do
     for j = 0 to map_height config do

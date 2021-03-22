@@ -26,7 +26,6 @@ type game_structure =
   | None
 
 type cell_config = {
-  game_structure : game_structure;
   width : float;
   height : float;
   fill_style : string;
@@ -42,12 +41,13 @@ type map_config = {
   height : int;
 }
 
-type cell_list = cell_config list list;
+type cell = { game_structure : game_structure }
 
 type gui_config = {
   canvas_config : canvas_config;
   map_config : map_config;
-  cell_config : cell_list;
+  cell_config : cell_config;
+  cell : cell list;
 }
 
 type camel = { food : int }
@@ -95,7 +95,7 @@ let power_plant =
     building_dependency = [];
     resource_dependency = [];
   }
-  
+
 let iron = { amount = 0; name = "iron" }
 
 let mine =
@@ -110,7 +110,7 @@ let mine =
     resource_dependency = [];
   }
 
-let money = {amount = 0; name = "money"}
+let money = { amount = 0; name = "money" }
 
 let barrack =
   {
@@ -128,8 +128,8 @@ let new_config x y m_x m_y c_x c_y fill_style =
   {
     canvas_config = { width = x; height = y };
     map_config = { width = m_x; height = m_y };
-    cell_config =
-      { game_structure = None; width = c_x; height = c_y; fill_style };
+    cell_config = { width = c_x; height = c_y; fill_style };
+    cell = [];
   }
 
 let canvas_width config = config.canvas_config.width
@@ -145,3 +145,7 @@ let cell_width config = config.cell_config.width
 let cell_height config = config.cell_config.height
 
 let cell_fill_style config = config.cell_config.fill_style
+
+let create_building building x y = failwith "Unimplemented"
+
+let collect_tax lst = failwith "Unimplemented"

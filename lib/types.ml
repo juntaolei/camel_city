@@ -42,10 +42,12 @@ type map_config = {
   height : int;
 }
 
+type cell_list = cell_config list list;
+
 type gui_config = {
   canvas_config : canvas_config;
   map_config : map_config;
-  cell_config : cell_config;
+  cell_config : cell_list;
 }
 
 type camel = { food : int }
@@ -84,7 +86,7 @@ let electricity = { amount = 0; name = "electricity" }
 
 let power_plant =
   {
-    name = "power plant";
+    name = "power_plant";
     cost = 0;
     maintenance = 0;
     output = electricity;
@@ -93,6 +95,22 @@ let power_plant =
     building_dependency = [];
     resource_dependency = [];
   }
+  
+let iron = { amount = 0; name = "iron" }
+
+let mine =
+  {
+    name = "mine";
+    cost = 0;
+    maintenance = 0;
+    output = iron;
+    tax = 0;
+    defense = 0;
+    building_dependency = [];
+    resource_dependency = [];
+  }
+
+let money = {amount = 0; name = "money"}
 
 let barrack =
   {

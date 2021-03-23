@@ -16,7 +16,6 @@ type building = {
   output : resource;
   tax : int;
   defense : int;
-  employment : int;
   building_dependency : building list;
   resource_dependency : resource list;
 }
@@ -68,7 +67,6 @@ let house =
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
-    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -83,7 +81,6 @@ let oats_plantation =
     output = oat;
     tax = 0;
     defense = 0;
-    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -98,7 +95,6 @@ let power_plant =
     output = electricity;
     tax = 0;
     defense = 0;
-    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -113,7 +109,6 @@ let mine =
     output = iron;
     tax = 0;
     defense = 0;
-    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -128,7 +123,6 @@ let barrack =
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
-    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }

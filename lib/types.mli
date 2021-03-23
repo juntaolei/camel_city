@@ -21,18 +21,6 @@ type gui_config
     construction that holds either a building, a road, or nothing. *)
 type game_structure
 
-(** The type of buildings. *)
-type building
-
-(** The type of roads. *)
-type road
-
-(** The type of resources consumed and produced by camel city. *)
-type resource
-
-(** The type of camel residents. *)
-type camel
-
 (** The type [stockpile] records amounts of resources at a certain game
     state. *)
 type stockpile
@@ -44,33 +32,6 @@ type game_state
 (** [new_config] initializes a new [gui_config]. Requires: *)
 val new_config :
   float -> float -> int -> int -> float -> float -> string -> gui_config
-
-val house : building
-
-val oats_plantation : building
-
-val power_plant : building
-
-val mine : building
-
-val barrack : building
-
-val oat : resource
-
-val electricity : resource
-
-val iron : resource
-
-val money : resource
-
-(** [creat_building conf build x_index y_index] updates [gui_config] by
-    placing [building] build in location ([x_index],
-    [y_index]). *)
-val create_building : gui_config -> building -> int -> int -> unit
-
-(** [collect_tax lst stock] is the updated stockpile after collecting taxes 
-    from existing buildings. *)
-val collect_tax : gui_config -> stockpile -> stockpile
 
 val canvas_width : gui_config -> float
 

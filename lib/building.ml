@@ -1,5 +1,3 @@
-open Types
-
 type resource = {
   amount : int;
   name : string;
@@ -92,6 +90,7 @@ let barrack =
     resource_dependency = [];
   }
 
+  (*
 let place_cell conf cell x_coord y_coord =
     List.mapi (fun i x -> if i = x_coord then 
       List.mapi (fun i y -> if i = y_coord then cell else y) else x) conf.cell
@@ -108,3 +107,4 @@ let rec sum_tax = function
 let rec tax_amount = function
   | [] -> 0
   | h :: t -> (sum_tax h) + tax_amount t
+*)

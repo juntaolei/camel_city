@@ -29,6 +29,14 @@ type stockpile
     instance of time. *)
 type game_state
 
+(** [place_cell conf cel x_index y_index] updates [gui_config] conf by
+    placing [cell] cel in location ([x_index], [y_index]). *)
+val place_cell : gui_config -> cell -> int -> int -> unit
+
+(** [tax_amount conf] is the amount of tax collected from existing cells in
+    a unit of time. *)
+val tax_amount : gui_config -> int
+
 (** [new_config] initializes a new [gui_config]. Requires: *)
 val new_config :
   float -> float -> int -> int -> float -> float -> string -> gui_config

@@ -1,5 +1,3 @@
-open Types
-
 (** The type of resources consumed and produced by camel city. *)
 type resource
 
@@ -30,10 +28,12 @@ val iron : resource
 
 val money : resource
 
+(*
 (** [place_cell conf cel x_index y_index] updates [gui_config] conf by
     placing [cell] cel in location ([x_index], [y_index]). *)
-val place_cell : gui_config -> cell -> int -> int -> unit
+val place_cell : Types.gui_config -> Types.cell -> int -> int -> unit
 
 (** [tax_amount conf] is the amount of tax collected from existing cells in
     a unit of time. *)
-val tax_amount : gui_config -> int
+val tax_amount : Types.gui_config -> int
+*)

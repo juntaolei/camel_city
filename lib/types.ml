@@ -37,6 +37,23 @@ type stockpile = {
   money_stock : money
 }
 
+let place_cell conf cell x_coord y_coord =
+  List.mapi (fun i x -> if i = x_coord then 
+    List.mapi (fun i y -> if i = y_coord then cell else y) else x) conf.cell
+
+(* helper functions *)
+(* summing tax for a cell list*)
+let rec sum_tax = function
+| [] -> 0
+| h::t -> match h with
+          | Building of building ->
+            building.tax + sum_tax t
+          | _ -> sum_tax t
+
+let rec tax_amount = function
+| [] -> 0
+| h :: t -> (sum_tax h) + tax_amount t
+
 let new_config x y m_x m_y c_x c_y fill_style =
   {
     canvas_config = { width = x; height = y };

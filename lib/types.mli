@@ -63,12 +63,14 @@ val iron : resource
 
 val money : resource
 
-(** [creat_building building x_index y_index] is the updated [cell_list]
-    after placing building [building] in location ([x_index],
+(** [creat_building conf build x_index y_index] updates [gui_config] by
+    placing [building] build in location ([x_index],
     [y_index]). *)
-val create_building : building -> int -> int -> cell list
+val create_building : gui_config -> building -> int -> int -> unit
 
-val collect_tax : cell list -> cell list
+(** [collect_tax lst stock] is the updated stockpile after collecting taxes 
+    from existing buildings. *)
+val collect_tax : gui_config -> stockpile -> stockpile
 
 val canvas_width : gui_config -> float
 

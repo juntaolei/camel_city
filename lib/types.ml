@@ -16,11 +16,12 @@ type building = {
   output : resource;
   tax : int;
   defense : int;
+  employment : int;
   building_dependency : building list;
   resource_dependency : resource list;
 }
 
-type game_structure =
+type cell =
   | Building of building
   | Road of road
   | None
@@ -41,18 +42,21 @@ type map_config = {
   height : int;
 }
 
-type cell = { game_structure : game_structure }
-
 type gui_config = {
   canvas_config : canvas_config;
   map_config : map_config;
   cell_config : cell_config;
-  cell : cell list;
+  cell : cell array array;
 }
 
-type camel = { food : int }
+type camel = { food : int; employment : building}
 
-type stockpile = { resources : resource list }
+type stockpile = { 
+  oat_stock : oat;
+  electricity_stock : electricity;
+  iron_stock : iron;
+  money_stock : money
+}
 
 type game_state = { gui : gui_config }
 
@@ -64,6 +68,7 @@ let house =
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
+    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -78,6 +83,7 @@ let oats_plantation =
     output = oat;
     tax = 0;
     defense = 0;
+    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -92,6 +98,7 @@ let power_plant =
     output = electricity;
     tax = 0;
     defense = 0;
+    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -106,6 +113,7 @@ let mine =
     output = iron;
     tax = 0;
     defense = 0;
+    employment = 0;
     building_dependency = [];
     resource_dependency = [];
   }
@@ -120,8 +128,39 @@ let barrack =
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
+    employment = 0;
     building_dependency = [];
     resource_dependency = [];
+  }
+
+let create_building conf build x_coord y_coord =
+  Array.set conf.cell.(x_coord) y_coord build 
+
+(* helper func *)
+let rec tax_for_row acc row = 
+  match row.length with
+  | 0 -> acc
+  | _ -> match row.(row.length - 1) with
+         | Building of building ->
+            tax_for_row (acc + building.tax) (Array.sub row 0 row.length - 1)
+         | _ -> tax_for_row acc (Array.sub row 0 row.length - 1)
+
+let collect_tax conf stock =
+  let rec sum_tax acc conf =
+    match conf.length with
+    | 0 -> acc
+    | _ -> 
+      sum_tax (tax_for_row acc conf.(conf.length - 1)) 
+      (Array.sub conf 0 conf.length - 1)
+  in 
+  {
+    oact_stock = stock.oat_stock;
+    electricity_stock = stock.electricity_stock;
+    iron_stock = stock.iron_stock;
+    money_stock = {
+      amount = sum_tax conf.cell stock.mone_stock.amount;
+      name = "money"
+      }
   }
 
 let new_config x y m_x m_y c_x c_y fill_style =

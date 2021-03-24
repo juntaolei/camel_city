@@ -1,65 +1,77 @@
-open Building
+open Buildings
 
 type canvas_config = {
   width : float;
-  height : float;
+  height : float
 }
 
 type map_config = {
   width : int;
-  height : int;
+  height : int
 }
 
 type cell_config = {
   width : float;
   height : float;
-  fill_style : string;
+  fill_style : string
 }
 
 type cell =
   | Building of building
-  | Road of road
+  | Road_t of road
   | None
 
 type gui_config = {
   canvas_config : canvas_config;
   map_config : map_config;
   cell_config : cell_config;
-  cell : cell list list;
+  cell : cell list list
 }
 
 type game_state = { gui : gui_config }
 
-type stockpile = { 
-  oat_stock : oat;
-  electricity_stock : electricity;
-  iron_stock : iron;
-  money_stock : money
-}
+type stockpile = { lst : resource list }
+
+(* helper function *)
+let rec place_row acc_r y cell = function
+  | [] -> acc_r
+  | h :: t -> 
+    place_row 
+    ((if List.length acc_r = y then cell else h) :: acc_r) y cell t
 
 let place_cell conf cell x_coord y_coord =
-  List.mapi (fun i x -> if i = x_coord then 
-    List.mapi (fun i y -> if i = y_coord then cell else y) else x) conf.cell
-
-(* helper functions *)
-(* summing tax for a cell list*)
-let rec sum_tax = function
+  let rec place_col acc_c = function
+  | [] -> acc_c
+  | h :: t -> 
+    place_col 
+    ((if List.length acc_c = x_coord then (place_row [] y_coord cell h) else h) 
+    :: acc_c) t in
+  {
+    canvas_config = conf.canvas_config;
+    map_config = conf.map_config;
+    cell_config = conf.cell_config;
+    cell = List.rev (place_col [] conf.cell)
+  }
+(* helper function *)
+let rec sum_row_tax = function
 | [] -> 0
 | h::t -> match h with
-          | Building of building ->
-            building.tax + sum_tax t
-          | _ -> sum_tax t
+          | Building building ->
+            get_tax building + sum_row_tax t
+          | _ -> sum_row_tax t
 
-let rec tax_amount = function
-| [] -> 0
-| h :: t -> (sum_tax h) + tax_amount t
+let rec tax_amount conf = 
+  let rec tax_amount_lst = function
+  | [] -> 0
+  | h :: t -> (sum_row_tax h) + tax_amount_lst t in
+  tax_amount_lst conf.cell
 
 let new_config x y m_x m_y c_x c_y fill_style =
   {
     canvas_config = { width = x; height = y };
     map_config = { width = m_x; height = m_y };
     cell_config = { width = c_x; height = c_y; fill_style };
-    cell = [];
+    cell = []
   }
 
 let canvas_width config = config.canvas_config.width

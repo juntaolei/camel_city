@@ -90,21 +90,4 @@ let barrack =
     resource_dependency = [];
   }
 
-  (*
-let place_cell conf cell x_coord y_coord =
-    List.mapi (fun i x -> if i = x_coord then 
-      List.mapi (fun i y -> if i = y_coord then cell else y) else x) conf.cell
-
-(* helper functions *)
-(* summing tax for a cell list*)
-let rec sum_tax = function
-  | [] -> 0
-  | h::t -> match h with
-            | Building of building ->
-              building.tax + sum_tax t
-            | _ -> sum_tax t
-
-let rec tax_amount = function
-  | [] -> 0
-  | h :: t -> (sum_tax h) + tax_amount t
-*)
+let get_tax building = building.tax

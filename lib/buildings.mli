@@ -28,6 +28,8 @@ val iron : resource
 
 val money : resource
 
+val get_tax : building -> int
+
 (*
 (** [place_cell conf cel x_index y_index] updates [gui_config] conf by
     placing [cell] cel in location ([x_index], [y_index]). *)

@@ -35,7 +35,7 @@ type stockpile = { lst : resource list }
 
 (* For now: index 0 = oat, index 1 = electricity, index 2 = iron, index
    3 = money*)
-(* type stockpile = (string, int) Hashtbl.t *)
+(* type stockpile = (resource, int) Hashtbl.t *)
 
 (* helper function *)
 let rec place_row acc_r y cell = function

@@ -31,6 +31,8 @@ type gui_config = {
 type game_state = { gui : gui_config }
 
 type stockpile = { lst : resource list }
+(* For now:
+index 0 = oat, index 1 = electricity, index 2 = iron, index 3 = money*)
 
 (* helper function *)
 let rec place_row acc_r y cell = function
@@ -65,6 +67,29 @@ let rec tax_amount conf =
   | [] -> 0
   | h :: t -> (sum_row_tax h) + tax_amount_lst t in
   tax_amount_lst conf.cell
+
+(* helper function
+    [merge_stock s1 s2 []] combines resources in [s1] and [s2] into a single
+    stockpile. *)
+let rec merge_stock s1 s2 acc = match List.length acc with
+  | 4 -> acc
+  | _ -> merge_stock s1 s2 ((new_resource 
+    (List.nth s1 (3 - List.length acc)).name 
+    (List.nth s1 (3 - List.length acc)).amount + 
+    (List.nth s2 (3 - List.length acc)).amount) :: acc )
+
+(* helper function
+    [update_tax pile] is the [pile] after collecting tax.*)
+let update_tax conf pile = 
+    let tax_pile = [new_resource 0 ""; new_resource 0 "";
+    new_resource 0 ""; new_resource (tax_amount conf) "money"] in
+      merge_stock pile tax_pile []
+
+(* order of update: geographic location or
+    collect tax -> oat_plantation -> power_plant -> mine *)
+let update_stockpile pile conf = pile
+  |> update conf |> failwith "unimplemented"
+
 
 let new_config x y m_x m_y c_x c_y fill_style =
   {

@@ -33,6 +33,10 @@ val place_cell : gui_config -> cell -> int -> int -> gui_config
     a unit of time. *)
 val tax_amount : gui_config -> int
 
+(** [update_stockpile conf pile] is the updated [pile] after collecting and
+    consuming resources from buildings in [conf]. *)
+val update_stockpile : gui_config -> stockpile -> stockpile
+
 (** [new_config] initializes a new [gui_config]. Requires: *)
 val new_config :
   float -> float -> int -> int -> float -> float -> string -> gui_config

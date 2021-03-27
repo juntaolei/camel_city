@@ -44,10 +44,17 @@ val barrack : building
 
 (** [new_resource num str] is the [resource] with name [str] and amount
     [num]. *)
-val new_resource : int -> string -> resource
+val new_resource : string -> int -> resource
 
-(** [get_input resource_name bld] is the [resource_name] input of [bld]*)
-val get_input : building -> string -> int
+(** [resource_name res] is the name of resource [res] *)
+val resource_name : resource -> string
+
+(** [resource_amount res] is the amount of resource [res] *)
+val resource_amount : resource -> int
+
+(** [get_resource_dependency resource_name bld] is the quantity of 
+    [resource_name] dependency of [bld]*)
+val get_resource_dependency : building -> string -> int
 
 (** [get_output resource_name bld] is the [resource_name] output of [bld]*)
 val get_output : building -> string -> int

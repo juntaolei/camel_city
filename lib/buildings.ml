@@ -13,11 +13,9 @@ type building = {
   name : string;
   cost : int;
   maintenance : int;
-  input : resource; 
   output : resource;
   tax : int;
   defense : int;
-  building_dependency : building list;
   resource_dependency : resource list;
 }
 
@@ -36,11 +34,9 @@ let house =
     name = "house";
     cost = 0;
     maintenance = 0;
-    input = { amount = 0; name = "" };
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
-    building_dependency = [];
     resource_dependency = [];
   }
 
@@ -49,11 +45,9 @@ let oats_plantation =
     name = "oats planation";
     cost = 0;
     maintenance = 0;
-    input = { amount = 0; name = "" };
     output = { amount = 10; name = "oat" };
     tax = 0;
     defense = 0;
-    building_dependency = [];
     resource_dependency = [];
   }
 
@@ -62,11 +56,9 @@ let power_plant =
     name = "power_plant";
     cost = 0;
     maintenance = 0;
-    input = { amount = 0; name = "" };
     output = { amount = 5; name = "electricity" };
     tax = 0;
     defense = 0;
-    building_dependency = [];
     resource_dependency = [];
   }
 
@@ -75,12 +67,10 @@ let mine =
     name = "mine";
     cost = 0;
     maintenance = 0;
-    input = { amount = 8; name = "electricity" };
     output = { amount = 1; name = "iron" };
     tax = 0;
     defense = 0;
-    building_dependency = [];
-    resource_dependency = [];
+    resource_dependency = [{ amount = 8; name = "electricity" }];
   }
 
 let barrack =
@@ -88,18 +78,24 @@ let barrack =
     name = "barrack";
     cost = 0;
     maintenance = 0;
-    input = { amount = 0; name = "" };
     output = { amount = 0; name = "" };
     tax = 0;
     defense = 0;
-    building_dependency = [];
     resource_dependency = [];
   }
 
-let new_resource num str = {amount = num; name = str}
+let new_resource str num = {amount = num; name = str}
 
-let get_input bld resource_name = 
-  if bld.input.name = resource_name then bld.input.amount else 0
+let resource_name (res : resource) = res.name
+
+let resource_amount (res : resource) = res.amount
+
+let get_resource_dependency bld resource_name = 
+  let rec find_resource (lst : resource list) = match lst with
+  | [] -> 0
+  | h :: t -> if (h.name = resource_name) then h.amount
+  else find_resource t
+in find_resource bld.resource_dependency
 
 let get_output bld resource_name = 
   if bld.output.name = resource_name then bld.output.amount else 0
@@ -107,6 +103,7 @@ let get_output bld resource_name =
 let get_tax bld = bld.tax
 
 let input_resource_check (bld : building) (res : resource) =
-  if (get_input bld res.name) <= res.amount then 
-    Some {name = res.name; amount = res.amount - (get_input bld res.name)}
+  if (get_resource_dependency bld res.name) <= res.amount then 
+    Some {name = res.name; amount = res.amount - 
+    (get_resource_dependency bld res.name)}
   else None

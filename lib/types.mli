@@ -35,6 +35,8 @@ val tax_amount : gui_config -> int
 
 (** [update_stockpile conf pile] is the updated [pile] after collecting and
     consuming resources from buildings in [conf]. *)
+(** Hello Matteo this function is for you to implement. functions defined
+    above might be helpful. *)
 val update_stockpile : gui_config -> stockpile -> stockpile
 
 (** [new_config] initializes a new [gui_config]. Requires: *)

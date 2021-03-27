@@ -25,7 +25,7 @@ type gui_config = {
   canvas_config : canvas_config;
   map_config : map_config;
   cell_config : cell_config;
-  cell : cell list list;
+  cell : cell list list; (* maybe try hash table implementation in MS2 *)
 }
 
 type game_state = { gui : gui_config }
@@ -34,10 +34,11 @@ type game_state = { gui : gui_config }
 type stockpile = { lst : resource list }
 
 (* For now: index 0 = oat, index 1 = electricity, index 2 = iron, index
-   3 = money*)
+   3 = money *)
 (* type stockpile = (resource, int) Hashtbl.t *)
 
-(* helper function *)
+(** [place_row acc_r y cell lst] is the updated [lst] from replacing
+    the element at index [y] with [cell]. *)
 let rec place_row acc_r y cell = function
   | [] -> acc_r
   | h :: t ->
@@ -51,10 +52,7 @@ let place_cell conf cell x_coord y_coord =
     | h :: t ->
         place_col
           ((if List.length acc_c = x_coord then
-            place_row [] y_coord cell h
-           else h)
-           :: acc_c)
-          t
+            place_row [] y_coord cell h else h) :: acc_c) t
   in
   {
     canvas_config = conf.canvas_config;
@@ -63,7 +61,7 @@ let place_cell conf cell x_coord y_coord =
     cell = List.rev (place_col [] conf.cell);
   }
 
-(* helper function *)
+(** [sum_row_tax lst] is the sum of tax of buildings in [lst]. *)
 let rec sum_row_tax = function
   | [] -> 0
   | h :: t -> (
@@ -85,30 +83,33 @@ let rec merge_stock s1 s2 acc =
   | 4 -> acc
   | _ ->
       merge_stock s1 s2
-        (new_resource (List.nth s1 (3 - List.length acc)).name
-           (List.nth s1 (3 - List.length acc)).amount
-         + (List.nth s2 (3 - List.length acc)).amount
-         :: acc)
+        ((new_resource (resource_name (List.nth s1 (3 - List.length acc)))
+        (resource_amount (List.nth s1 (3 - List.length acc)) + 
+        resource_amount (List.nth s2 (3 - List.length acc))))
+        :: acc)
 
 (** The following merges s1 into s2. *)
 
 (** let merge_stockpile s1 s2 = Hashtbl.iter (fun k v -> Hashtbl.replace
     s2 k (Hashtbl.find s1 k + v)) s2 *)
 
-(* helper function [update_tax pile] is the [pile] after collecting tax.*)
+(** [update_tax pile] is the [pile] after collecting tax in [conf]. *)
 let update_tax conf pile =
   let tax_pile =
     [
-      new_resource 0 "";
-      new_resource 0 "";
-      new_resource 0 "";
-      new_resource (tax_amount conf) "money";
+      new_resource "" 0;
+      new_resource "" 0;
+      new_resource "" 0;
+      new_resource "money" (tax_amount conf);
     ]
   in
   merge_stock pile tax_pile []
 
-(* order of update: geographic location or collect tax -> oat_plantation
-   -> power_plant -> mine *)
+(* order of update?
+    option 1: geographic location (recursion through the cell list list) 
+    option 2: oat_plantation-> power_plant -> mine (so that the resource 
+    produced can be used as inputs for other buildlings immediately in the
+    same round of update) maybe consider this for MS2? *)
 let update_stockpile pile conf =
   pile |> update conf |> failwith "unimplemented"
 

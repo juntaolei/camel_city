@@ -11,14 +11,15 @@ type cell =
   | Road_t of road
   | None
 
-type state = {
-  gui_config : gui_config;
-  cells : cell array array;
-}
-
 (* For now: index 0 = oat, index 1 = electricity, index 2 = iron, index
    3 = money *)
 type stockpile = resource list
+
+type state = {
+  gui_config : gui_config;
+  cells : cell array array;
+  stockpile : stockpile;
+}
 
 let build_cell_lst width height = Array.make_matrix width height None
 
@@ -72,7 +73,11 @@ let new_state
       cell_size = (cell_width, cell_height);
     }
   in
-  { gui_config; cells = build_cell_lst map_length map_length }
+  {
+    gui_config;
+    cells = build_cell_lst map_length map_length;
+    stockpile = [];
+  }
 
 let canvas_size state = state.gui_config.canvas_size
 

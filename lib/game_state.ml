@@ -1,66 +1,20 @@
+open Buildings
+open Types
 
-open buildings
-let m = 1
+type update = { stockpile : stockpile }
 
-type residential = {
-  house = house list
-}
-type resource_generating = {
-  oats_plantations = oats_plantation list
+let rec add_resources state update = failwith "Unimplemented"
 
+let rec sub_resources state update = failwith "Unimplemented"
 
-}
-type industrial = {
-  power_plants = power_plant list
+let update_resources state update = failwith "Unimplemented"
 
+let update_money state update = failwith "Unimplemented"
 
-}
-type military = {
+let next_state game_state update =
+  (* match game_state.tick with | > 500 -> | _ -> let money =
+     update_money in let new_tick = game_state.tick + 1 in
+     new_game_state = { tick = new_tick
 
-}
-
-type buildings = {
-  residentials = residential list
-  resource_generatings = resource_generating list
-  industrials =  industrial list
-  militarys  = military list
-
-}
-
-type game_state = {
-  tick: int
-  buildings : buildings list
-  resources = resource list
-  roads = road list
-  money = int
-
-}
-let rec add_resources buildings_catagorie = 
-
-let rec minus_resources buildings = 
-
-let update_resources resources  = 
-  add_resources
-
-
-let update_money a =
-
-
-let rec update_game_state game_state = 
-  match game_state.tick with
-  | > 500 ->
-  | _ ->  let money = update_money in 
-    let new_tick = game_state.tick + 1 in
-    new_game_state = {
-      tick = new_tick
-
-    }
-    update_game_state 
-
-
-
-
-
-
-
-
+     } update_game_state *)
+  failwith "Unimplemented"

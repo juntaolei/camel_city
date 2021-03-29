@@ -16,4 +16,4 @@
   main.js
   index.html
   style.css
-  (glob_files sprites/*.{png})))
+  (glob_files textures/*.{png})))

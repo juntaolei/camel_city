@@ -1,6 +1,9 @@
 (** The type [cell] represents the most basic unit in construction that
     holds either a building, a road, or nothing. *)
-type cell
+type cell =
+  | Building of Buildings.building
+  | Road_t of Buildings.road
+  | None
 
 (** The type [state] records condition of the game at a certain instance
     of time. *)
@@ -10,23 +13,10 @@ type state
     state. *)
 type stockpile
 
-(** [build_cell_lst width height] is a two-dimensional array of size
-    [width] by [height] with type [cell]. *)
-val build_cell_lst : int -> int -> cell array array
-
-(** [place_cell state cell x y] replaces the [cells] of the game [state]
-    at indices [x] and [y] with a new [cell]. *)
-val place_cell : state -> cell -> int -> int -> unit
-
-(** [total_tax_amount state] is the amount of tax collected from
-    existing cells in a unit of time. *)
-val total_tax_amount : state -> int
-
-(** [update_stockpile conf pile] is the updated [pile] after collecting
-    and consuming resources from buildings in [conf]. *)
-val update_stockpile : state -> stockpile -> stockpile
-(** Hello Matteo this function is for you to implement. functions
-    defined above might be helpful. *)
+(** The type [update] should contain the necessary fields that can be
+    updated. This should be types like stockpile. The game cells does
+    not need to be included as cells can be mutated. *)
+type update
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
@@ -47,3 +37,14 @@ val cell_size : state -> int * int
 (** [cells state] is a two dimensional array of cells as defined in
     [state]. *)
 val cells : state -> cell array array
+
+(** [next_state state update] is the new state by updating the existing
+    [state ] with [update]. *)
+val next_state : state -> update -> state
+
+(** This is the only function that should be exposed outside of this
+    module. Implementing this function requires merging the values
+    inside the update state to the existing game state to create a new
+    state. For further optimization, change the type signature to the
+    one below. *)
+(* val next_state : Types.state ref -> update -> unit *)

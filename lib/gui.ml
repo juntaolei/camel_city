@@ -2,60 +2,63 @@ open Js_of_ocaml
 open Types
 module Html = Dom_html
 
-let map_canvas =
-  match Html.getElementById_coerce "gui_map" Html.CoerceTo.canvas with
+let bg_canvas =
+  match Html.getElementById_coerce "bg" Html.CoerceTo.canvas with
   | None -> raise Not_found
   | Some canvas -> canvas
 
-let map_ctx = map_canvas##getContext Html._2d_
+let bg_ctx = bg_canvas##getContext Html._2d_
 
 let fg_canvas =
-  match
-    Html.getElementById_coerce "gui_overlay" Html.CoerceTo.canvas
-  with
+  match Html.getElementById_coerce "fg" Html.CoerceTo.canvas with
   | None -> raise Not_found
   | Some canvas -> canvas
 
 let fg_ctx = fg_canvas##getContext Html._2d_
 
-let reset_canvas ctx state =
-  ctx##clearRect 0. 0.
+let reset_canvas state =
+  bg_ctx##clearRect 0. 0.
+    (state |> canvas_size |> fst |> float_of_int)
+    (state |> canvas_size |> snd |> float_of_int);
+  fg_ctx##clearRect 0. 0.
     (state |> canvas_size |> fst |> float_of_int)
     (state |> canvas_size |> snd |> float_of_int)
 
-let setup_canvas
-    (canvas : Html.canvasElement Js.t)
-    (ctx : Html.canvasRenderingContext2D Js.t)
-    state =
-  canvas##.width := state |> canvas_size |> fst;
-  canvas##.height := state |> canvas_size |> snd;
-  ctx##translate
-    (float_of_int canvas##.width /. 2.)
+let setup_canvas state =
+  bg_canvas##.width := state |> canvas_size |> fst;
+  bg_canvas##.height := state |> canvas_size |> snd;
+  fg_canvas##.width := state |> canvas_size |> fst;
+  fg_canvas##.height := state |> canvas_size |> snd;
+  bg_ctx##translate
+    (float_of_int bg_canvas##.width /. 2.)
+    (state |> cell_size |> snd |> float_of_int);
+  fg_ctx##translate
+    (float_of_int fg_canvas##.width /. 2.)
     (state |> cell_size |> snd |> float_of_int)
 
-let draw_cell (ctx : Html.canvasRenderingContext2D Js.t) state x y color
-    =
+let draw_cell state x y color =
   let cell_width = state |> cell_size |> fst in
   let cell_height = state |> cell_size |> snd in
-  ctx##save;
-  ctx##translate
+  fg_ctx##save;
+  fg_ctx##translate
     ((float_of_int y -. float_of_int x) *. float_of_int cell_width /. 2.)
     ((float_of_int x +. float_of_int y)
     *. float_of_int cell_height
     /. 2.);
-  ctx##beginPath;
-  ctx##moveTo 0. 0.;
-  ctx##lineTo
+  fg_ctx##beginPath;
+  fg_ctx##moveTo 0. 0.;
+  fg_ctx##lineTo
     (float_of_int cell_width /. 2.)
     (float_of_int cell_height /. 2.);
-  ctx##lineTo 0. (float_of_int cell_height);
-  ctx##lineTo
+  fg_ctx##lineTo 0. (float_of_int cell_height);
+  fg_ctx##lineTo
     (-.float_of_int cell_width /. 2.)
     (float_of_int cell_height /. 2.);
-  ctx##closePath;
-  ctx##.fillStyle := Js.string color;
-  ctx##fill;
-  ctx##restore
+  fg_ctx##lineTo 0. 0.;
+  fg_ctx##closePath;
+  fg_ctx##.fillStyle := Js.string color;
+  fg_ctx##fill;
+  fg_ctx##restore
 
 let create_img filename =
   let img = Html.createImg Html.document in
@@ -65,15 +68,15 @@ let create_img filename =
 let draw_img state x y texture =
   let cell_width = state |> cell_size |> fst in
   let cell_height = state |> cell_size |> snd in
-  map_ctx##save;
-  map_ctx##translate
+  bg_ctx##save;
+  bg_ctx##translate
     ((float_of_int y -. float_of_int x) *. float_of_int cell_width /. 2.)
     ((float_of_int x +. float_of_int y)
     *. float_of_int cell_height
     /. 2.);
-  map_ctx##drawImage_full (create_img texture) 0. 0. 130. 230. (-65.) 0.
+  bg_ctx##drawImage_full (create_img texture) 0. 0. 130. 230. (-65.) 0.
     130. 230.;
-  map_ctx##restore
+  bg_ctx##restore
 
 let draw_map state =
   Array.iteri
@@ -85,22 +88,22 @@ let cell_positions state event =
   (* print_endline (string_of_int (event##.clientX - int_of_float
      fg_canvas##getBoundingClientRect##.left)); *)
   let mouse_x =
-    event##.clientX
-    - int_of_float fg_canvas##getBoundingClientRect##.left
+    float_of_int event##.clientX
+    -. fg_canvas##getBoundingClientRect##.left
   in
   let mouse_y =
-    event##.clientY
-    - int_of_float fg_canvas##getBoundingClientRect##.top
+    float_of_int event##.clientY
+    -. fg_canvas##getBoundingClientRect##.top
   in
-  let canvas_width = state |> canvas_size |> fst in
-  let cell_width = state |> cell_size |> fst in
-  let cell_height = state |> cell_size |> snd in
-  let x = (mouse_x - (canvas_width / 2)) / cell_width in
-  let y = (mouse_y - cell_height) / cell_height in
-  ( x + y |> float_of_int |> floor |> int_of_float,
-    y - x |> float_of_int |> floor |> int_of_float )
+  let cell_width = state |> cell_size |> fst |> float_of_int in
+  let cell_height = state |> cell_size |> snd |> float_of_int in
+  let map_length = state |> map_length |> float_of_int in
+  let x = (mouse_x /. cell_width) -. (map_length /. 2.) in
+  let y = (mouse_y -. cell_height) /. cell_height in
+  (y -. x |> floor |> int_of_float, y +. x |> floor |> int_of_float)
 
 let highlight state event =
+  reset_canvas state;
   let canvas_width = state |> canvas_size |> fst in
   let canvas_height = state |> canvas_size |> snd in
   let map_length = state |> map_length in
@@ -112,24 +115,15 @@ let highlight state event =
     (float_of_int (canvas_height * 2));
   if
     fst positions >= 0
+    && fst positions < map_length
+    && snd positions >= 0
     && snd positions < map_length
-    && fst positions >= 0
-    && snd positions < map_length
-  then
-    print_endline
-      (string_of_int (fst positions)
-      ^ " "
-      ^ string_of_int (snd positions));
-  draw_cell fg_ctx state (fst positions) (snd positions) "black";
-  Js._false
+  then draw_cell state (fst positions) (snd positions) "blue";
+  Js._true
 
 let draw_gui state =
-  reset_canvas map_ctx state;
-  reset_canvas fg_ctx state;
-  setup_canvas map_canvas map_ctx state;
-  setup_canvas fg_canvas fg_ctx state;
   draw_map state;
-  Html.addEventListener fg_canvas Html.Event.mousemove
-    (Dom.handler (highlight state))
-    Js._true
+  let wrapper event = highlight state event in
+  Html.addEventListener Html.document Html.Event.mousemove
+    (Dom.handler wrapper) Js._false
   |> ignore

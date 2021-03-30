@@ -84,31 +84,35 @@ let barrack =
     resource_dependency = [];
   }
 
-let new_resource str num = { amount = num; name = str }
+let new_resource name amount = { amount; name }
 
-let resource_name (res : resource) = res.name
+let resource_name (resource : resource) = resource.name
 
-let resource_amount (res : resource) = res.amount
+let resource_amount (resource : resource) = resource.amount
 
-let get_resource_dependency bld resource_name =
+let get_resource_dependency building resource_name =
   let rec find_resource (lst : resource list) =
     match lst with
     | [] -> 0
-    | h :: t ->
-        if h.name = resource_name then h.amount else find_resource t
+    | h :: _ when h.name = resource_name -> h.amount
+    | _ :: t -> find_resource t
   in
-  find_resource bld.resource_dependency
+  find_resource building.resource_dependency
 
-let get_output bld resource_name =
-  if bld.output.name = resource_name then bld.output.amount else 0
+let get_output building resource_name =
+  if building.output.name = resource_name then building.output.amount
+  else 0
 
 let get_tax bld = bld.tax
 
-let input_resource_check (bld : building) (res : resource) =
-  if get_resource_dependency bld res.name <= res.amount then
+let input_resource_check building (resource : resource) =
+  if get_resource_dependency building resource.name <= resource.amount
+  then
     Some
       {
-        name = res.name;
-        amount = res.amount - get_resource_dependency bld res.name;
+        name = resource.name;
+        amount =
+          resource.amount
+          - get_resource_dependency building resource.name;
       }
   else None

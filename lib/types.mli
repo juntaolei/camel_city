@@ -18,9 +18,9 @@ val build_cell_lst : int -> int -> cell array array
     at indices [x] and [y] with a new [cell]. *)
 val place_cell : state -> cell -> int -> int -> unit
 
-(** [tax_amount state] is the amount of tax collected from existing
-    cells in a unit of time. *)
-val tax_amount : state -> int
+(** [total_tax_amount state] is the amount of tax collected from
+    existing cells in a unit of time. *)
+val total_tax_amount : state -> int
 
 (** [update_stockpile conf pile] is the updated [pile] after collecting
     and consuming resources from buildings in [conf]. *)
@@ -29,7 +29,7 @@ val update_stockpile : state -> stockpile -> stockpile
     defined above might be helpful. *)
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
-    initializes a new [gui_config]. Requires: *)
+    initializes a new [state]. Requires: *)
 val new_state : int -> int -> int -> int -> int -> state
 
 (** [canvas_size state] is the canvas size of the HTML Canvas as defined

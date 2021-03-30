@@ -20,16 +20,16 @@ type military = {
 }
 
 type buildings = {
-  residentials = residential list
-  resource_generatings = resource_generating list
-  industrials =  industrial list
-  militarys  = military list
+  residentials = residential 
+  resource_generatings = resource_generating 
+  industrials =  industrial 
+  militarys  = military 
 
 }
 
 type game_state = {
   tick: int
-  buildings : buildings list
+  buildings : buildings 
   resources = resource list
   roads = road list
   money = int
@@ -45,7 +45,7 @@ let update_resources resources  =
 
 let update_money a =
 
-
+let build = 
 let rec update_game_state game_state = 
   match game_state.tick with
   | > 500 ->

@@ -2,10 +2,10 @@ open Buildings
 open Types
 
 type buildings = {
-  residential = building list 
-  resource_generating = building list 
-  industrial = building list  
-  military = building list  
+  residential = [] 
+  resource_generating = []
+  industrial = []  
+  military = []  
 
 }
 
@@ -40,8 +40,13 @@ let update_resources resources game_state =
   minus_resources game_state.buildings.residential
   add_resources game_state.buildings.residential
 
+let rec update_money_helper buildings_catagorie =
+  match buildings_catagorie with 
+  | [] -> 0
+  | h::t (get_tax h) h.ms
 
-let update_money a =
+let update_money game_state =
+
 
 let rec update_game_state game_state = 
   match game_state.tick with

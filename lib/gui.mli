@@ -1,5 +1,10 @@
-val reset_canvas : Types.state -> unit
+(** [reset_canvas state] clears everything from the foreground canvas
+    and the background canvas.*)
+val reset_canvas : State.state -> unit
 
-val setup_canvas : Types.state -> unit
+(** [setup_canvas state] setups the foreground canvas and the background
+    canvas based on properties from [state]. *)
+val setup_canvas : State.state -> unit
 
-val draw_gui : Types.state -> unit
+(** [draw_gui state] draws the GUI of the game based on a given [state]. *)
+val draw_gui : State.state -> unit

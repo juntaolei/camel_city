@@ -6,7 +6,7 @@ let js = Js.string
 
 let document = Html.document
 
-let state = Types.new_state 910 666 7 128 64
+let state = State.new_state 910 666 7 128 64
 
 let main () =
   Gui.reset_canvas state;

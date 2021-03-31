@@ -18,6 +18,7 @@ type state = {
   cell_size : int * int;
   cells : cell array array;
   stockpile : stockpile;
+  buildings : building;
 }
 
 (** [build_cell_lst width height] is an two dimensional array with

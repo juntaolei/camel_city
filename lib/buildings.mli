@@ -53,7 +53,7 @@ val resource_name : resource -> string
 (** [resource_amount resource] is the amount of resource [resource]. *)
 val resource_amount : resource -> int
 
-(** [resource_dependency name building] is the quantity of [name]
+(** [resource_dependency building name] is the quantity of [name]
     dependency of [building]. *)
 val resource_dependency : building -> string -> int
 

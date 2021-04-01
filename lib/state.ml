@@ -18,7 +18,7 @@ type state = {
   cell_size : int * int;
   cells : cell array array;
   stockpile : stockpile;
-  buildings : building;
+  buildings : building list;
 }
 
 (** [build_cell_lst width height] is an two dimensional array with
@@ -43,7 +43,7 @@ let total_tax_amount state =
 
 (** [merge_stockpile s1 s2] is combines stockpiles [s1] and [s2] into a
     single stockpile. *)
-let rec merge_stockpile s1 s2 =
+let merge_stockpile s1 s2 =
   List.map2
     (fun e1 e2 ->
       new_resource (resource_name e1)
@@ -83,6 +83,7 @@ let new_state
     cell_size = (cell_width, cell_height);
     cells = build_cell_lst map_length map_length;
     stockpile = [];
+    buildings = [];
   }
 
 let canvas_size state = state.canvas_size

@@ -29,3 +29,11 @@ Create a zip of the source code:
 ```bash
 make zip
 ```
+
+## Running the Game in the Browser
+
+Build the project as instructed above.
+
+Open _build/default/bin/index.html in a browser.
+
+Note: The GUI is primarily tested with Firefox.

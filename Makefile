@@ -12,3 +12,6 @@ clean:
 
 test:
 	dune runtest
+
+zip:
+	zip -r camel_city.zip bin lib test .ocamlformat dune-project Makefile README.md

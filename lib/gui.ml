@@ -98,8 +98,6 @@ let draw_map state =
 (** [cell_positions state event] are the x and y indices of a cell in
     [state] that the mouse through [event] is currently hovering over. *)
 let cell_positions state event =
-  (* print_endline (string_of_int (event##.clientX - int_of_float
-     fg_canvas##getBoundingClientRect##.left)); *)
   let mouse_x =
     float_of_int event##.clientX
     -. fg_canvas##getBoundingClientRect##.left
@@ -133,7 +131,9 @@ let highlight state event =
     && fst positions < map_length
     && snd positions >= 0
     && snd positions < map_length
-  then draw_cell state (fst positions) (snd positions) "blue";
+  then
+    draw_cell state (fst positions) (snd positions)
+      "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
 let draw_gui state =

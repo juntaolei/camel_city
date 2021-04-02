@@ -1,5 +1,5 @@
-(** The type [cell] represents the most basic unit in construction that
-    holds either a building, a road, or nothing. *)
+(* * The type [cell] represents the most basic unit in construction that
+   holds either a building, a road, or nothing. *)
 type cell =
   | Building of Buildings.building
   | Road_t of Buildings.road
@@ -9,14 +9,9 @@ type cell =
     of time. *)
 type state
 
-(** The type [stockpile] records amounts of resources at a certain game
-    state. *)
+(** The type [stockpile] is a resource list that coresponds with the
+    amount of resources the play has. *)
 type stockpile
-
-(** The type [update] should contain the necessary fields that can be
-    updated. This should be types like stockpile. The game cells does
-    not need to be included as cells can be mutated. *)
-type update
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
@@ -40,11 +35,4 @@ val cells : state -> cell array array
 
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)
-val next_state : state -> update -> state
-
-(** This is the only function that should be exposed outside of this
-    module. Implementing this function requires merging the values
-    inside the update state to the existing game state to create a new
-    state. For further optimization, change the type signature to the
-    one below. *)
-(* val next_state : Types.state ref -> update -> unit *)
+val next_state : state -> state

@@ -1,4 +1,4 @@
-(* open Buildings open Types
+open Buildings open Types
 
    type buildings = { residential = [] resource_generating = []
    industrial = [] military = []
@@ -49,4 +49,4 @@
    500 -> | _ -> let money = update_money in let new_tick =
    game_state.tick + 1 in new_game_state = { tick = new_tick
 
-   } update_game_state *) failwith "Unimplemented" *)
+   } update_game_state *) failwith "Unimplemented"

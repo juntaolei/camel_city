@@ -13,6 +13,11 @@ type state
     state. *)
 type stockpile
 
+(** The type [update] should contain the necessary fields that can be
+    updated. This should be types like stockpile. The game cells does
+    not need to be included as cells can be mutated. *)
+type update
+
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
 val new_state : int -> int -> int -> int -> int -> state
@@ -35,7 +40,7 @@ val cells : state -> cell array array
 
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)
-val next_state : state -> state
+val next_state : state -> update -> state
 
 (** This is the only function that should be exposed outside of this
     module. Implementing this function requires merging the values

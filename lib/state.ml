@@ -4,6 +4,8 @@ open Buildings
    3 = money *)
 type stockpile = resource list
 
+type update = { stockpile : stockpile }
+
 type cell =
   | Building of building
   | Road_t of road
@@ -92,4 +94,8 @@ let cell_size state = state.cell_size
 
 let cells state = state.cells
 
-let next_state state = state
+let next_state state (update : update) =
+  {
+    state with
+    stockpile = merge_stockpile state.stockpile update.stockpile;
+  }

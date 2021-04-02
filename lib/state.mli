@@ -1,3 +1,5 @@
+open Buildings
+
 (* * The type [cell] represents the most basic unit in construction that
    holds either a building, a road, or nothing. *)
 type cell =
@@ -15,7 +17,17 @@ type stockpile
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
-val new_state : int -> int -> int -> int -> int -> state
+
+val new_state :
+  int ->
+  int ->
+  int ->
+  int ->
+  int ->
+  int ->
+  stockpile ->
+  building list ->
+  state
 
 (** [canvas_size state] is the canvas size of the HTML Canvas as defined
     in [state]. *)

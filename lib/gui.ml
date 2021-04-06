@@ -72,6 +72,8 @@ let create_img filename =
   img##.src := Js.string filename;
   img
 
+let sand = create_img "textures/sand.png"
+
 (** [draw_img state x y texture] draws the [texture] that represents a
     cell of indices [x] and [y] in [state] on the background canvas. *)
 let draw_img state x y texture =
@@ -83,16 +85,14 @@ let draw_img state x y texture =
     ((float_of_int x +. float_of_int y)
     *. float_of_int cell_height
     /. 2.);
-  bg_ctx##drawImage_full (create_img texture) 0. 0. 130. 230. (-65.) 0.
-    130. 230.;
+  bg_ctx##drawImage_full texture 0. 0. 130. 230. (-65.) 0. 130. 230.;
   bg_ctx##restore
 
 (** [draw_map state] draws the cells in [state] on the background
     canvas.*)
 let draw_map state =
   Array.iteri
-    (fun i ->
-      Array.iteri (fun j _ -> draw_img state i j "textures/sand.png"))
+    (fun i -> Array.iteri (fun j _ -> draw_img state i j sand))
     (cells state)
 
 (** [cell_positions state event] are the x and y indices of a cell in
@@ -115,7 +115,7 @@ let cell_positions state event =
 
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
-let highlight state event =
+let highlight state (event : Html.mouseEvent Js.t) =
   reset_canvas state;
   let canvas_width = state |> canvas_size |> fst in
   let canvas_height = state |> canvas_size |> snd in
@@ -136,9 +136,4 @@ let highlight state event =
       "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
-let draw_gui state =
-  draw_map state;
-  let wrapper event = highlight state event in
-  Html.addEventListener Html.document Html.Event.mousemove
-    (Dom.handler wrapper) Js._false
-  |> ignore
+let draw_gui state = draw_map state

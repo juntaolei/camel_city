@@ -6,7 +6,7 @@ let js = Js.string
 
 let document = Html.document
 
-let state = State.new_state 900 550 7 128 64
+let state = State.new_state 1200 750 9 128 64
 
 let main () =
   Gui.reset_gui state;

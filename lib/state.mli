@@ -18,6 +18,14 @@ type stockpile
     not need to be included as cells can be mutated. *)
 type update
 
+(** [select_building state i] is the current selected building from the
+    building selection pane. *)
+val select_building : state -> int -> unit
+
+(** [selected_building state] is if a building is currently selected
+    from the building selection pane. *)
+val selected_building : state -> bool
+
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
 val new_state : int -> int -> int -> int -> int -> state

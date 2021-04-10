@@ -20,16 +20,20 @@ let fg_canvas =
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
 
-(** Module wide value for the progress HTML element for showing the
+(** Module wide value for the HTML progress element for showing the
     amount of money. *)
 let money_progres_bar = Html.getElementById "money"
 
-(** Module wide value for the progress HTML element for showing the
+(** Module wide value for the HTML progress element for showing the
     amount of food. *)
 let food_progres_bar = Html.getElementById "food"
 
+(** Module wide value for the HTML div element for showing the selection
+    of buildings available to be placed. *)
+let building_selection = Html.getElementById "building_selection"
+
 (** List of texture names to be used in the GUI. *)
-let texture_names = [ "sand" ]
+let texture_names = [ "sand"; "road" ]
 
 (** [create_img filename] is the image loaded based on a [filename]. *)
 let create_img filename =
@@ -180,6 +184,22 @@ let highlight state (event : Html.mouseEvent Js.t) =
     draw_cell state (fst positions) (snd positions)
       "hsla(60, 100%, 50%, 0.25)";
   Js._true
+
+let draw_building_selection state =
+  List.mapi
+    (fun i x ->
+      let new_div = Html.createDiv Html.document in
+      new_div##.id := i |> string_of_int |> Js.string;
+      new_div##.style##.display := Js.string "block";
+      Html.addEventListener new_div Html.Event.click
+        (Dom.handler (fun e ->
+             if selected_building state then select_building state (-1)
+             else
+               select_building state
+                 (e##.target##.id |> Js.to_string |> int_of_string);
+             Js._true))
+        Js._false)
+    textures
 
 let add_event_listeners state =
   Html.addEventListener Html.document Html.Event.mousemove

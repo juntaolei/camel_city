@@ -30,6 +30,22 @@ Create a zip of the source code:
 make zip
 ```
 
+## TODO (MS2)
+
+- [ ] Implement placing buildings.
+
+- [ ] Add a start page to pick game setting or upload JSON saves.
+
+- [ ] Import buildings from JSON.
+
+- [ ] Implement save to JSON.
+
+  - [ ] Add ability to read from JSON file.
+
+  - [ ] Create state from JSON.
+
+  - [ ] Add ability to convert state to JSON.
+
 ## Running the Game in the Browser
 
 Build the project as instructed above.

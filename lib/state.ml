@@ -19,7 +19,12 @@ type state = {
   cells : cell array array;
   stockpile : stockpile;
   buildings : building list;
+  mutable selected_building : int;
 }
+
+let select_building state i = state.selected_building <- i
+
+let selected_building state = state.selected_building >= 0
 
 (** [build_cell_lst width height] is an two dimensional array with
     [width] and [height]. *)
@@ -84,6 +89,7 @@ let new_state
     cells = build_cell_lst map_length map_length;
     stockpile = [];
     buildings = [];
+    selected_building = -1;
   }
 
 let canvas_size state = state.canvas_size

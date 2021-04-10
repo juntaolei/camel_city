@@ -53,3 +53,13 @@ canvas {
   display: block;
   position: absolute;
 }
+
+#building_selection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  overflow: auto;
+  width: 100%;
+}

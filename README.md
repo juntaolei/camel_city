@@ -1,5 +1,21 @@
 # Camel City
 
+## TODO (MS2)
+
+- [ ] Implement placing buildings.
+
+- [ ] Add a start page to pick game setting or upload JSON saves.
+
+- [ ] Import buildings from JSON.
+
+- [ ] Implement save to JSON.
+
+  - [ ] Add ability to read from JSON file.
+
+  - [ ] Create state from JSON.
+
+  - [ ] Add ability to convert state to JSON.
+
 ## Instruction
 
 This assumes that the user is using the same OCaml switch as cs3110-2021sp.
@@ -29,22 +45,6 @@ Create a zip of the source code:
 ```bash
 make zip
 ```
-
-## TODO (MS2)
-
-- [ ] Implement placing buildings.
-
-- [ ] Add a start page to pick game setting or upload JSON saves.
-
-- [ ] Import buildings from JSON.
-
-- [ ] Implement save to JSON.
-
-  - [ ] Add ability to read from JSON file.
-
-  - [ ] Create state from JSON.
-
-  - [ ] Add ability to convert state to JSON.
 
 ## Running the Game in the Browser
 

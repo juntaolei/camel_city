@@ -185,21 +185,13 @@ let highlight state (event : Html.mouseEvent Js.t) =
       "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
-let draw_building_selection state =
-  List.mapi
-    (fun i x ->
-      let new_div = Html.createDiv Html.document in
-      new_div##.id := i |> string_of_int |> Js.string;
-      new_div##.style##.display := Js.string "block";
-      Html.addEventListener new_div Html.Event.click
-        (Dom.handler (fun e ->
-             if selected_building state then select_building state (-1)
-             else
-               select_building state
-                 (e##.target##.id |> Js.to_string |> int_of_string);
-             Js._true))
-        Js._false)
-    textures
+(* let draw_building_selection state = List.mapi (fun i x -> let new_div
+   = Html.createDiv Html.document in new_div##.id := i |> string_of_int
+   |> Js.string; new_div##.style##.display := Js.string "block";
+   Html.addEventListener new_div Html.Event.click (Dom.handler (fun e ->
+   if selected_building state then select_building state (-1) else
+   select_building state (e##.target##.id |> Js.to_string |>
+   int_of_string); Js._true)) Js._false) textures *)
 
 let add_event_listeners state =
   Html.addEventListener Html.document Html.Event.mousemove

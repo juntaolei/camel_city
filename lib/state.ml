@@ -40,8 +40,6 @@ let build_cell_lst width height = Array.make_matrix width height None
 (** [place_cell state cell x y] updates the old cell as indexed by [x]
     and [y] in [state] with a new [cell]. *)
 let place_cell state cell x y = state.cells.(x).(y) <- cell
-(** [resource_sufficiency_check_helper] checks if there is enough
-    resources in the stockpile for the building to operate*)
 
 let canvas_size state = state.canvas_size
 
@@ -194,11 +192,12 @@ let rec next_state (state : state) : state =
         update_resources state.buildings state.stockpile
       in
       let update_state =
-        new_state ~tick:(state.tick + 1) (canvas_width state)
-          (canvas_height state) (map_length state) (cell_width state)
-          (cell_height state) ~stockpile:new_resources
-          ~buildings:(get_buildings state)
+        new_state ~stockpile:new_resources
+          ~buildings:(get_buildings state) ~tick:(state.tick + 1)
+          (canvas_width state) (canvas_height state) (map_length state)
+          (cell_width state) (cell_height state)
       in
+
       next_state update_state
     else next_state state
   else next_state state

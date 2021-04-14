@@ -27,6 +27,10 @@ val iron : resource
 (** [money] is a [resource] collected from buildings. *)
 val money : resource
 
+(*
+should we just make buildings generic? i.e. create a list of buildings, 
+with each index corresponding to a type?
+
 (** [house] is a [building] that allows camel residents, thereby
     increasing camelcity's population. *)
 val house : building
@@ -43,9 +47,13 @@ val mine : building
 (** [barrack] is a [building] that defends the city by increasing
     [defence] of buildlings. Details to be determined. *)
 val barrack : building
+*)
 
-(** [new_resource name amount] is a resource with [name] and [amount]. *)
-val new_resource : string -> int -> resource
+(** [building_name building] is the name of building [building]. *)
+val building_name : building -> string
+
+(** [new_resource amount name] is a resource with [name] and [amount]. *)
+val new_resource : int -> string -> resource
 
 (** [resource_name resource] is the name of resource [resource]. *)
 val resource_name : resource -> string
@@ -56,6 +64,11 @@ val resource_amount : resource -> int
 (** [resource_dependency building name] is the quantity of [name]
     dependency of [building]. *)
 val resource_dependency : building -> string -> int
+
+(** [new_building name cost maint out_a out_n tax defense res_a res_n] is a 
+    new building with the parameters provided. *)
+val new_building : string -> int -> int -> int -> string -> int -> int 
+    -> int -> string -> building
 
 (** [output building] is the output of [building]. *)
 val output : building -> resource

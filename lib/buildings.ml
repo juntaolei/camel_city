@@ -29,62 +29,7 @@ let iron = { amount = 0; name = "iron" }
 
 let money = { amount = 0; name = "money" }
 
-let house =
-  {
-    name = "house";
-    cost = 0;
-    maintenance = 0;
-    output = { amount = 0; name = "" };
-    tax = 0;
-    defense = 0;
-    resource_dependency = [];
-  }
-
-let oats_plantation =
-  {
-    name = "oats planation";
-    cost = 0;
-    maintenance = 0;
-    output = { amount = 10; name = "oat" };
-    tax = 0;
-    defense = 0;
-    resource_dependency = [];
-  }
-
-let power_plant =
-  {
-    name = "power_plant";
-    cost = 0;
-    maintenance = 0;
-    output = { amount = 5; name = "electricity" };
-    tax = 0;
-    defense = 0;
-    resource_dependency = [];
-  }
-
-let mine =
-  {
-    name = "mine";
-    cost = 0;
-    maintenance = 0;
-    output = { amount = 1; name = "iron" };
-    tax = 0;
-    defense = 0;
-    resource_dependency = [ { amount = 8; name = "electricity" } ];
-  }
-
-let barrack =
-  {
-    name = "barrack";
-    cost = 0;
-    maintenance = 0;
-    output = { amount = 0; name = "" };
-    tax = 0;
-    defense = 0;
-    resource_dependency = [];
-  }
-
-let new_resource name amount = { name; amount }
+let new_resource amount name = { amount = amount; name = name }
 
 let resource_name (resource : resource) = resource.name
 
@@ -99,6 +44,16 @@ let resource_dependency building name =
   in
   find_resource building.resource_dependency
 
+let new_building n c m out_a out_n t d r_a r_n =
+  {
+    name = n;
+    cost = c;
+    maintenance = m;
+    output = new_resource out_a out_n;
+    tax = t;
+    defense = d;
+    resource_dependency = [new_resource r_a r_n] (* only single resource dependency for now*)
+  }
 let output building = building.output
 
 let tax_amount building = building.tax

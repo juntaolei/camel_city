@@ -20,6 +20,53 @@ let fg_canvas =
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
 
+(** Module wide value for the HTML progress element for showing the
+    amount of money. *)
+let money_progres_bar = Html.getElementById "money"
+
+(** Module wide value for the HTML progress element for showing the
+    amount of food. *)
+let food_progres_bar = Html.getElementById "food"
+
+(** Module wide value for the HTML div element for showing the selection
+    of buildings available to be placed. *)
+let building_selection = Html.getElementById "building_selection"
+
+(** List of texture names to be used in the GUI. *)
+let texture_names = [ "sand"; "road" ]
+
+(** [create_img filename] is the image loaded based on a [filename]. *)
+let create_img filename =
+  let img = Html.createImg Html.document in
+  img##.src := Js.string ("textures/" ^ filename ^ ".png");
+  img
+
+(** List of loaded textures to be used in the GUI. *)
+let textures = List.map (fun x -> (x, create_img x)) texture_names
+
+(** [find_texture name] is the loaded texture given by the texture
+    [name]. *)
+let find_texture name =
+  List.find (fun x -> name = fst x) textures |> snd
+
+(** [set_progress_bar state element] changes the attributes of [element]
+    to show some statistics about state. *)
+let set_progress_bar state element =
+  element##setAttribute (Js.string "max") (Js.string "100");
+  element##setAttribute (Js.string "value") (Js.string "10")
+
+(** [set_money_progress_bar state] changes the attributes of the
+    progress HTML element to show money. *)
+let set_money_progress_bar state =
+  set_progress_bar state money_progres_bar
+
+(** [set_food_progress_bar state] changes the attributes of the progress
+    HTML element to show food. *)
+let set_food_progress_bar state =
+  set_progress_bar state food_progres_bar
+
+(** [reset_canvas state] clears everything from the foreground canvas
+    and the background canvas.*)
 let reset_canvas state =
   bg_ctx##clearRect 0. 0.
     (state |> canvas_size |> fst |> float_of_int)
@@ -28,6 +75,8 @@ let reset_canvas state =
     (state |> canvas_size |> fst |> float_of_int)
     (state |> canvas_size |> snd |> float_of_int)
 
+(** [setup_canvas state] setups the foreground canvas and the background
+    canvas based on properties from [state]. *)
 let setup_canvas state =
   bg_canvas##.width := state |> canvas_size |> fst;
   bg_canvas##.height := state |> canvas_size |> snd;
@@ -39,6 +88,13 @@ let setup_canvas state =
   fg_ctx##translate
     (float_of_int fg_canvas##.width /. 2.)
     (state |> cell_size |> snd |> float_of_int)
+
+let reset_gui state = reset_canvas state
+
+let setup_gui state =
+  setup_canvas state;
+  set_money_progress_bar state;
+  set_food_progress_bar state
 
 (** [draw_cell state x y color] colors a cell of indices [x] and [y] in
     [state] with [color] on the foreground canvas. *)
@@ -66,12 +122,6 @@ let draw_cell state x y color =
   fg_ctx##fill;
   fg_ctx##restore
 
-(** [create_img filename] is the image loaded based on a [filename]. *)
-let create_img filename =
-  let img = Html.createImg Html.document in
-  img##.src := Js.string filename;
-  img
-
 (** [draw_img state x y texture] draws the [texture] that represents a
     cell of indices [x] and [y] in [state] on the background canvas. *)
 let draw_img state x y texture =
@@ -83,8 +133,7 @@ let draw_img state x y texture =
     ((float_of_int x +. float_of_int y)
     *. float_of_int cell_height
     /. 2.);
-  bg_ctx##drawImage_full (create_img texture) 0. 0. 130. 230. (-65.) 0.
-    130. 230.;
+  bg_ctx##drawImage_full texture 0. 0. 130. 230. (-65.) 0. 130. 230.;
   bg_ctx##restore
 
 (** [draw_map state] draws the cells in [state] on the background
@@ -92,14 +141,12 @@ let draw_img state x y texture =
 let draw_map state =
   Array.iteri
     (fun i ->
-      Array.iteri (fun j _ -> draw_img state i j "textures/sand.png"))
+      Array.iteri (fun j _ -> draw_img state i j (find_texture "sand")))
     (cells state)
 
 (** [cell_positions state event] are the x and y indices of a cell in
     [state] that the mouse through [event] is currently hovering over. *)
 let cell_positions state event =
-  (* print_endline (string_of_int (event##.clientX - int_of_float
-     fg_canvas##getBoundingClientRect##.left)); *)
   let mouse_x =
     float_of_int event##.clientX
     -. fg_canvas##getBoundingClientRect##.left
@@ -117,7 +164,7 @@ let cell_positions state event =
 
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
-let highlight state event =
+let highlight state (event : Html.mouseEvent Js.t) =
   reset_canvas state;
   let canvas_width = state |> canvas_size |> fst in
   let canvas_height = state |> canvas_size |> snd in
@@ -133,12 +180,23 @@ let highlight state event =
     && fst positions < map_length
     && snd positions >= 0
     && snd positions < map_length
-  then draw_cell state (fst positions) (snd positions) "blue";
+  then
+    draw_cell state (fst positions) (snd positions)
+      "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
-let draw_gui state =
-  draw_map state;
-  let wrapper event = highlight state event in
+(* let draw_building_selection state = List.mapi (fun i x -> let new_div
+   = Html.createDiv Html.document in new_div##.id := i |> string_of_int
+   |> Js.string; new_div##.style##.display := Js.string "block";
+   Html.addEventListener new_div Html.Event.click (Dom.handler (fun e ->
+   if selected_building state then select_building state (-1) else
+   select_building state (e##.target##.id |> Js.to_string |>
+   int_of_string); Js._true)) Js._false) textures *)
+
+let add_event_listeners state =
   Html.addEventListener Html.document Html.Event.mousemove
-    (Dom.handler wrapper) Js._false
+    (Dom.handler (highlight state))
+    Js._false
   |> ignore
+
+let draw_gui state = draw_map state

@@ -32,9 +32,11 @@ header {
 #main {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-around;
   height: 100%;
+  margin-top: 2rem;
 }
 
 #gui {
@@ -50,4 +52,14 @@ header {
 canvas {
   display: block;
   position: absolute;
+}
+
+#building_selection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  overflow: auto;
+  width: 100%;
 }

@@ -2,15 +2,15 @@ open Js_of_ocaml
 open Lib
 module Html = Dom_html
 
-let js = Js.string
+(** Initial game configuration *)
+let state = State.new_state 1200 750 9 128 64
 
-let document = Html.document
-
-let state = State.new_state 910 666 7 128 64
-
+(** [main ()] is the game loop that redraws the GUI based on updates to
+    the game state. *)
 let main () =
-  Gui.reset_canvas state;
-  Gui.setup_canvas state;
+  Gui.reset_gui state;
+  Gui.setup_gui state;
+  Gui.add_event_listeners state;
   let rec loop () =
     Gui.draw_gui state;
     Html.window##requestAnimationFrame
@@ -19,4 +19,5 @@ let main () =
   in
   loop ()
 
+(** Program entrypoint *)
 let _ = main ()

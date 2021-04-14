@@ -1,10 +1,14 @@
-(** [reset_canvas state] clears everything from the foreground canvas
-    and the background canvas.*)
-val reset_canvas : State.state -> unit
+(** [reset_gui state] clears the HTML document based on properties from
+    [state]. *)
+val reset_gui : State.state -> unit
 
-(** [setup_canvas state] setups the foreground canvas and the background
-    canvas based on properties from [state]. *)
-val setup_canvas : State.state -> unit
+(** [setup_gui state] setups the HTML document based on properties from
+    [state]. *)
+val setup_gui : State.state -> unit
+
+(** [add_event_listeners state] adds event listeners to the HTML
+    document. *)
+val add_event_listeners : State.state -> unit
 
 (** [draw_gui state] draws the GUI of the game based on a given [state]. *)
 val draw_gui : State.state -> unit

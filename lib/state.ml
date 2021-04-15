@@ -104,7 +104,7 @@ let build_cell_lst width height = Array.make_matrix width height None
 (** [place_cell state cell x y] updates the old cell as indexed by [x]
     and [y] in [state] with a new [cell]. *)
 let place_cell state cell x y = state.cells.(x).(y) <- cell
-(*
+
 (** [total_tax_amount state] is the total tax amount from all cells in
     [state]. *)
 let total_tax_amount state =
@@ -138,7 +138,7 @@ let update_tax state stockpile =
     ]
   in
   merge_stockpile stockpile taxes
-*)
+
 (* order of update? option 1: geographic location (recursion through the
    cell list list) option 2: oat_plantation-> power_plant -> mine (so
    that the resource produced can be used as inputs for other buildlings
@@ -167,7 +167,7 @@ let new_state
     selected_building = -1;
   }
 
-(*
+
 let canvas_size state = state.canvas_size
 
 let map_length state = state.map_length
@@ -183,4 +183,3 @@ let next_state state (update : update) =
     state with
     stockpile = merge_stockpile state.stockpile update.stockpile;
   }
-*)

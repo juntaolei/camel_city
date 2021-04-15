@@ -70,6 +70,9 @@ val resource_dependency : building -> string -> int
 val new_building : string -> int -> int -> int -> string -> int -> int 
     -> int -> string -> building
 
+(** [output building] is the name of [building]. *)
+val building_name : building -> string
+
 (** [output building] is the output of [building]. *)
 val output : building -> resource
 

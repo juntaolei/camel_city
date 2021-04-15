@@ -25,29 +25,32 @@ type state = {
   mutable selected_building : int;
 }
 
+let get_index id lst = List.nth lst id
 (** [iter_buildings acc json] is the list of initialized [buildings]
     extracted from the json object [json]. *)
-let rec iter_buildings (acc : building list) = function
+let rec iter_buildings (acc : building list) (s : Yojson.Basic.t list) = match s with
 | [] -> acc
 | h :: t -> iter_buildings ((new_building 
-  h |> member "name" |> to_string
-  h |> member "cost" |> to_string |> int_of_string
-  h |> member "output" |> member "amount" |> to_string |> int_of_string
-  h |> member "output" |> member "name" |> to_string
-  h |> member "tax" |> to_string |> int_of_string
-  h |> member "cost" |> to_string |> int_of_string
-  h |> member "defense" |> to_string |> int_of_string
-  h |> member "resource_dependency" |> member "amount" |> to_string |> int_of_string
-  h |> member "resource_dependency" |> member "name" |> to_string
+  (h |> member "name" |> to_string)
+  (h |> member "cost" |> to_string |> int_of_string)
+  (h |> member "maintenance" |> to_string |> int_of_string)
+  (h |> member "output" |> member "amount" |> to_string |> int_of_string)
+  (h |> member "output" |> member "name" |> to_string)
+  (h |> member "tax" |> to_string |> int_of_string)
+  (h |> member "defense" |> to_string |> int_of_string)
+  (h |> member "resource_dependency" |> to_list |> get_index 0
+    |> member "amount" |> to_string |> int_of_string)
+  (h |> member "resource_dependency" |> to_list |> get_index 0
+    |> member "name" |> to_string)
 ) :: acc) t
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)
-let rec init_stockpile (acc : resource list) = function
+let rec init_stockpile (acc : resource list) =function
 | [] -> acc
 | h :: t -> init_stockpile ((new_resource 
-  h |> member "amount" |> to_string |> int_of_string
-  h |> member "name" |> to_string
+  (h |> member "amount" |> to_string |> int_of_string)
+  (h |> member "name" |> to_string)
   ) :: acc) t
 
 (** [init_new_building name bld_lst] is a new building with name [name] if
@@ -64,33 +67,30 @@ let rec iter_cells s (acc : cell array array) = function
   let x_coord = h |> member "x" |> to_string |> int_of_string in
   let y_coord = h |> member "y" |> to_string |> int_of_string in
   let obj = h |> member "object" |> to_string in
-  if not (obj = "") then 
-    acc.(x_coord).(y_coord) <- Building (init_new_building obj s.buildings);
-  iter_cells acc t
+  (if not (obj = "") then 
+    acc.(x_coord).(y_coord) <- Building (init_new_building obj s.buildings));
+  iter_cells s acc t
 
 (** [from_json json] is the state read from the file with name [file]. *)
 let from_file file = 
   let json = Yojson.Basic.from_file file in
-  let get_field name coord = json |> member name |> member coord 
-  |> to_string |> int_of_string in
+  let get_field name coord = (json |> member name |> member coord 
+  |> to_string |> int_of_string) in
   let init_state = new_state file 
     (get_field "canvas_size" "x") 
     (get_field "canvas_size" "y")
-    (json |> member "map_length" |> to_string)
+    (json |> member "map_length" |> to_string |> int_of_string)
     (get_field "cell_size" "x") 
     (get_field "cell_size" "y")
   in 
   {
     init_state with 
     cells = iter_cells init_state init_state.cells 
-      json |> member "cells" |> to_list;
+      (json |> member "cells" |> to_list);
     stockpile = List.rev 
-      (init_stockpile [] json |> member "stockpile" |> to_list);
-    population = json |> member "population" |> to_string |> int_of_string;
-    buildings = iter_buildings [] 
-      (Yojson.Basic.from_file "buildings_init.json") 
-      |> member "buildings" |> to_list;
-    }
+      (init_stockpile [] (json |> member "stockpile" |> to_list));
+    population = (json |> member "population" |> to_string |> int_of_string)
+  }
 
 
 let select_building state i = state.selected_building <- i
@@ -104,7 +104,7 @@ let build_cell_lst width height = Array.make_matrix width height None
 (** [place_cell state cell x y] updates the old cell as indexed by [x]
     and [y] in [state] with a new [cell]. *)
 let place_cell state cell x y = state.cells.(x).(y) <- cell
-
+(*
 (** [total_tax_amount state] is the total tax amount from all cells in
     [state]. *)
 let total_tax_amount state =
@@ -138,7 +138,7 @@ let update_tax state stockpile =
     ]
   in
   merge_stockpile stockpile taxes
-
+*)
 (* order of update? option 1: geographic location (recursion through the
    cell list list) option 2: oat_plantation-> power_plant -> mine (so
    that the resource produced can be used as inputs for other buildlings
@@ -160,11 +160,14 @@ let new_state
     cell_size = (cell_width, cell_height);
     cells = build_cell_lst map_length map_length;
     stockpile = [];
-    buildings = [];
+    buildings = iter_buildings [] 
+      ((Yojson.Basic.from_file "buildings_init.json") 
+      |> member "buildings" |> to_list);
     population = 0;
     selected_building = -1;
   }
 
+(*
 let canvas_size state = state.canvas_size
 
 let map_length state = state.map_length
@@ -180,3 +183,4 @@ let next_state state (update : update) =
     state with
     stockpile = merge_stockpile state.stockpile update.stockpile;
   }
+*)

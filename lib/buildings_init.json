@@ -3,42 +3,42 @@
         {   "name" : "house",
             "cost" : "0",
             "maintenance" : "0",
-            "output" : {"amonunt" : "0", "name" = ""},
+            "output" : {"amount" : "0", "name" : ""},
             "tax" : "0",
             "defense" : "0",
-            "resource_dependency" : [{"amonunt" : "0", "name" = ""}]
+            "resource_dependency" : [{"amount" : "0", "name" : ""}]
         },
         {   "name" : "oats_plantation",
             "cost" : "0",
             "maintenance" : "0",
-            "output" : {"amonunt" : "10", "name" = "oat"},
+            "output" : {"amount" : "10", "name" : "oat"},
             "tax" : "0",
             "defense" : "0",
-            "resource_dependency" : [{"amonunt" : "0", "name" = ""}]
+            "resource_dependency" : [{"amount" : "0", "name" : ""}]
         },
         {   "name" : "power_plant",
             "cost" : "0",
             "maintenance" : "0",
-            "output" : {"amonunt" : "5", "name" = "electricity"},
+            "output" : {"amount" : "5", "name" : "electricity"},
             "tax" : "0",
             "defense" : "0",
-            "resource_dependency" : [{"amonunt" : "0", "name" = ""}]
+            "resource_dependency" : [{"amount" : "0", "name" : ""}]
         },
         {   "name" : "mine",
             "cost" : "0",
             "maintenance" : "0",
-            "output" : {"amonunt" : "1", "name" = "iron"},
+            "output" : {"amount" : "1", "name" : "iron"},
             "tax" : "0",
             "defense" : "0",
-            "resource_dependency" : [{"amonunt" : "5", "name" = "electricity"}]
+            "resource_dependency" : [{"amount" : "5", "name" : "electricity"}]
         },
         {   "name" : "barrack",
             "cost" : "0",
             "maintenance" : "0",
-            "output" : {"amonunt" : "0", "name" = ""},
+            "output" : {"amount" : "0", "name" : ""},
             "tax" : "0",
             "defense" : "0",
-            "resource_dependency" : [{"amonunt" : "0", "name" = ""}]
+            "resource_dependency" : [{"amount" : "0", "name" : ""}]
         }
         
     ]

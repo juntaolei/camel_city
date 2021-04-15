@@ -54,7 +54,8 @@ let new_building n c m out_a out_n t d r_a r_n =
     defense = d;
     resource_dependency = [new_resource r_a r_n] (* only single resource dependency for now*)
   }
-let output building = building.output
+let building_name building = building.name
+  let output building = building.output
 
 let tax_amount building = building.tax
 

@@ -14,6 +14,8 @@ type building
     supports operations of buildings. *)
 type camel
 
+(*
+should we just make buildings and resources generic? 
 
 (** [oat] is a [resource] consumed by camels and produced by
     oat_plantation. *)
@@ -28,11 +30,6 @@ val iron : resource
 (** [money] is a [resource] collected from buildings. *)
 val money : resource
 
-(*
-should we just make buildings generic? i.e. create a list of buildings, 
-with each index corresponding to a type?
-
->>>>>>> origin/json
 (** [house] is a [building] that allows camel residents, thereby
     increasing camelcity's population. *)
 val house : building

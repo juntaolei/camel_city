@@ -20,13 +20,6 @@ type camel = { food : int }
 
 let new_resource (name : string) (amount : int) : resource =
   (name, amount)
-let oat = { amount = 0; name = "oat" }
-
-let electricity = { amount = 0; name = "electricity" }
-
-let iron = { amount = 0; name = "iron" }
-
-let money = { amount = 0; name = "money" }
 
 let resource_name (resource : resource) = fst resource
 
@@ -42,10 +35,10 @@ let new_building n c m out_a out_n t d r_a r_n =
     name = n;
     cost = c;
     maintenance = m;
-    output = new_resource out_a out_n;
-    tax = t;
+    output = new_resource out_n out_a;
+    income = t;
     defense = d;
-    resource_dependency = [new_resource r_a r_n] (* only single resource dependency for now*)
+    resource_dependency = [new_resource r_n r_a] (* only single resource dependency for now*)
   }
 let building_name building = building.name
   let output building = building.output

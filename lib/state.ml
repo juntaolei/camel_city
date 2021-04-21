@@ -1,4 +1,5 @@
 open Buildings
+open Yojson.Basic.Util
 
 type stockpile = resource list
 
@@ -19,67 +20,143 @@ type cell =
   | None
 
 type state = {
+  file_name : string;
   tick : int;
   canvas_size : int * int;
   map_length : int;
   cell_size : int * int;
   cells : cell array array;
+  population : int;
   stockpile : stockpile;
   buildings : building list;
   mutable selected_building : int;
 }
 
-let select_building state i = state.selected_building <- i
+let get_index id lst = List.nth lst id
+(** [iter_buildings acc json] is the list of initialized [buildings]
+    extracted from the json object [json]. *)
+let rec iter_buildings (acc : building list) (s : Yojson.Basic.t list) = match s with
+| [] -> acc
+| h :: t -> iter_buildings ((new_building 
+  (h |> member "name" |> to_string)
+  (h |> member "cost" |> to_string |> int_of_string)
+  (h |> member "maintenance" |> to_string |> int_of_string)
+  (h |> member "output" |> member "amount" |> to_string |> int_of_string)
+  (h |> member "output" |> member "name" |> to_string)
+  (h |> member "tax" |> to_string |> int_of_string)
+  (h |> member "defense" |> to_string |> int_of_string)
+  (h |> member "resource_dependency" |> to_list |> get_index 0
+    |> member "amount" |> to_string |> int_of_string)
+  (h |> member "resource_dependency" |> to_list |> get_index 0
+    |> member "name" |> to_string)
+) :: acc) t
 
-let selected_building state = state.selected_building >= 0
+(** [init_stockpile acc json] is the list of initialized [stockpile]
+    extracted from the json object [json]. *)
+let rec init_stockpile (acc : resource list) =function
+| [] -> acc
+| h :: t -> init_stockpile ((new_resource 
+  (h |> member "name" |> to_string)
+  (h |> member "amount" |> to_string |> int_of_string)
+  ) :: acc) t
 
-(** [build_cell_lst width height] is an two dimensional array with
-    [width] and [height]. *)
-let build_cell_lst width height = Array.make_matrix width height None
+(** [init_new_building name bld_lst] is a new building with name [name] if
+    such building exists in [blk_lst]. Otherwise a failure is raised. *)
+let rec init_new_building name = function
+| [] -> failwith "not a valid building name"
+| h :: t -> if (building_name h) = name then h 
+  else init_new_building name t
 
-(** [place_cell state cell x y] updates the old cell as indexed by [x]
-    and [y] in [state] with a new [cell]. *)
-let place_cell state cell x y = state.cells.(x).(y) <- cell
+(** [iter_cells s acc json] is the updated cells from information in [json]. *)
+let rec iter_cells s (acc : cell array array) = function
+| [] -> acc
+| h :: t ->
+  let x_coord = h |> member "x" |> to_string |> int_of_string in
+  let y_coord = h |> member "y" |> to_string |> int_of_string in
+  let obj = h |> member "object" |> to_string in
+  (if not (obj = "") then 
+    acc.(x_coord).(y_coord) <- Building (init_new_building obj s.buildings));
+  iter_cells s acc t
 
-let canvas_size state = state.canvas_size
-
-let canvas_width state = fst state.canvas_size
-
-let canvas_height state = snd state.canvas_size
-
-let map_length state = state.map_length
-
-let cell_size state = state.cell_size
-
-let cell_width state = fst state.cell_size
-
-let cell_height state = snd state.cell_size
-
-let cells state = state.cells
-
-let tick state = state.tick
-
-let get_buildings state = state.buildings
-
-let new_state
-    ?(stockpile = [])
-    ?(buildings = [])
-    ?(tick = 1)
-    (canvas_width : int)
-    (canvas_height : int)
-    (map_length : int)
-    (cell_width : int)
-    (cell_height : int) =
+(** [from_json json] is the state read from the file with name [file]. *)
+let from_file file = 
+  let json = Yojson.Basic.from_file file in
+  let get_field name coord = (json |> member name |> member coord 
+  |> to_string |> int_of_string) in
+  let init_state = new_state file 
+    (get_field "canvas_size" "x") 
+    (get_field "canvas_size" "y")
+    (json |> member "map_length" |> to_string |> int_of_string)
+    (get_field "cell_size" "x") 
+    (get_field "cell_size" "y")
+  in 
   {
-    tick;
-    canvas_size = (canvas_width, canvas_height);
-    map_length;
-    cell_size = (cell_width, cell_height);
-    cells = build_cell_lst map_length map_length;
-    stockpile;
-    buildings;
-    selected_building = -1;
+    init_state with 
+    cells = iter_cells init_state init_state.cells 
+      (json |> member "cells" |> to_list);
+    stockpile = List.rev 
+      (init_stockpile [] (json |> member "stockpile" |> to_list));
+    population = (json |> member "population" |> to_string |> int_of_string)
   }
+
+  let select_building state i = state.selected_building <- i
+
+  let selected_building state = state.selected_building >= 0
+  
+  (** [build_cell_lst width height] is an two dimensional array with
+      [width] and [height]. *)
+  let build_cell_lst width height = Array.make_matrix width height None
+  
+  (** [place_cell state cell x y] updates the old cell as indexed by [x]
+      and [y] in [state] with a new [cell]. *)
+  let place_cell state cell x y = state.cells.(x).(y) <- cell
+  
+  let canvas_size state = state.canvas_size
+  
+  let canvas_width state = fst state.canvas_size
+  
+  let canvas_height state = snd state.canvas_size
+  
+  let map_length state = state.map_length
+  
+  let cell_size state = state.cell_size
+  
+  let cell_width state = fst state.cell_size
+  
+  let cell_height state = snd state.cell_size
+  
+  let cells state = state.cells
+  
+  let tick state = state.tick
+  
+  let get_buildings state = state.buildings
+  
+  let file_name state = state.file_name;
+  
+  let new_state
+      (filename : string)
+      ?(stockpile = [])
+      ?(buildings = []) (*?*)
+      ?(tick = 1)
+      (canvas_width : int)
+      (canvas_height : int)
+      (map_length : int)
+      (cell_width : int)
+      (cell_height : int) =
+    {
+      tick;
+      filename = filename;
+      canvas_size = (canvas_width, canvas_height);
+      map_length;
+      cell_size = (cell_width, cell_height);
+      cells = build_cell_lst map_length map_length;
+      stockpile;
+      buildings = iter_buildings [] 
+        ((Yojson.Basic.from_file "buildings_init.json") 
+        |> member "buildings" |> to_list);
+      population = 0;
+      selected_building = -1;
+    }
 
 let rec resource_sufficiency_check_helper
     (dependencies : resource list)

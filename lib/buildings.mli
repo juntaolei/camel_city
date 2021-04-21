@@ -14,6 +14,25 @@ type building
     supports operations of buildings. *)
 type camel
 
+
+(** [oat] is a [resource] consumed by camels and produced by
+    oat_plantation. *)
+val oat : resource
+
+(** [oat] is a [resource] consumed by camels. *)
+val electricity : resource
+
+(** [oat] is a [resource] consumed by mines. *)
+val iron : resource
+
+(** [money] is a [resource] collected from buildings. *)
+val money : resource
+
+(*
+should we just make buildings generic? i.e. create a list of buildings, 
+with each index corresponding to a type?
+
+>>>>>>> origin/json
 (** [house] is a [building] that allows camel residents, thereby
     increasing camelcity's population. *)
 val house : building
@@ -30,9 +49,14 @@ val coal_mine : building
 (** [barrack] is a [building] that defends the city by increasing
     [defence] of buildlings. Details to be determined. *)
 val barrack : building
+*)
+
+(** [building_name building] is the name of building [building]. *)
+val building_name : building -> string
 
 (** [new_resource string int] makes a new resource [resource].*)
 val new_resource : string -> int -> resource
+
 (** [resource_name resource] is the name of resource [resource]. *)
 val resource_name : resource -> string
 
@@ -42,6 +66,14 @@ val resource_amount : resource -> int
 (** [resource_dependency building name] is the quantity of [name]
     dependency of [building]. *)
 val resource_dependency : building -> resource list
+
+(** [new_building name cost maint out_a out_n tax defense res_a res_n] is a 
+    new building with the parameters provided. *)
+val new_building : string -> int -> int -> int -> string -> int -> int 
+    -> int -> string -> building
+
+(** [output building] is the name of [building]. *)
+val building_name : building -> string
 
 (** [output building] is the output of [building]. *)
 val output : building -> resource

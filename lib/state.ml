@@ -75,6 +75,9 @@ let rec iter_cells s (acc : cell array array) = function
   let y_coord = h |> member "y" |> to_string |> int_of_string in
   let obj = h |> member "object" |> to_string in
   (if not (obj = "") then 
+    if (obj = "road") then 
+      acc.(x_coord).(y_coord) <- Road (new_road 1 x_coord y_coord) (* cost of roads? *)
+    else
     acc.(x_coord).(y_coord) <- Building (init_new_building obj s.buildings));
   iter_cells s acc t
 
@@ -98,6 +101,51 @@ let from_file file =
       (init_stockpile [] (json |> member "stockpile" |> to_list));
     population = (json |> member "population" |> to_string |> int_of_string)
   }
+
+  (** [generate_stock_lst acc pile] is the `List containing contents 
+  of [pile]. *)
+  let rec generate_stock_lst acc = function
+  | [] -> `List (List.rev acc)
+  | h :: t -> generate_stock_lst
+    (`Assoc [("name", resource_name h);
+    ("amount", resource_amount h)] :: acc) t
+
+  
+let generate_cell_lst cells =
+  let str_of_cell = function
+  | None -> ""
+  | Building t -> building_name t
+  | Road r -> "road"
+in
+let acc_row = [] in 
+let acc = [] in
+  Array.fold_right (fun x acc_row ->
+      (Array.fold_right 
+      (fun y acc -> 
+        (`Assoc [("x", string_of_int (List.length acc_row));
+        ("y", string_of_int (List.length acc));
+        ("object", str_of_cell y)]) :: acc) x acc) :: acc_row
+      ) cells acc_row
+
+let save_state s = 
+  let json_obj = 
+    `Assoc [ 
+    ("tick", `String (string_of_int (tick s)));
+    ("canvas_size", `Assoc [
+      ("x", `String (string_of_int (canvas_width s)));
+      ("y", `String (string_of_int (canvas_height s)))
+    ]);
+    ("map_length", `String (string_of_int (map_length s)));
+    ("cell_size", `Assoc [
+      ("x", `String (string_of_int (cell_width s)));
+      ("y", `String (string_of_int (cell_height s)))
+    ]);
+    ("cells", generate_cell_lst state.cells);
+    ("population", `String (string_of_int (population s)));
+    ("stockpile", generate_stock_lst [] state.stockpile)
+    ]
+in
+Yojson.to_file s.file_name json_obj
 
   let select_building state i = state.selected_building <- i
 
@@ -128,6 +176,8 @@ let from_file file =
   let cells state = state.cells
   
   let tick state = state.tick
+
+  let population state = state.population
   
   let get_buildings state = state.buildings
   

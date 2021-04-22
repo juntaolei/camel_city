@@ -40,6 +40,12 @@ let new_building n c m out_a out_n t d r_a r_n =
     defense = d;
     resource_dependency = [new_resource r_n r_a] (* only single resource dependency for now*)
   }
+let new_road c x_coord y_coord = 
+  {
+    cost = c;
+    x = x_coord;
+    y = y_coord
+  }
 let building_name building = building.name
   let output building = building.output
 

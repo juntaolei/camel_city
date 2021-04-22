@@ -69,6 +69,9 @@ val resource_dependency : building -> resource list
 val new_building : string -> int -> int -> int -> string -> int -> int 
     -> int -> string -> building
 
+(** [new_road cost x y ] is a road of cost [cost] and location [(x, y)]. *)
+val new_road : int -> int -> int -> road
+
 (** [output building] is the name of [building]. *)
 val building_name : building -> string
 

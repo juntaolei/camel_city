@@ -61,3 +61,5 @@ val cells : state -> cell array array
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)
 val next_state : state -> state
+
+val iter_buildings : building list -> Yojson.Basic.t list

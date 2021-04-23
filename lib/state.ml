@@ -417,16 +417,16 @@ let from_file file =
 
   (** [generate_stock_lst acc pile] is the `List containing contents 
   of [pile]. *)
-  let rec generate_stock_lst acc = function
-    | [] -> `List (List.rev acc)
+  let rec generate_stock_lst acc pile = match pile with
+    | [] -> List.rev acc
     | h :: t -> generate_stock_lst
       (`Assoc 
-        [("name", resource_name h);
-          ("amount", resource_amount h |> string_of_int)] :: acc) t
+        [("name", `String (resource_name h));
+        ("amount", `String (resource_amount h |> string_of_int))] :: acc) t
 
   
 let generate_cell_lst cells =
-  let str_of_cell = function
+  let str_of_cell (cel : cell) : string = match cel with
     | None -> ""
     | Building t -> building_name t
     | Road r -> "road"
@@ -436,9 +436,9 @@ let generate_cell_lst cells =
     Array.fold_right (fun x acc_row ->
         (Array.fold_right 
         (fun y acc -> 
-          (`Assoc [("x", string_of_int (List.length acc_row));
-          ("y", string_of_int (List.length acc));
-          ("object", str_of_cell y)]) :: acc) x acc) :: acc_row
+          `Assoc [("x", `String (List.length acc_row |> string_of_int));
+          ("y", `String (List.length acc |> string_of_int));
+          ("object", `String (str_of_cell y))] :: acc) x acc) @ acc_row
         ) cells acc_row
 
 let save_state s = 
@@ -454,9 +454,9 @@ let save_state s =
       ("x", `String (string_of_int (cell_width s)));
       ("y", `String (string_of_int (cell_height s)))
     ]);
-    ("cells", generate_cell_lst s.cells);
+    ("cells", `List (generate_cell_lst s.cells));
     ("population", `String (string_of_int (population s)));
-    ("stockpile", generate_stock_lst [] s.stockpile)
+    ("stockpile", `List (generate_stock_lst [] s.stockpile))
     ]
   in
   Yojson.to_file s.file_name json_obj

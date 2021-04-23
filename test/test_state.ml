@@ -1,7 +1,7 @@
 open OUnit2
 open Lib.State
 
-let state = new_state 1000 900 10 128 64
+let state = new_state "test_state.json" 1000 900 10 128 64
 
 let state_test =
   [

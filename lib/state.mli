@@ -4,7 +4,7 @@ open Buildings
    holds either a building, a road, or nothing. *)
 type cell =
   | Building of Buildings.building
-  | Road_t of Buildings.road
+  | Road of Buildings.road
   | None
 
 (** The type [state] records condition of the game at a certain instance
@@ -32,6 +32,7 @@ val selected_building : state -> bool
     initializes a new [state]. Requires: *)
 
 val new_state :
+  string ->
   ?stockpile:stockpile ->
   ?buildings:building list ->
   ?tick:int ->
@@ -62,4 +63,4 @@ val cells : state -> cell array array
     [state ] with [update]. *)
 val next_state : state -> state
 
-val iter_buildings : building list -> Yojson.Basic.t list
+val iter_buildings : building list -> Yojson.Basic.t list -> building list

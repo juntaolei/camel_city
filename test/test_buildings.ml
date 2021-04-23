@@ -15,11 +15,12 @@ let resource_tests =
 
 let building_tests =
   [
+    (*
     ( "resource output for oats plantation is oat" >:: fun _ ->
       assert_equal (oats_plantation |> output |> resource_name) "oat" );
     ( "amount of resource output for oats plantation is 10" >:: fun _ ->
       assert_equal (oats_plantation |> output |> resource_amount) 10 );
-    (* ( "tax amount of barrack is 0" >:: fun _ -> assert_equal
+    ( "tax amount of barrack is 0" >:: fun _ -> assert_equal
        (tax_amount barrack) 0 ); *)
     (* ( "amount of electricity required for mine is 8" >:: fun _ ->
        assert_equal (resource_dependency mine "electricity") 8 ); (

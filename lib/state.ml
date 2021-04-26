@@ -63,9 +63,16 @@ let get_index id lst = List.nth lst id
 
 let cells state = state.cells
 
+let str_of_cell (c : cell) = match c with
+| None -> ""
+| Road r -> "road"
+| Building b -> building_name b
+
 let tick state = state.tick
 
 let population state = state.population
+
+let stockpile state = state.stockpile
 
 let get_buildings state = state.buildings
 

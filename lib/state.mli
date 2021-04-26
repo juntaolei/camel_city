@@ -51,13 +51,23 @@ val canvas_size : state -> int * int
     [state]. *)
 val map_length : state -> int
 
+
 (** [cell_size state] is the cell size of the game cell as defined in
     [state]. *)
 val cell_size : state -> int * int
 
+(** [population state] is the population of [state]. *)
+val population : state -> int
+
 (** [cells state] is a two dimensional array of cells as defined in
     [state]. *)
 val cells : state -> cell array array
+
+(** [str_of_cell cel] is the string representation of [cel]. *)
+val str_of_cell : cell -> string
+
+(** [stockpile state] is the stockpile of [state]. *)
+val stockpile : state -> stockpile
 
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)

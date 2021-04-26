@@ -19,7 +19,7 @@ let resource_tests =
 let building_tests =
   [
     ( "building name of oat plantation is \"oat plantation\"" >:: fun _ ->
-      assert_equal (building_name planation_bld) "oat pladntation" );
+      assert_equal (building_name planation_bld) "oat plantation" );
     ( "cost of oat plantation is 10" >:: fun _ ->
       assert_equal (cost planation_bld) 10 );
     ( "maintenance of oat plantation is 5" >:: fun _ ->

@@ -64,22 +64,28 @@ val resource_amount : resource -> int
     dependency of [building]. *)
 val resource_dependency : building -> resource list
 
-(** [new_building name cost maint out_a out_n tax defense res_a res_n] is a 
+(** [new_building name cost maint out_a out_n inc defense res_a res_n] is a 
     new building with the parameters provided. *)
 val new_building : string -> int -> int -> int -> string -> int -> int 
     -> int -> string -> building
 
+(** [cost building] is the cost of [building].*)
+val cost : building -> int
+
 (** [new_road cost x y ] is a road of cost [cost] and location [(x, y)]. *)
 val new_road : int -> int -> int -> road
 
-(** [output building] is the name of [building]. *)
-val building_name : building -> string
+(** [cost_rd road] is the cost of [road].*)
+val cost_rd : road -> int
 
 (** [output building] is the output of [building]. *)
 val output : building -> resource
 
-(** [tax_amount building] is the [income] output of [building]. *)
+(** [income building] is the [income] output of [building]. *)
 val income : building -> int
 
 (** [maintenance building] is the [maintenance] cost of [building]. *)
 val maintenance : building -> int
+
+(** [defense building] is the [defense] level of [building]. *)
+val defense : building -> int

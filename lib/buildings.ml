@@ -46,11 +46,16 @@ let new_road c x_coord y_coord =
     x = x_coord;
     y = y_coord
   }
+let cost_rd (r : road) = r.cost
+
 let building_name building = building.name
-  let output building = building.output
+let output building = building.output
+let cost building = building.cost
 
 let resource_dependency building = building.resource_dependency
 
 let income building = building.income
 
 let maintenance building = building.maintenance
+
+let defense building = building.defense

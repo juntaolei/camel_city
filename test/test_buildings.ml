@@ -3,7 +3,10 @@ open Lib.Buildings
 
 let water = new_resource "water" 1
 
-let electricity_lst = [ new_resource "electricity" 8 ]
+(*let electricity_lst = [ new_resource "electricity" 8 ]*)
+let road_1  = new_road 10 1 2
+
+let planation_bld = new_building "oat plantation" 10 5 5 "oat" 6 7 0 ""
 
 let resource_tests =
   [
@@ -15,18 +18,27 @@ let resource_tests =
 
 let building_tests =
   [
-    (*
-    ( "resource output for oats plantation is oat" >:: fun _ ->
-      assert_equal (oats_plantation |> output |> resource_name) "oat" );
-    ( "amount of resource output for oats plantation is 10" >:: fun _ ->
-      assert_equal (oats_plantation |> output |> resource_amount) 10 );
-    ( "tax amount of barrack is 0" >:: fun _ -> assert_equal
-       (tax_amount barrack) 0 ); *)
-    (* ( "amount of electricity required for mine is 8" >:: fun _ ->
-       assert_equal (resource_dependency mine "electricity") 8 ); (
-       "insufficient electricity given for mine" >:: fun _ ->
-       assert_equal (resource_sufficiency_check mine (new_resource
-       "electricity" 1)) None ); *)
+    ( "building name of oat plantation is \"oat plantation\"" >:: fun _ ->
+      assert_equal (building_name planation_bld) "oat pladntation" );
+    ( "cost of oat plantation is 10" >:: fun _ ->
+      assert_equal (cost planation_bld) 10 );
+    ( "maintenance of oat plantation is 5" >:: fun _ ->
+      assert_equal (maintenance planation_bld) 5 );
+    ( "resource output of oat plantation is \"oat\"" >:: fun _ ->
+      assert_equal (resource_name (output planation_bld)) "oat");
+    ( "amount of resource output of oat plantation is 5" >:: fun _ ->
+      assert_equal (resource_amount (output planation_bld)) 5);
+    ( "income of oat plantation is 6" >:: fun _ ->
+      assert_equal (income planation_bld) 6 );
+    ( "defense of oat plantation is 7" >:: fun _ ->
+      assert_equal (defense planation_bld) 7 )
+
   ]
 
-let test_suite = List.flatten [ resource_tests; building_tests ]
+let road_tests = 
+  [
+    ( "cost of road_1 is 10" >:: fun _ ->
+      assert_equal (cost_rd road_1) 10 )
+  ]
+
+let test_suite = List.flatten [ resource_tests; building_tests; road_tests ]

@@ -2,19 +2,19 @@
 
 ## TODO (MS2)
 
-- [ ] Implement placing buildings.
+- [x] Implement placing buildings.
 
 - [ ] Add a start page to pick game setting or upload JSON saves.
 
-- [ ] Import buildings from JSON.
+- [x] Import buildings from JSON.
 
 - [ ] Implement save to JSON.
 
-  - [ ] Add ability to read from JSON file.
+  - [x] Add ability to read from JSON file.
 
-  - [ ] Create state from JSON.
+  - [x] Create state from JSON.
 
-  - [ ] Add ability to convert state to JSON.
+  - [x] Add ability to convert state to JSON.
 
 ## Instruction
 

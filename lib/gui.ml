@@ -1,3 +1,4 @@
+open Buildings
 open Js_of_ocaml
 open State
 module Html = Dom_html
@@ -28,6 +29,18 @@ let money_progres_bar = Html.getElementById "money"
     amount of food. *)
 let food_progres_bar = Html.getElementById "food"
 
+(** Module wide value for the HTML progress element for showing the
+    amount of electricity. *)
+let electricity_progres_bar = Html.getElementById "electricity"
+
+(** Module wide value for the HTML progress element for showing the
+    amount of iron. *)
+let iron_progres_bar = Html.getElementById "iron"
+
+(** Module wide value for the HTML progress element for showing the
+    amount of coal. *)
+let coal_progres_bar = Html.getElementById "coal"
+
 (** Module wide value for the HTML div element for showing the selection
     of buildings available to be placed. *)
 let building_selection = Html.getElementById "building_selection"
@@ -49,21 +62,40 @@ let textures = List.map (fun x -> (x, create_img x)) texture_names
 let find_texture name =
   List.find (fun x -> name = fst x) textures |> snd
 
-(** [set_progress_bar state element] changes the attributes of [element]
-    to show some statistics about state. *)
-let set_progress_bar state element =
+(** [set_progress_bar state element name] changes the attributes of
+    [element] to show some statistics about state. *)
+let set_progress_bar state element name =
   element##setAttribute (Js.string "max") (Js.string "100");
-  element##setAttribute (Js.string "value") (Js.string "10")
+  Firebug.console##log (stockpile state);
+  element##setAttribute (Js.string "value")
+    (Js.string
+       (List.find (fun (k, _) -> k = name) (stockpile state)
+       |> snd |> string_of_int))
 
 (** [set_money_progress_bar state] changes the attributes of the
     progress HTML element to show money. *)
 let set_money_progress_bar state =
-  set_progress_bar state money_progres_bar
+  set_progress_bar state money_progres_bar "money"
 
 (** [set_food_progress_bar state] changes the attributes of the progress
     HTML element to show food. *)
 let set_food_progress_bar state =
-  set_progress_bar state food_progres_bar
+  set_progress_bar state food_progres_bar "oat"
+
+(** [set_electricity_progress_bar state] changes the attributes of the
+    progress HTML element to show food. *)
+let set_electricity_progress_bar state =
+  set_progress_bar state electricity_progres_bar "electricity"
+
+(** [set_iron_progress_bar state] changes the attributes of the progress
+    HTML element to show food. *)
+let set_iron_progress_bar state =
+  set_progress_bar state iron_progres_bar "iron"
+
+(** [set_coal_progress_bar state] changes the attributes of the progress
+    HTML element to show food. *)
+let set_coal_progress_bar state =
+  set_progress_bar state coal_progres_bar "coal"
 
 (** [reset_canvas state] clears everything from the foreground canvas
     and the background canvas.*)
@@ -94,7 +126,10 @@ let reset_gui state = reset_canvas state
 let setup_gui state =
   setup_canvas state;
   set_money_progress_bar state;
-  set_food_progress_bar state
+  set_food_progress_bar state;
+  set_electricity_progress_bar state;
+  set_iron_progress_bar state;
+  set_coal_progress_bar state
 
 (** [draw_cell state x y color] colors a cell of indices [x] and [y] in
     [state] with [color] on the foreground canvas. *)
@@ -141,7 +176,14 @@ let draw_img state x y texture =
 let draw_map state =
   Array.iteri
     (fun i ->
-      Array.iteri (fun j _ -> draw_img state i j (find_texture "sand")))
+      Array.iteri (fun j c ->
+          let texture =
+            match c with
+            | Road _ -> find_texture "road"
+            | Building b -> find_texture (building_name b)
+            | _ -> find_texture "sand"
+          in
+          draw_img state i j texture))
     (cells state)
 
 (** [cell_positions state event] are the x and y indices of a cell in
@@ -185,18 +227,78 @@ let highlight state (event : Html.mouseEvent Js.t) =
       "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
-(* let draw_building_selection state = List.mapi (fun i x -> let new_div
-   = Html.createDiv Html.document in new_div##.id := i |> string_of_int
-   |> Js.string; new_div##.style##.display := Js.string "block";
-   Html.addEventListener new_div Html.Event.click (Dom.handler (fun e ->
-   if selected_building state then select_building state (-1) else
-   select_building state (e##.target##.id |> Js.to_string |>
-   int_of_string); Js._true)) Js._false) textures *)
-
-let add_event_listeners state =
+let add_highlight_listener state =
   Html.addEventListener Html.document Html.Event.mousemove
     (Dom.handler (highlight state))
     Js._false
   |> ignore
+
+let plot_cell state (event : Html.mouseEvent Js.t) =
+  let positions = cell_positions state event in
+  let a =
+    if current_selected state < 0 then "sand"
+    else List.nth textures (current_selected state) |> fst
+  in
+  print_endline a;
+  reset_canvas state;
+  if selected_building state && a <> "road" && a <> "sand" then
+    place_cell state
+      (Building
+         (List.find (fun b -> building_name b = a) (buildings state)))
+      (fst positions) (snd positions);
+  if selected_building state && a = "road" then
+    place_cell state
+      (Road (new_road 0 (fst positions) (snd positions)))
+      (fst positions) (snd positions);
+  if selected_building state && a = "sand" then
+    place_cell state None (fst positions) (snd positions);
+  draw_map state;
+  Js._true
+
+let add_plot_listener state =
+  Html.addEventListener Html.document Html.Event.click
+    (Dom.handler (plot_cell state))
+    Js._false
+  |> ignore
+
+let draw_building_selections =
+  List.mapi
+    (fun i (_, t) ->
+      let new_div = Html.createDiv Html.document in
+      new_div##.style##.display := Js.string "block";
+      t##.id := i |> string_of_int |> Js.string;
+      Dom.appendChild building_selection new_div;
+      Dom.appendChild new_div t)
+    textures
+  |> ignore
+
+let select state (event : Html.mouseEvent Js.t) =
+  let event_target =
+    match Js.Opt.to_option event##.target with
+    | Some e -> e
+    | _ -> failwith ""
+  in
+  let event_id = Js.to_string event_target##.id in
+  let current = Html.getElementById event_id in
+  if selected_building state then
+    current##.classList##remove (Js.string "selected");
+  select_building state (int_of_string event_id);
+  print_endline (current_selected state |> string_of_int);
+  Js._true
+
+let add_building_selection_listener state =
+  List.mapi
+    (fun i _ ->
+      let img = Html.getElementById (string_of_int i) in
+      Html.addEventListener img Html.Event.click
+        (Dom.handler (select state))
+        Js._false)
+    textures
+  |> ignore
+
+let add_event_listeners state =
+  add_highlight_listener state;
+  add_plot_listener state;
+  add_building_selection_listener state
 
 let draw_gui state = draw_map state

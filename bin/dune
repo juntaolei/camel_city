@@ -7,8 +7,19 @@
 
 (rule
  (targets main.js)
+ (deps buildings_init.json)
  (action
-  (run %{bin:js_of_ocaml} --source-map %{dep:main.bc} -o %{targets})))
+  (run
+   %{bin:js_of_ocaml}
+   --source-map
+   %{dep:main.bc}
+   -o
+   %{targets}
+   --pretty
+   -I
+   ./
+   --file
+   %{dep:buildings_init.json})))
 
 (alias
  (name default)

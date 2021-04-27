@@ -13,12 +13,14 @@ type state
 
 (** The type [stockpile] is a resource list that coresponds with the
     amount of resources the play has. *)
-type stockpile
+type stockpile = resource list
 
 (** The type [update] should contain the necessary fields that can be
     updated. This should be types like stockpile. The game cells does
     not need to be included as cells can be mutated. *)
 (* type update *)
+
+val current_selected : state -> int
 
 (** [select_building state i] is the current selected building from the
     building selection pane. *)
@@ -30,11 +32,9 @@ val selected_building : state -> bool
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
-
 val new_state :
   string ->
   ?stockpile:stockpile ->
-  ?buildings:building list ->
   ?tick:int ->
   int ->
   int ->
@@ -50,7 +50,6 @@ val canvas_size : state -> int * int
 (** [map_length state] is the map length of the game map as defined in
     [state]. *)
 val map_length : state -> int
-
 
 (** [cell_size state] is the cell size of the game cell as defined in
     [state]. *)
@@ -69,18 +68,21 @@ val str_of_cell : cell -> string
 (** [stockpile state] is the stockpile of [state]. *)
 val stockpile : state -> stockpile
 
+val buildings : state -> building list
+
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)
 val next_state : state -> state
 
-val iter_buildings : building list -> Yojson.Basic.t list -> building list
+val iter_buildings :
+  building list -> Yojson.Basic.t list -> building list
 
-(** [from_json file] is the state read from the file with name [file]. 
-    [file] must be a valid file name ending in [.json].
-*)
+(** [from_json file] is the state read from the file with name [file].
+    [file] must be a valid file name ending in [.json]. *)
 val from_file : string -> state
 
-(** [save_state st] saves the state [st] into a json file in the same directory.
-    If the file already exists, contents will be overwritten.
-*)
+(** [save_state st] saves the state [st] into a json file in the same
+    directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> unit
+
+val place_cell : state -> cell -> int -> int -> unit

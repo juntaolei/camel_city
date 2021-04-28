@@ -2,19 +2,19 @@
 
 ## TODO (MS2)
 
-Target Line Count: 833 / 1000
+Target Line Count: 910 / 1000
 
 - [x] Implement placing buildings.
 
-- [ ] Add a start page to pick game setting or upload JSON saves.
+- [X] Add a start page to pick game setting or upload JSON saves.
 
   - [x] Add ability to pick game setting.
 
-  - [ ] Add ability to upload JSON saves.
+  - [X] Add ability to upload JSON saves.
 
 - [x] Import buildings from JSON.
 
-- [?] Implement save to JSON.
+- [X] Implement save to JSON.
 
   - [x] Add ability to read from JSON file.
 

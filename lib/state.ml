@@ -111,6 +111,11 @@ let rec iter_buildings (acc : building list) (s : Yojson.Basic.t list) =
          :: acc)
         t
 
+let buildings_init =
+  iter_buildings []
+    ("buildings_init.json" |> Yojson.Basic.from_file
+   |> member "buildings" |> to_list)
+
 let new_state
     (file_name : string)
     ?(stockpile = resource_stockpile)
@@ -128,10 +133,7 @@ let new_state
     cell_size = (cell_width, cell_height);
     cells = build_cell_lst map_length map_length;
     stockpile;
-    buildings =
-      iter_buildings []
-        (Sys_js.read_file ~name:"buildings_init.json"
-        |> Yojson.Basic.from_string |> member "buildings" |> to_list);
+    buildings = buildings_init;
     population = 0;
     selected_building = -1;
   }
@@ -338,7 +340,7 @@ let generate_cell_lst cells =
     match cel with
     | None -> ""
     | Building t -> building_name t
-    | Road r -> "road"
+    | Road _ -> "road"
   in
   let acc_row = [] in
   let acc = [] in
@@ -380,4 +382,5 @@ let save_state s =
         ("stockpile", `List (generate_stock_lst [] s.stockpile));
       ]
   in
-  Yojson.to_file s.file_name json_obj
+  (* Yojson.to_file s.file_name json_obj *)
+  Yojson.to_string json_obj

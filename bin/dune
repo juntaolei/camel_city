@@ -16,6 +16,7 @@
    -o
    %{targets}
    --pretty
+   --debuginfo
    -I
    ./
    --file

@@ -13,18 +13,30 @@
   <header>
     <h1 id="title">Camel City</h1>
   </header>
+  <div id="startup">
+    <label for="cell_size" id="cell_size_label">Cell Size: 9</label>
+    <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
+    <input type="submit" value="Submit" name="submit" id="submit">
+  </div>
   <div id="main">
     <div id="stats">
       <label for="money">Money: </label>
       <progress id="money"></progress>
+      |
       <label for="food">Food: </label>
       <progress id="food"></progress>
+      |
       <label for="electricity">Electricity: </label>
       <progress id="electricity"></progress>
+      |
       <label for="iron">Iron: </label>
       <progress id="iron"></progress>
+      |
       <label for="coal">Coal: </label>
       <progress id="coal"></progress>
+    </div>
+    <div id="save">
+      <button id="save_button">Save Game</button>
     </div>
     <div id="gui">
       <canvas id="bg"></canvas>

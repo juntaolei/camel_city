@@ -41,6 +41,13 @@ let iron_progres_bar = Html.getElementById "iron"
     amount of coal. *)
 let coal_progres_bar = Html.getElementById "coal"
 
+let save_button =
+  match
+    Html.getElementById_coerce "save_button" Html.CoerceTo.button
+  with
+  | None -> raise Not_found
+  | Some button -> button
+
 (** Module wide value for the HTML div element for showing the selection
     of buildings available to be placed. *)
 let building_selection = Html.getElementById "building_selection"
@@ -66,7 +73,6 @@ let find_texture name =
     [element] to show some statistics about state. *)
 let set_progress_bar state element name =
   element##setAttribute (Js.string "max") (Js.string "100");
-  Firebug.console##log (stockpile state);
   element##setAttribute (Js.string "value")
     (Js.string
        (List.find (fun (k, _) -> k = name) (stockpile state)
@@ -116,10 +122,10 @@ let setup_canvas state =
   fg_canvas##.height := state |> canvas_size |> snd;
   bg_ctx##translate
     (float_of_int bg_canvas##.width /. 2.)
-    (state |> cell_size |> snd |> float_of_int);
+    ((state |> cell_size |> snd |> float_of_int) *. 2.);
   fg_ctx##translate
     (float_of_int fg_canvas##.width /. 2.)
-    (state |> cell_size |> snd |> float_of_int)
+    ((state |> cell_size |> snd |> float_of_int) *. 2.)
 
 let reset_gui state = reset_canvas state
 
@@ -160,14 +166,12 @@ let draw_cell state x y color =
 (** [draw_img state x y texture] draws the [texture] that represents a
     cell of indices [x] and [y] in [state] on the background canvas. *)
 let draw_img state x y texture =
-  let cell_width = state |> cell_size |> fst in
-  let cell_height = state |> cell_size |> snd in
+  let cell_width = state |> cell_size |> fst |> float_of_int in
+  let cell_height = state |> cell_size |> snd |> float_of_int in
   bg_ctx##save;
   bg_ctx##translate
-    ((float_of_int y -. float_of_int x) *. float_of_int cell_width /. 2.)
-    ((float_of_int x +. float_of_int y)
-    *. float_of_int cell_height
-    /. 2.);
+    ((float_of_int y -. float_of_int x) *. cell_width /. 2.)
+    ((float_of_int x +. float_of_int y) *. cell_height /. 2.);
   bg_ctx##drawImage_full texture 0. 0. 130. 230. (-65.) 0. 130. 230.;
   bg_ctx##restore
 
@@ -181,14 +185,21 @@ let draw_map state =
             match c with
             | Road _ -> find_texture "road"
             | Building b -> find_texture (building_name b)
-            | _ -> find_texture "sand"
+            | None -> find_texture "sand"
           in
           draw_img state i j texture))
     (cells state)
 
 (** [cell_positions state event] are the x and y indices of a cell in
     [state] that the mouse through [event] is currently hovering over. *)
-let cell_positions state event =
+let cell_positions state (event : Html.mouseEvent Js.t) =
+  let canvas_width = state |> canvas_size |> fst |> float_of_int in
+  let cell_width = state |> cell_size |> fst |> float_of_int in
+  let cell_height = state |> cell_size |> snd |> float_of_int in
+  let map_length = state |> map_length |> float_of_int in
+  let padding_width =
+    (canvas_width -. (cell_width *. map_length)) /. 2.
+  in
   let mouse_x =
     float_of_int event##.clientX
     -. fg_canvas##getBoundingClientRect##.left
@@ -197,11 +208,10 @@ let cell_positions state event =
     float_of_int event##.clientY
     -. fg_canvas##getBoundingClientRect##.top
   in
-  let cell_width = state |> cell_size |> fst |> float_of_int in
-  let cell_height = state |> cell_size |> snd |> float_of_int in
-  let map_length = state |> map_length |> float_of_int in
-  let x = (mouse_x /. cell_width) -. (map_length /. 2.) in
-  let y = (mouse_y -. cell_height) /. cell_height in
+  let x =
+    ((mouse_x -. padding_width) /. cell_width) -. (map_length /. 2.)
+  in
+  let y = (mouse_y -. (cell_height *. 2.)) /. cell_height in
   (y -. x |> floor |> int_of_float, y +. x |> floor |> int_of_float)
 
 (** [highlight state event] highlights a cell in [state] by calculating
@@ -228,7 +238,7 @@ let highlight state (event : Html.mouseEvent Js.t) =
   Js._true
 
 let add_highlight_listener state =
-  Html.addEventListener Html.document Html.Event.mousemove
+  Html.addEventListener fg_canvas Html.Event.mousemove
     (Dom.handler (highlight state))
     Js._false
   |> ignore
@@ -239,7 +249,6 @@ let plot_cell state (event : Html.mouseEvent Js.t) =
     if current_selected state < 0 then "sand"
     else List.nth textures (current_selected state) |> fst
   in
-  print_endline a;
   reset_canvas state;
   if selected_building state && a <> "road" && a <> "sand" then
     place_cell state
@@ -281,9 +290,13 @@ let select state (event : Html.mouseEvent Js.t) =
   let event_id = Js.to_string event_target##.id in
   let current = Html.getElementById event_id in
   if selected_building state then
-    current##.classList##remove (Js.string "selected");
-  select_building state (int_of_string event_id);
-  print_endline (current_selected state |> string_of_int);
+    current##.classList##remove (Js.string "selected")
+  else current##.classList##add (Js.string "selected");
+  if
+    selected_building state
+    && event_id = (current_selected state |> string_of_int)
+  then select_building state (-1)
+  else select_building state (int_of_string event_id);
   Js._true
 
 let add_building_selection_listener state =
@@ -296,9 +309,99 @@ let add_building_selection_listener state =
     textures
   |> ignore
 
+let save_game state _ =
+  let div = Html.getElementById "save" in
+  let new_link = Html.createA Html.document in
+  new_link##.href :=
+    Js.string ("data:text/json" ^ Url.urlencode (save_state state));
+  new_link##.innerHTML := Js.string "Click this link to download";
+  Dom.appendChild div new_link;
+  Js._true
+
+let add_save_button_listener state =
+  Html.addEventListener save_button Html.Event.click
+    (Dom.handler (save_game state))
+    Js._false
+  |> ignore
+
+let update_slider_label =
+  let label =
+    match
+      Html.getElementById_coerce "cell_size_label" Html.CoerceTo.label
+    with
+    | None -> raise Not_found
+    | Some label -> label
+  in
+  let slider =
+    match
+      Html.getElementById_coerce "cell_size" Html.CoerceTo.input
+    with
+    | None -> raise Not_found
+    | Some slider -> slider
+  in
+  slider##.onchange :=
+    Dom.handler (fun _ ->
+        label##.innerHTML :=
+          Js.string ("Cell Size: " ^ Js.to_string slider##.value);
+        Js._true)
+
+let toggle_game is_hidden =
+  let main_div = Html.getElementById "main" in
+  if is_hidden then main_div##.classList##remove (Js.string "hidden")
+  else main_div##.classList##add (Js.string "hidden")
+
+let toggle_startup is_hidden =
+  let startup = Html.getElementById "startup" in
+  if is_hidden then startup##.classList##remove (Js.string "hidden")
+  else startup##.classList##add (Js.string "hidden")
+
 let add_event_listeners state =
   add_highlight_listener state;
   add_plot_listener state;
-  add_building_selection_listener state
+  add_building_selection_listener state;
+  add_save_button_listener state
+
+let draw_setup =
+  update_slider_label;
+  toggle_game false
 
 let draw_gui state = draw_map state
+
+let start_game =
+  let submit =
+    match Html.getElementById_coerce "submit" Html.CoerceTo.input with
+    | None -> raise Not_found
+    | Some input -> input
+  in
+  let slider =
+    match
+      Html.getElementById_coerce "cell_size" Html.CoerceTo.input
+    with
+    | None -> raise Not_found
+    | Some slider -> slider
+  in
+  submit##.onclick :=
+    Dom.handler (fun _ ->
+        let state =
+          new_state "game_state.json" 1200 750
+            (slider##.value |> Js.to_string |> int_of_string)
+            128 64
+        in
+        toggle_startup false;
+        toggle_game true;
+        reset_gui state;
+        setup_gui state;
+        draw_building_selections;
+        add_event_listeners state;
+        let rec loop () =
+          draw_gui state;
+          Html.window##requestAnimationFrame
+            (Js.wrap_callback (fun _ -> loop ()))
+          |> ignore
+        in
+        loop ();
+        Js._true)
+
+let main =
+  draw_setup;
+  start_game

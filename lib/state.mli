@@ -83,6 +83,6 @@ val from_file : string -> state
 
 (** [save_state st] saves the state [st] into a json file in the same
     directory. If the file already exists, contents will be overwritten. *)
-val save_state : state -> unit
+val save_state : state -> string
 
 val place_cell : state -> cell -> int -> int -> unit

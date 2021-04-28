@@ -81,6 +81,8 @@ val iter_buildings :
     [file] must be a valid file name ending in [.json]. *)
 val from_file : string -> state
 
+val from_string : string -> state
+
 (** [save_state st] saves the state [st] into a json file in the same
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string

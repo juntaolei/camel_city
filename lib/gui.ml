@@ -380,6 +380,58 @@ let start_game =
     | None -> raise Not_found
     | Some slider -> slider
   in
+  let game_save =
+    match
+      Html.getElementById_coerce "game_save" Html.CoerceTo.input
+    with
+    | None -> raise Not_found
+    | Some input -> input
+  in
+  game_save##.onchange :=
+    Dom.handler (fun _ ->
+        let file_lst =
+          match Js.Optdef.to_option game_save##.files with
+          | Some e -> e
+          | _ -> failwith ""
+        in
+        let file =
+          match Js.Opt.to_option (file_lst##item 0) with
+          | Some e -> e
+          | _ -> failwith ""
+        in
+        let file_reader = new%js File.fileReader in
+        file_reader##.onload :=
+          Dom.handler (fun e ->
+              let evt =
+                match Js.Opt.to_option e##.target with
+                | Some e -> e
+                | _ -> failwith ""
+              in
+              let result = evt##.result in
+              let state =
+                from_string
+                  (match
+                     Js.Opt.to_option (File.CoerceTo.string result)
+                   with
+                  | Some e -> Js.to_string e
+                  | _ -> failwith "")
+              in
+              toggle_startup false;
+              toggle_game true;
+              reset_gui state;
+              setup_gui state;
+              draw_building_selections;
+              add_event_listeners state;
+              let rec loop () =
+                draw_gui state;
+                Html.window##requestAnimationFrame
+                  (Js.wrap_callback (fun _ -> loop ()))
+                |> ignore
+              in
+              loop ();
+              Js._true);
+        file_reader##readAsText file;
+        Js._true);
   submit##.onclick :=
     Dom.handler (fun _ ->
         let state =

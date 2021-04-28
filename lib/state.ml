@@ -318,6 +318,31 @@ let from_file file =
       json |> member "population" |> to_string |> int_of_string;
   }
 
+let from_string string =
+  let json = Yojson.Basic.from_string string in
+  let get_field name coord =
+    json |> member name |> member coord |> to_string |> int_of_string
+  in
+  let init_state =
+    new_state string
+      (get_field "canvas_size" "x")
+      (get_field "canvas_size" "y")
+      (json |> member "map_length" |> to_string |> int_of_string)
+      (get_field "cell_size" "x")
+      (get_field "cell_size" "y")
+  in
+  {
+    init_state with
+    cells =
+      iter_cells init_state init_state.cells
+        (json |> member "cells" |> to_list);
+    stockpile =
+      List.rev
+        (init_stockpile [] (json |> member "stockpile" |> to_list));
+    population =
+      json |> member "population" |> to_string |> int_of_string;
+  }
+
 (** [generate_stock_lst acc pile] is the `List containing contents of
     [pile]. *)
 let rec generate_stock_lst acc pile =

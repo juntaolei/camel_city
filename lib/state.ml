@@ -1,5 +1,6 @@
 open Buildings
 open Yojson.Basic.Util
+open Js_of_ocaml
 
 type stockpile = resource list
 
@@ -154,14 +155,15 @@ let subtract_maintenace building (stockpile : stockpile) : stockpile =
 
 let subtract_resource building (stockpile : stockpile) : stockpile =
   let output = output building in
-  let name = resource_name output in
+  let output_name = resource_name output in
+  let building_name = resource_name output in
   let change = resource_amount output in
-  if name = "" then stockpile
+  if building_name = "" then stockpile
   else
-    let new_value = List.assoc name stockpile - change in
     List.map
       (fun (name, value) ->
-        if name = name then (name, new_value) else (name, value))
+        if name = output_name then (name, value - change)
+        else (name, value))
       stockpile
 
 (** [add_income] adds the money that the building generates to it's
@@ -198,7 +200,7 @@ let update_stockpile lst stockpile =
         else
           let new_stockpile =
             subtract_maintenace h stockpile
-            |> subtract_resource h |> add_income h |> add_resource h
+            |> add_income h |> add_resource h
           in
           update_stockpile_aux new_stockpile t
   in

@@ -217,7 +217,6 @@ let cell_positions state (event : Html.mouseEvent Js.t) =
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
 let highlight state (event : Html.mouseEvent Js.t) =
-  reset_canvas state;
   let canvas_width = state |> canvas_size |> fst in
   let canvas_height = state |> canvas_size |> snd in
   let map_length = state |> map_length in
@@ -249,7 +248,6 @@ let plot_cell state (event : Html.mouseEvent Js.t) =
     if current_selected state < 0 then "sand"
     else List.nth textures (current_selected state) |> fst
   in
-  reset_canvas state;
   if selected_building state && a <> "road" && a <> "sand" then
     place_cell state
       (Building
@@ -423,7 +421,7 @@ let start_game =
               draw_building_selections;
               add_event_listeners state;
               let rec loop () =
-                draw_gui state;
+                draw_gui (next_state state);
                 Html.window##requestAnimationFrame
                   (Js.wrap_callback (fun _ -> loop ()))
                 |> ignore
@@ -445,13 +443,13 @@ let start_game =
         setup_gui state;
         draw_building_selections;
         add_event_listeners state;
-        let rec loop () =
-          draw_gui state;
+        draw_gui state;
+        let rec loop state =
           Html.window##requestAnimationFrame
-            (Js.wrap_callback (fun _ -> loop ()))
+            (Js.wrap_callback (fun _ -> loop (next_state state)))
           |> ignore
         in
-        loop ();
+        loop state |> ignore;
         Js._true)
 
 let main =

@@ -27,7 +27,7 @@ type state = {
   canvas_size : int * int;
   map_length : int;
   cell_size : int * int;
-  cells : cell array array;
+  mutable cells : cell array array;
   population : int;
   stockpile : stockpile;
   buildings : building list;
@@ -147,6 +147,7 @@ let rec resource_sufficiency_check_helper
       let resource_name = Buildings.resource_name h in
       let resource_change = Buildings.resource_amount h in
       let new_resource_value =
+        (* MAJOR PROBLEM: Throws not found error. *)
         List.assoc resource_name resource_stockpile - resource_change
       in
       if new_resource_value >= 0 then
@@ -234,28 +235,25 @@ let rec update_resources
   match building_list with
   | [] -> resource_stockpile
   | h :: t ->
-      if not (resource_sufficiency_check h resource_stockpile) then
-        update_resources t (sub_maintance h resource_stockpile)
-      else
-        update_resources t
-          (add_resources h
-             (add_income h
-                (sub_resource h (sub_maintance h resource_stockpile))))
+      (* if not (resource_sufficiency_check h resource_stockpile) then
+         update_resources t (sub_maintance h resource_stockpile) else
+         update_resources t (add_resources h (add_income h (sub_resource
+         h (sub_maintance h resource_stockpile)))) *)
+      update_resources t resource_stockpile
 
-let rec next_state (state : state) : state =
-  if pause then
-    if state.tick < 100 then
-      let new_resources =
-        update_resources state.buildings state.stockpile
-      in
-      let update_state =
-        new_state ~stockpile:new_resources ~tick:(state.tick + 1)
-          (file_name state) (canvas_width state) (canvas_height state)
-          (map_length state) (cell_width state) (cell_height state)
-      in
-      next_state update_state
-    else next_state state
-  else next_state state
+let next_state (state : state) : state =
+  (* if pause then if state.tick < 100 then let new_resources =
+     update_resources state.buildings state.stockpile in let
+     update_state = new_state ~stockpile:new_resources ~tick:(state.tick
+     + 1) (file_name state) (canvas_width state) (canvas_height state)
+     (map_length state) (cell_width state) (cell_height state) in
+     next_state update_state else next_state state else next_state state *)
+  let new_resources =
+    update_resources state.buildings state.stockpile
+  in
+  new_state ~stockpile:new_resources ~tick:(state.tick + 1)
+    (file_name state) (canvas_width state) (canvas_height state)
+    (map_length state) (cell_width state) (cell_height state)
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)

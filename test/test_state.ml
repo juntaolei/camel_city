@@ -2,14 +2,15 @@ open OUnit2
 open Lib.State
 open Lib.Buildings
 
-(* This test suite covers the most basic commands in [state.ml] including 
-    functions for creating and updating states. *)
+(* This test suite covers the most basic commands in [state.ml]
+   including functions for creating and updating states. *)
 
 let state_0 = new_state "test_state.json" 1000 900 10 128 64
+
 let state_1 = from_file "map_1.json"
 
-(** [expected_cell_array_1] is the expected cell array array extracted from
-    file "map_1.json". *)
+(** [expected_cell_array_1] is the expected cell array array extracted
+    from file "map_1.json". *)
 let expected_cell_array_1 =
   let empty = Array.make_matrix 3 3 None in
   empty.(0).(0) <-
@@ -19,17 +20,18 @@ let expected_cell_array_1 =
     Building (new_building "oats_plantation" 0 0 10 "oat" 0 0 0 "");
   empty
 
-(** [expected_stockpile_1] is the expected stockpile extracted from file 
-  "map_1.json". *)
-  let expected_stockpile_1 = [
-  new_resource "oat" 0;
-  new_resource "electricity" 40;
-  new_resource "iron" 20;
-  new_resource "money" 100
-]
+(** [expected_stockpile_1] is the expected stockpile extracted from file
+    "map_1.json". *)
+let expected_stockpile_1 =
+  [
+    new_resource "oat" 0;
+    new_resource "electricity" 40;
+    new_resource "iron" 20;
+    new_resource "money" 100;
+  ]
 
-(** [lst_of_array_array a] is the cell list list represented by the cell array
-    array [a]. *)
+(** [lst_of_array_array a] is the cell list list represented by the cell
+    array array [a]. *)
 let lst_of_array_array a =
   let acc = ref [] in
   for i = 0 to Array.length a - 1 do
@@ -42,24 +44,27 @@ let lst_of_array_array a =
   done;
   !acc
 
-(** [string_of_lst acc lst] is the string representation of cell list [lst]. *)
+(** [string_of_lst acc lst] is the string representation of cell list
+    [lst]. *)
 let rec string_of_lst acc = function
   | [] -> acc
   | h :: t -> string_of_lst (acc ^ str_of_cell h ^ ",") t
 
-(** [string_of_lst acc lst] is the string representation of cell list list
-    [lst]. *)
+(** [string_of_lst acc lst] is the string representation of cell list
+    list [lst]. *)
 let rec string_of_lst_lst acc = function
   | [] -> acc
   | h :: t -> string_of_lst_lst ("[" ^ string_of_lst "" h ^ "]" ^ acc) t
 
-(** [string_of_stockpile acc sp] is the string representation of stockpile 
-    [sp]. *)
+(** [string_of_stockpile acc sp] is the string representation of
+    stockpile [sp]. *)
 let rec string_of_stockpile acc = function
-| [] -> acc
-| h :: t -> 
-  string_of_stockpile 
-    (acc ^ (resource_name h) ^ ":" ^ (string_of_int (resource_amount h))) t
+  | [] -> acc
+  | h :: t ->
+      string_of_stockpile
+        (acc ^ resource_name h ^ ":" ^ string_of_int (resource_amount h))
+        t
+
 let canvas_size_test name st expected : test =
   name >:: fun _ ->
   assert_equal expected (canvas_size st) ~printer:(fun (a, b) ->
@@ -84,8 +89,9 @@ let cell_test name st expected : test =
       string_of_lst_lst "" (lst_of_array_array x))
 
 let stockpile_test name st expected : test =
-  name >:: fun _ -> assert_equal expected (stockpile st) 
-  ~printer: (fun x -> string_of_stockpile "" x)
+  name >:: fun _ ->
+  assert_equal expected (stockpile st) ~printer:(fun x ->
+      string_of_stockpile "" x)
 
 let state_test =
   [
@@ -101,8 +107,6 @@ let state_test =
     population_test "population testing" state_1 20;
     cell_test "cell test for state_1" state_1 expected_cell_array_1;
     stockpile_test "stockpile for state_1" state_1 expected_stockpile_1;
-
-    (** updating states *)
   ]
 
 let test_suite = List.flatten [ state_test ]

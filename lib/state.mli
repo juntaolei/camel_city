@@ -15,11 +15,6 @@ type state
     amount of resources the play has. *)
 type stockpile = resource list
 
-(** The type [update] should contain the necessary fields that can be
-    updated. This should be types like stockpile. The game cells does
-    not need to be included as cells can be mutated. *)
-(* type update *)
-
 val current_selected : state -> int
 
 (** [select_building state i] is the current selected building from the
@@ -33,9 +28,9 @@ val selected_building : state -> bool
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
 val new_state :
-  string ->
   ?stockpile:stockpile ->
   ?tick:int ->
+  string ->
   int ->
   int ->
   int ->
@@ -74,13 +69,10 @@ val buildings : state -> building list
     [state ] with [update]. *)
 val next_state : state -> state
 
-val iter_buildings :
-  building list -> Yojson.Basic.t list -> building list
+val iter_buildings : Yojson.Basic.t list -> building list
 
-(** [from_json file] is the state read from the file with name [file].
-    [file] must be a valid file name ending in [.json]. *)
-val from_file : string -> state
-
+(** [from_json string] is the state read from the string with name
+    [string]. [string] must be a valid JSON. *)
 val from_string : string -> state
 
 (** [save_state st] saves the state [st] into a json file in the same

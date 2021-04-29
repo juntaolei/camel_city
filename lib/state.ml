@@ -1,5 +1,4 @@
 open Buildings
-open Js_of_ocaml
 open Yojson.Basic.Util
 
 type stockpile = resource list
@@ -22,7 +21,7 @@ type cell =
   | None
 
 type state = {
-  file_name : string;
+  filename : string;
   tick : int;
   canvas_size : int * int;
   map_length : int;
@@ -50,19 +49,9 @@ let place_cell state cell x y = state.cells.(x).(y) <- cell
 
 let canvas_size state = state.canvas_size
 
-let canvas_width state = fst state.canvas_size
-
-let canvas_height state = snd state.canvas_size
-
 let map_length state = state.map_length
 
 let cell_size state = state.cell_size
-
-let cell_width state = fst state.cell_size
-
-let cell_height state = snd state.cell_size
-
-let get_index id lst = List.nth lst id
 
 let cells state = state.cells
 
@@ -81,45 +70,42 @@ let stockpile state = state.stockpile
 
 let get_buildings state = state.buildings
 
-let file_name state = state.file_name
+let filename state = state.filename
 
 let get_index id lst = List.nth lst id
 
 (** [iter_buildings acc json] is the list of initialized [buildings]
     extracted from the json object [json]. *)
-let rec iter_buildings (acc : building list) (s : Yojson.Basic.t list) =
-  match s with
-  | [] -> acc
-  | h :: t ->
-      iter_buildings
-        (new_building
-           (h |> member "name" |> to_string)
-           (h |> member "cost" |> to_string |> int_of_string)
-           (h |> member "maintenance" |> to_string |> int_of_string)
-           (h |> member "output" |> member "amount" |> to_string
-          |> int_of_string)
-           (h |> member "output" |> member "name" |> to_string)
-           (h |> member "tax" |> to_string |> int_of_string)
-           (h |> member "defense" |> to_string |> int_of_string)
-           (h
-           |> member "resource_dependency"
-           |> to_list |> get_index 0 |> member "amount" |> to_string
-           |> int_of_string)
-           (h
-           |> member "resource_dependency"
-           |> to_list |> get_index 0 |> member "name" |> to_string)
-         :: acc)
-        t
+let iter_buildings json =
+  List.fold_left
+    (fun acc building ->
+      new_building
+        (building |> member "name" |> to_string)
+        (building |> member "cost" |> to_string |> int_of_string)
+        (building |> member "maintenance" |> to_string |> int_of_string)
+        (building |> member "output" |> member "amount" |> to_string
+       |> int_of_string)
+        (building |> member "output" |> member "name" |> to_string)
+        (building |> member "tax" |> to_string |> int_of_string)
+        (building |> member "defense" |> to_string |> int_of_string)
+        (building
+        |> member "resource_dependency"
+        |> to_list |> get_index 0 |> member "amount" |> to_string
+        |> int_of_string)
+        (building
+        |> member "resource_dependency"
+        |> to_list |> get_index 0 |> member "name" |> to_string)
+      :: acc)
+    [] json
 
 let buildings_init =
-  iter_buildings []
-    ("buildings_init.json" |> Yojson.Basic.from_file
-   |> member "buildings" |> to_list)
+  "buildings_init.json" |> Yojson.Basic.from_file |> member "buildings"
+  |> to_list |> iter_buildings
 
 let new_state
-    (file_name : string)
     ?(stockpile = resource_stockpile)
     ?(tick = 1)
+    (filename : string)
     (canvas_width : int)
     (canvas_height : int)
     (map_length : int)
@@ -127,7 +113,7 @@ let new_state
     (cell_height : int) =
   {
     tick;
-    file_name;
+    filename;
     canvas_size = (canvas_width, canvas_height);
     map_length;
     cell_size = (cell_width, cell_height);
@@ -139,8 +125,8 @@ let new_state
   }
 
 let rec resource_sufficiency_check_helper
-    (dependencies : resource list)
-    (resource_stockpile : stockpile) : bool =
+    dependencies
+    (stockpile : stockpile) =
   match dependencies with
   | [] -> true
   | h :: t ->
@@ -148,100 +134,88 @@ let rec resource_sufficiency_check_helper
       let resource_change = Buildings.resource_amount h in
       let new_resource_value =
         (* MAJOR PROBLEM: Throws not found error. *)
-        List.assoc resource_name resource_stockpile - resource_change
+        List.assoc resource_name stockpile - resource_change
       in
       if new_resource_value >= 0 then
-        true && resource_sufficiency_check_helper t resource_stockpile
-      else
-        false && resource_sufficiency_check_helper t resource_stockpile
+        true && resource_sufficiency_check_helper t stockpile
+      else false && resource_sufficiency_check_helper t stockpile
 
-let resource_sufficiency_check
-    (building : building)
-    (resource_stockpile : stockpile) : bool =
+let resource_sufficiency_check building stockpile : bool =
   let dependencies = Buildings.resource_dependency building in
-  resource_sufficiency_check_helper dependencies resource_stockpile
+  resource_sufficiency_check_helper dependencies stockpile
 
 (** [sub_resource] subtracts the resources that the building uses from
     their values in resource stockpile*)
-let rec sub_resource_helper
-    (dependencies : resource list)
-    (resource_stockpile : stockpile) : stockpile =
+let rec sub_resource_helper dependencies stockpile : stockpile =
   match dependencies with
-  | [] -> resource_stockpile
+  | [] -> stockpile
   | h :: t ->
       let resource_name = Buildings.resource_name h in
       let resource_change = Buildings.resource_amount h in
       let new_resource_value =
-        List.assoc resource_name resource_stockpile - resource_change
+        List.assoc resource_name stockpile - resource_change
       in
       let new_resources =
         List.map
           (fun (name, value) ->
             if name = resource_name then (name, new_resource_value)
             else (name, value))
-          resource_stockpile
+          stockpile
       in
       sub_resource_helper t new_resources
 
-let sub_resource (building : building) (resource_stockpile : stockpile)
-    : stockpile =
+let sub_resource building stockpile =
   let dependencies = Buildings.resource_dependency building in
-  sub_resource_helper dependencies resource_stockpile
+  sub_resource_helper dependencies stockpile
 
 (** [sub_maintance] aubtracts the money that the building generates to
     it's value in resource stockpile*)
-let sub_maintance (building : building) (resource_stockpile : stockpile)
-    : stockpile =
+let sub_maintance building (stockpile : stockpile) : stockpile =
   let new_money =
-    List.assoc "money" resource_stockpile
-    - Buildings.maintenance building
+    List.assoc "money" stockpile - Buildings.maintenance building
   in
   List.map
     (fun (name, value) ->
       if name = "money" then (name, new_money) else (name, value))
-    resource_stockpile
+    stockpile
 
 (** [add_income] adds the money that the building generates to it's
     value in resource stockpile*)
-let add_income (building : building) (resource_stockpile : stockpile) :
-    stockpile =
+let add_income building (stockpile : stockpile) : stockpile =
   let new_money =
-    List.assoc "money" resource_stockpile + Buildings.income building
+    List.assoc "money" stockpile + Buildings.income building
   in
   List.map
     (fun (name, value) ->
       if name = "money" then (name, new_money) else (name, value))
-    resource_stockpile
+    stockpile
 
 (** [add_resources] adds the resource that the building generates to
     it's value in resource stockpile*)
-let add_resources (building : building) (resource_stockpile : stockpile)
-    : stockpile =
+let add_resources building (stockpile : stockpile) : stockpile =
   let resource = Buildings.output building in
   let resource_name = Buildings.resource_name resource in
   let resource_change = Buildings.resource_amount resource in
   let new_resource_value =
-    List.assoc resource_name resource_stockpile + resource_change
+    List.assoc resource_name stockpile + resource_change
   in
   List.map
     (fun (name, value) ->
       if name = resource_name then (name, new_resource_value)
       else (name, value))
-    resource_stockpile
+    stockpile
 
-let rec update_resources
-    (building_list : building list)
-    (resource_stockpile : stockpile) : stockpile =
-  match building_list with
-  | [] -> resource_stockpile
+let rec update_resources (lst : building list) stockpile : stockpile =
+  match lst with
+  | [] -> stockpile
   | h :: t ->
       (* if not (resource_sufficiency_check h resource_stockpile) then
          update_resources t (sub_maintance h resource_stockpile) else
          update_resources t (add_resources h (add_income h (sub_resource
          h (sub_maintance h resource_stockpile)))) *)
-      update_resources t resource_stockpile
+      update_resources t stockpile
 
-let next_state (state : state) : state =
+let next_state state =
   (* if pause then if state.tick < 100 then let new_resources =
      update_resources state.buildings state.stockpile in let
      update_state = new_state ~stockpile:new_resources ~tick:(state.tick
@@ -252,69 +226,80 @@ let next_state (state : state) : state =
     update_resources state.buildings state.stockpile
   in
   new_state ~stockpile:new_resources ~tick:(state.tick + 1)
-    (file_name state) (canvas_width state) (canvas_height state)
-    (map_length state) (cell_width state) (cell_height state)
+    (filename state)
+    (canvas_size state |> fst)
+    (canvas_size state |> snd)
+    (map_length state)
+    (cell_size state |> fst)
+    (cell_size state |> snd)
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)
-let rec init_stockpile (acc : resource list) = function
-  | [] -> acc
-  | h :: t ->
-      init_stockpile
-        (new_resource
-           (h |> member "name" |> to_string)
-           (h |> member "amount" |> to_string |> int_of_string)
-         :: acc)
-        t
+let init_stockpile json =
+  List.fold_left
+    (fun acc resource ->
+      new_resource
+        (resource |> member "name" |> to_string)
+        (resource |> member "amount" |> to_string |> int_of_string)
+      :: acc)
+    [] json
 
 (** [init_new_building name bld_lst] is a new building with name [name]
     if such building exists in [blk_lst]. Otherwise a failure is raised. *)
-let rec init_new_building name = function
-  | [] -> failwith "not a valid building name"
-  | h :: t ->
-      if building_name h = name then h else init_new_building name t
+let init_new_building name lst =
+  List.find (fun building -> building_name building = name) lst
 
 (** [iter_cells s acc json] is the updated cells from information in
     [json]. *)
-let rec iter_cells s (acc : cell array array) = function
-  | [] -> acc
-  | h :: t ->
-      let x_coord = h |> member "x" |> to_string |> int_of_string in
-      let y_coord = h |> member "y" |> to_string |> int_of_string in
-      let obj = h |> member "object" |> to_string in
-      if not (obj = "") then
-        if obj = "road" then
-          acc.(x_coord).(y_coord) <- Road (new_road 1 x_coord y_coord)
-          (* cost of roads? *)
+let iter_cells state cells json =
+  let x cell = cell |> member "x" |> to_string |> int_of_string in
+  let y cell = cell |> member "y" |> to_string |> int_of_string in
+  let obj cell = cell |> member "object" |> to_string in
+  List.iter
+    (fun cell ->
+      if obj cell <> "" then
+        if obj cell = "road" then
+          cells.(x cell).(y cell) <- Road (new_road 0 (x cell) (y cell))
         else
-          acc.(x_coord).(y_coord) <-
-            Building (init_new_building obj s.buildings);
-      iter_cells s acc t
+          cells.(x cell).(y cell) <-
+            Building (init_new_building (obj cell) state.buildings))
+    json;
+  cells
 
-let from_file file =
-  let json = Yojson.Basic.from_file file in
-  let get_field name coord =
-    json |> member name |> member coord |> to_string |> int_of_string
+(** [generate_stock_lst acc pile] is the `List containing contents of
+    [pile]. *)
+let generate_stock_lst stockpile =
+  let json_of_resource resource =
+    `Assoc
+      [
+        ("name", `String (resource_name resource));
+        ("amount", `String (resource_amount resource |> string_of_int));
+      ]
   in
-  let init_state =
-    new_state file
-      (get_field "canvas_size" "x")
-      (get_field "canvas_size" "y")
-      (json |> member "map_length" |> to_string |> int_of_string)
-      (get_field "cell_size" "x")
-      (get_field "cell_size" "y")
+  List.fold_left
+    (fun acc resource -> json_of_resource resource :: acc)
+    stockpile
+
+(** [generate_cell_lst cells] is the `List containing contents of
+    [pile]. *)
+let generate_cell_lst cells =
+  let str_of_cell = function
+    | None -> ""
+    | Building t -> building_name t
+    | Road _ -> "road"
   in
-  {
-    init_state with
-    cells =
-      iter_cells init_state init_state.cells
-        (json |> member "cells" |> to_list);
-    stockpile =
-      List.rev
-        (init_stockpile [] (json |> member "stockpile" |> to_list));
-    population =
-      json |> member "population" |> to_string |> int_of_string;
-  }
+  let json_of_cell i j cell =
+    `Assoc
+      [
+        ("x", `String (string_of_int i));
+        ("y", `String (string_of_int j));
+        ("object", `String (str_of_cell cell));
+      ]
+  in
+  Array.fold_left (fun acc row -> Array.to_list row :: acc) [] cells
+  |> List.mapi (fun i row ->
+         List.mapi (fun j cell -> json_of_cell i j cell) row)
+  |> List.flatten
 
 let from_string string =
   let json = Yojson.Basic.from_string string in
@@ -335,75 +320,30 @@ let from_string string =
       iter_cells init_state init_state.cells
         (json |> member "cells" |> to_list);
     stockpile =
-      List.rev
-        (init_stockpile [] (json |> member "stockpile" |> to_list));
+      List.rev (init_stockpile (json |> member "stockpile" |> to_list));
     population =
       json |> member "population" |> to_string |> int_of_string;
   }
 
-(** [generate_stock_lst acc pile] is the `List containing contents of
-    [pile]. *)
-let rec generate_stock_lst acc pile =
-  match pile with
-  | [] -> List.rev acc
-  | h :: t ->
-      generate_stock_lst
-        (`Assoc
-           [
-             ("name", `String (resource_name h));
-             ("amount", `String (resource_amount h |> string_of_int));
-           ]
-         :: acc)
-        t
-
-(** [generate_cell_lst cells] is the `List containing contents of
-    [pile]. *)
-let generate_cell_lst cells =
-  let str_of_cell (cel : cell) : string =
-    match cel with
-    | None -> ""
-    | Building t -> building_name t
-    | Road _ -> "road"
-  in
-  let acc_row = [] in
-  let acc = [] in
-  Array.fold_right
-    (fun x acc_row ->
-      Array.fold_right
-        (fun y acc ->
-          `Assoc
-            [
-              ("x", `String (List.length acc_row |> string_of_int));
-              ("y", `String (List.length acc |> string_of_int));
-              ("object", `String (str_of_cell y));
-            ]
-          :: acc)
-        x acc
-      @ acc_row)
-    cells acc_row
-
 let save_state s =
-  let json_obj =
-    `Assoc
-      [
-        ("tick", `String (string_of_int (tick s)));
-        ( "canvas_size",
-          `Assoc
-            [
-              ("x", `String (string_of_int (canvas_width s)));
-              ("y", `String (string_of_int (canvas_height s)));
-            ] );
-        ("map_length", `String (string_of_int (map_length s)));
-        ( "cell_size",
-          `Assoc
-            [
-              ("x", `String (string_of_int (cell_width s)));
-              ("y", `String (string_of_int (cell_height s)));
-            ] );
-        ("cells", `List (generate_cell_lst s.cells));
-        ("population", `String (string_of_int (population s)));
-        ("stockpile", `List (generate_stock_lst [] s.stockpile));
-      ]
-  in
-  (* Yojson.to_file s.file_name json_obj *)
-  Yojson.to_string json_obj
+  `Assoc
+    [
+      ("tick", `String (string_of_int (tick s)));
+      ( "canvas_size",
+        `Assoc
+          [
+            ("x", `String (string_of_int (canvas_size s |> fst)));
+            ("y", `String (string_of_int (canvas_size s |> snd)));
+          ] );
+      ("map_length", `String (string_of_int (map_length s)));
+      ( "cell_size",
+        `Assoc
+          [
+            ("x", `String (string_of_int (cell_size s |> fst)));
+            ("y", `String (string_of_int (cell_size s |> snd)));
+          ] );
+      ("cells", `List (generate_cell_lst s.cells));
+      ("population", `String (string_of_int (population s)));
+      ("stockpile", `List (generate_stock_lst [] s.stockpile));
+    ]
+  |> Yojson.to_string

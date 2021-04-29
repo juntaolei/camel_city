@@ -2,12 +2,20 @@ open OUnit2
 open Lib.State
 open Lib.Buildings
 
+let read_file_as_string filename =
+  let channel = open_in filename in
+  let content =
+    really_input_string channel (in_channel_length channel)
+  in
+  close_in channel;
+  content
+
 (* This test suite covers the most basic commands in [state.ml]
    including functions for creating and updating states. *)
 
 let state_0 = new_state "test_state.json" 1000 900 10 128 64
 
-let state_1 = from_file "map_1.json"
+let state_1 = from_string (read_file_as_string "map_1.json")
 
 (** [expected_cell_array_1] is the expected cell array array extracted
     from file "map_1.json". *)

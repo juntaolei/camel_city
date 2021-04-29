@@ -3,20 +3,21 @@ open Js_of_ocaml
 open State
 module Html = Dom_html
 
-(** Module wide value for the background canvas. *)
-let bg_canvas =
-  match Html.getElementById_coerce "bg" Html.CoerceTo.canvas with
+(** [get_element_by_id name element_type] gets an HTML element of
+    [element_type] by its [id]. *)
+let get_element_by_id id element_type =
+  match Html.getElementById_coerce id element_type with
   | None -> raise Not_found
-  | Some canvas -> canvas
+  | Some element -> element
+
+(** Module wide value for the background canvas. *)
+let bg_canvas = get_element_by_id "bg" Html.CoerceTo.canvas
 
 (** Module wide value for the 2D context of the background canvas. *)
 let bg_ctx = bg_canvas##getContext Html._2d_
 
 (** Module wide value for the foreground canvas. *)
-let fg_canvas =
-  match Html.getElementById_coerce "fg" Html.CoerceTo.canvas with
-  | None -> raise Not_found
-  | Some canvas -> canvas
+let fg_canvas = get_element_by_id "fg" Html.CoerceTo.canvas
 
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
@@ -41,16 +42,29 @@ let iron_progres_bar = Html.getElementById "iron"
     amount of coal. *)
 let coal_progres_bar = Html.getElementById "coal"
 
-let save_button =
-  match
-    Html.getElementById_coerce "save_button" Html.CoerceTo.button
-  with
-  | None -> raise Not_found
-  | Some button -> button
+(** Module wide value for the HTML input element for saving a game state
+    to JSON. *)
+let save_button = get_element_by_id "save_button" Html.CoerceTo.button
 
 (** Module wide value for the HTML div element for showing the selection
     of buildings available to be placed. *)
 let building_selection = Html.getElementById "building_selection"
+
+(** Module wide value for the HTML input element for submitting setup
+    for a game session. *)
+let submit = get_element_by_id "submit" Html.CoerceTo.input
+
+(** Module wide value for the HTML label element for showing the
+    currently selected cell size in game setup. *)
+let label = get_element_by_id "cell_size_label" Html.CoerceTo.label
+
+(** Module wide value for the HTML input element for selecting cell size
+    in game setup. *)
+let slider = get_element_by_id "cell_size" Html.CoerceTo.input
+
+(** Module wide value for the HTML input element for uploading the
+    current game save. *)
+let game_save = get_element_by_id "game_save" Html.CoerceTo.input
 
 (** List of texture names to be used in the GUI. *)
 let texture_names = [ "sand"; "road" ]
@@ -126,16 +140,6 @@ let setup_canvas state =
   fg_ctx##translate
     (float_of_int fg_canvas##.width /. 2.)
     ((state |> cell_size |> snd |> float_of_int) *. 2.)
-
-let reset_gui state = reset_canvas state
-
-let setup_gui state =
-  setup_canvas state;
-  set_money_progress_bar state;
-  set_food_progress_bar state;
-  set_electricity_progress_bar state;
-  set_iron_progress_bar state;
-  set_coal_progress_bar state
 
 (** [draw_cell state x y color] colors a cell of indices [x] and [y] in
     [state] with [color] on the foreground canvas. *)
@@ -263,7 +267,7 @@ let plot_cell state (event : Html.mouseEvent Js.t) =
   Js._true
 
 let add_plot_listener state =
-  Html.addEventListener Html.document Html.Event.click
+  Html.addEventListener fg_canvas Html.Event.click
     (Dom.handler (plot_cell state))
     Js._false
   |> ignore
@@ -281,9 +285,7 @@ let draw_building_selections =
 
 let select state (event : Html.mouseEvent Js.t) =
   let event_target =
-    match Js.Opt.to_option event##.target with
-    | Some e -> e
-    | _ -> failwith ""
+    Js.Opt.get event##.target (fun _ -> raise Not_found)
   in
   let event_id = Js.to_string event_target##.id in
   let current = Html.getElementById event_id in
@@ -310,8 +312,12 @@ let add_building_selection_listener state =
 let save_game state _ =
   let div = Html.getElementById "save" in
   let new_link = Html.createA Html.document in
-  new_link##.href :=
-    Js.string ("data:text/json" ^ Url.urlencode (save_state state));
+  let encode_url =
+    "data:text/json;charset=utf-8,"
+    ^ Js.to_string
+        (Js.encodeURIComponent (Js.string (save_state state)))
+  in
+  new_link##.href := Js.string encode_url;
   new_link##.innerHTML := Js.string "Click this link to download";
   Dom.appendChild div new_link;
   Js._true
@@ -323,25 +329,12 @@ let add_save_button_listener state =
   |> ignore
 
 let update_slider_label =
-  let label =
-    match
-      Html.getElementById_coerce "cell_size_label" Html.CoerceTo.label
-    with
-    | None -> raise Not_found
-    | Some label -> label
+  let onchange_handler _ =
+    let cell_size = Js.to_string slider##.value in
+    label##.innerHTML := Js.string ("Cell Size: " ^ cell_size);
+    Js._true
   in
-  let slider =
-    match
-      Html.getElementById_coerce "cell_size" Html.CoerceTo.input
-    with
-    | None -> raise Not_found
-    | Some slider -> slider
-  in
-  slider##.onchange :=
-    Dom.handler (fun _ ->
-        label##.innerHTML :=
-          Js.string ("Cell Size: " ^ Js.to_string slider##.value);
-        Js._true)
+  slider##.onchange := Dom.handler onchange_handler
 
 let toggle_game is_hidden =
   let main_div = Html.getElementById "main" in
@@ -363,94 +356,63 @@ let draw_setup =
   update_slider_label;
   toggle_game false
 
-let draw_gui state = draw_map state
+let setup_gui state =
+  reset_canvas state;
+  setup_canvas state;
+  set_money_progress_bar state;
+  set_food_progress_bar state;
+  set_electricity_progress_bar state;
+  set_iron_progress_bar state;
+  set_coal_progress_bar state;
+  draw_building_selections;
+  add_event_listeners state;
+  draw_map state
+
+let rec game_loop state =
+  Html.window##requestAnimationFrame
+    (Js.wrap_callback (fun _ -> game_loop (next_state state)))
+  |> ignore
+
+let handle_start_from_file _ =
+  let file_lst =
+    Js.Optdef.get game_save##.files (fun _ -> raise Not_found)
+  in
+  let file = Js.Opt.get (file_lst##item 0) (fun _ -> raise Not_found) in
+  let file_reader = new%js File.fileReader in
+  let file_load_handler e =
+    let evt = Js.Opt.get e##.target (fun _ -> raise Not_found) in
+    let result = evt##.result in
+    let state =
+      from_string
+        (Js.Opt.get (File.CoerceTo.string result) (fun _ ->
+             raise Not_found)
+        |> Js.to_string)
+    in
+    toggle_startup false;
+    toggle_game true;
+    setup_gui state;
+    game_loop state;
+    Js._true
+  in
+  file_reader##.onload := Dom.handler file_load_handler;
+  file_reader##readAsText file;
+  Js._true
+
+let handle_start_from_setup _ =
+  let state =
+    new_state "game_state.json" 1200 750
+      (slider##.value |> Js.to_string |> int_of_string)
+      128 64
+  in
+  toggle_startup false;
+  toggle_game true;
+  setup_gui state;
+  game_loop state;
+  Js._true
 
 let start_game =
-  let submit =
-    match Html.getElementById_coerce "submit" Html.CoerceTo.input with
-    | None -> raise Not_found
-    | Some input -> input
-  in
-  let slider =
-    match
-      Html.getElementById_coerce "cell_size" Html.CoerceTo.input
-    with
-    | None -> raise Not_found
-    | Some slider -> slider
-  in
-  let game_save =
-    match
-      Html.getElementById_coerce "game_save" Html.CoerceTo.input
-    with
-    | None -> raise Not_found
-    | Some input -> input
-  in
-  game_save##.onchange :=
-    Dom.handler (fun _ ->
-        let file_lst =
-          match Js.Optdef.to_option game_save##.files with
-          | Some e -> e
-          | _ -> failwith ""
-        in
-        let file =
-          match Js.Opt.to_option (file_lst##item 0) with
-          | Some e -> e
-          | _ -> failwith ""
-        in
-        let file_reader = new%js File.fileReader in
-        file_reader##.onload :=
-          Dom.handler (fun e ->
-              let evt =
-                match Js.Opt.to_option e##.target with
-                | Some e -> e
-                | _ -> failwith ""
-              in
-              let result = evt##.result in
-              let state =
-                from_string
-                  (match
-                     Js.Opt.to_option (File.CoerceTo.string result)
-                   with
-                  | Some e -> Js.to_string e
-                  | _ -> failwith "")
-              in
-              toggle_startup false;
-              toggle_game true;
-              reset_gui state;
-              setup_gui state;
-              draw_building_selections;
-              add_event_listeners state;
-              let rec loop () =
-                draw_gui (next_state state);
-                Html.window##requestAnimationFrame
-                  (Js.wrap_callback (fun _ -> loop ()))
-                |> ignore
-              in
-              loop ();
-              Js._true);
-        file_reader##readAsText file;
-        Js._true);
-  submit##.onclick :=
-    Dom.handler (fun _ ->
-        let state =
-          new_state "game_state.json" 1200 750
-            (slider##.value |> Js.to_string |> int_of_string)
-            128 64
-        in
-        toggle_startup false;
-        toggle_game true;
-        reset_gui state;
-        setup_gui state;
-        draw_building_selections;
-        add_event_listeners state;
-        draw_gui state;
-        let rec loop state =
-          Html.window##requestAnimationFrame
-            (Js.wrap_callback (fun _ -> loop (next_state state)))
-          |> ignore
-        in
-        loop state |> ignore;
-        Js._true)
+  game_save##.onchange := Dom.handler handle_start_from_file;
+  submit##.onclick := Dom.handler handle_start_from_setup
 
 let main =
   draw_setup;

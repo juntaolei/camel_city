@@ -153,18 +153,24 @@ let subtract_maintenace building (stockpile : stockpile) : stockpile =
       if name = "money" then (name, new_money) else (name, value))
     stockpile
 
-let subtract_resource building (stockpile : stockpile) : stockpile =
-  let output = output building in
-  let output_name = resource_name output in
-  let building_name = resource_name output in
-  let change = resource_amount output in
-  if building_name = "" then stockpile
-  else
-    List.map
-      (fun (name, value) ->
-        if name = output_name then (name, value - change)
-        else (name, value))
-      stockpile
+let subtract_dependency building (stockpile : stockpile) : stockpile =
+  let resource_dependency = resource_dependency building in
+  let rec subtract_dependency_aux resource_dependency stockpile =
+    match resource_dependency with
+    | [] -> stockpile
+    | h :: t ->
+        let output_name = resource_name h in
+        let change = resource_amount h in
+        if output_name = "" then stockpile
+        else
+          subtract_dependency_aux t
+            (List.map
+               (fun (name, value) ->
+                 if name = output_name then (name, value - change)
+                 else (name, value))
+               stockpile)
+  in
+  subtract_dependency_aux resource_dependency stockpile
 
 (** [add_income] adds the money that the building generates to it's
     value in resource stockpile*)
@@ -180,9 +186,8 @@ let add_income building (stockpile : stockpile) : stockpile =
 let add_resource building (stockpile : stockpile) : stockpile =
   let output = output building in
   let output_name = resource_name output in
-  let building_name = resource_name output in
   let change = resource_amount output in
-  if building_name = "" then stockpile
+  if output_name = "" then stockpile
   else
     List.map
       (fun (name, value) ->
@@ -200,7 +205,7 @@ let update_stockpile lst stockpile =
         else
           let new_stockpile =
             subtract_maintenace h stockpile
-            |> add_income h |> add_resource h
+            |> subtract_dependency h |> add_income h |> add_resource h
           in
           update_stockpile_aux new_stockpile t
   in

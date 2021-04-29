@@ -67,7 +67,16 @@ let slider = get_element_by_id "cell_size" Html.CoerceTo.input
 let game_save = get_element_by_id "game_save" Html.CoerceTo.input
 
 (** List of texture names to be used in the GUI. *)
-let texture_names = [ "sand"; "road" ]
+let texture_names =
+  [
+    "sand";
+    "road";
+    "house";
+    "oats_plantation";
+    "power_plant";
+    "mine";
+    "barrack";
+  ]
 
 (** [create_img filename] is the image loaded based on a [filename]. *)
 let create_img filename =
@@ -85,7 +94,7 @@ let find_texture name =
 
 (** [set_progress_bar state element name] changes the attributes of
     [element] to show some statistics about state. *)
-let set_progress_bar state element name =
+let set_progress_bar (state : state) element name =
   element##setAttribute (Js.string "max") (Js.string "100");
   element##setAttribute (Js.string "value")
     (Js.string
@@ -94,32 +103,32 @@ let set_progress_bar state element name =
 
 (** [set_money_progress_bar state] changes the attributes of the
     progress HTML element to show money. *)
-let set_money_progress_bar state =
+let set_money_progress_bar (state : state) =
   set_progress_bar state money_progres_bar "money"
 
 (** [set_food_progress_bar state] changes the attributes of the progress
     HTML element to show food. *)
-let set_food_progress_bar state =
+let set_food_progress_bar (state : state) =
   set_progress_bar state food_progres_bar "oat"
 
 (** [set_electricity_progress_bar state] changes the attributes of the
     progress HTML element to show food. *)
-let set_electricity_progress_bar state =
+let set_electricity_progress_bar (state : state) =
   set_progress_bar state electricity_progres_bar "electricity"
 
 (** [set_iron_progress_bar state] changes the attributes of the progress
     HTML element to show food. *)
-let set_iron_progress_bar state =
+let set_iron_progress_bar (state : state) =
   set_progress_bar state iron_progres_bar "iron"
 
 (** [set_coal_progress_bar state] changes the attributes of the progress
     HTML element to show food. *)
-let set_coal_progress_bar state =
+let set_coal_progress_bar (state : state) =
   set_progress_bar state coal_progres_bar "coal"
 
 (** [reset_canvas state] clears everything from the foreground canvas
     and the background canvas.*)
-let reset_canvas state =
+let reset_canvas (state : state) =
   bg_ctx##clearRect 0. 0.
     (state |> canvas_size |> fst |> float_of_int)
     (state |> canvas_size |> snd |> float_of_int);
@@ -129,7 +138,7 @@ let reset_canvas state =
 
 (** [setup_canvas state] setups the foreground canvas and the background
     canvas based on properties from [state]. *)
-let setup_canvas state =
+let setup_canvas (state : state) =
   bg_canvas##.width := state |> canvas_size |> fst;
   bg_canvas##.height := state |> canvas_size |> snd;
   fg_canvas##.width := state |> canvas_size |> fst;
@@ -181,7 +190,7 @@ let draw_img state x y texture =
 
 (** [draw_map state] draws the cells in [state] on the background
     canvas.*)
-let draw_map state =
+let draw_map (state : state) =
   Array.iteri
     (fun i ->
       Array.iteri (fun j c ->
@@ -220,7 +229,7 @@ let cell_positions state (event : Html.mouseEvent Js.t) =
 
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
-let highlight state (event : Html.mouseEvent Js.t) =
+let highlight (state : state) (event : Html.mouseEvent Js.t) =
   let canvas_width = state |> canvas_size |> fst in
   let canvas_height = state |> canvas_size |> snd in
   let map_length = state |> map_length in
@@ -240,16 +249,16 @@ let highlight state (event : Html.mouseEvent Js.t) =
       "hsla(60, 100%, 50%, 0.25)";
   Js._true
 
-let add_highlight_listener state =
+let add_highlight_listener (state : state) =
   Html.addEventListener fg_canvas Html.Event.mousemove
     (Dom.handler (highlight state))
     Js._false
   |> ignore
 
-let plot_cell state (event : Html.mouseEvent Js.t) =
+let plot_cell (state : state) (event : Html.mouseEvent Js.t) =
   let positions = cell_positions state event in
   let a =
-    if current_selected state < 0 then "sand"
+    if not (selected_building state) then "sand"
     else List.nth textures (current_selected state) |> fst
   in
   if selected_building state && a <> "road" && a <> "sand" then
@@ -266,7 +275,7 @@ let plot_cell state (event : Html.mouseEvent Js.t) =
   draw_map state;
   Js._true
 
-let add_plot_listener state =
+let add_plot_listener (state : state) =
   Html.addEventListener fg_canvas Html.Event.click
     (Dom.handler (plot_cell state))
     Js._false
@@ -274,12 +283,15 @@ let add_plot_listener state =
 
 let draw_building_selections =
   List.mapi
-    (fun i (_, t) ->
+    (fun i (n, t) ->
       let new_div = Html.createDiv Html.document in
+      let label = Html.createLabel Html.document in
+      label##.innerHTML := Js.string n;
       new_div##.style##.display := Js.string "block";
       t##.id := i |> string_of_int |> Js.string;
       Dom.appendChild building_selection new_div;
-      Dom.appendChild new_div t)
+      Dom.appendChild new_div t;
+      Dom.appendChild new_div label)
     textures
   |> ignore
 
@@ -289,17 +301,24 @@ let select state (event : Html.mouseEvent Js.t) =
   in
   let event_id = Js.to_string event_target##.id in
   let current = Html.getElementById event_id in
-  if selected_building state then
-    current##.classList##remove (Js.string "selected")
-  else current##.classList##add (Js.string "selected");
+  let previous =
+    Html.getElementById_opt (string_of_int (current_selected state))
+  in
+  if match previous with None -> false | Some _ -> true then
+    (match previous with
+    | None -> failwith ""
+    | Some element -> element)##.classList##remove
+      (Js.string "selected");
   if
     selected_building state
     && event_id = (current_selected state |> string_of_int)
   then select_building state (-1)
   else select_building state (int_of_string event_id);
+  if selected_building state then
+    current##.classList##add (Js.string "selected");
   Js._true
 
-let add_building_selection_listener state =
+let add_building_selection_listener (state : state) =
   List.mapi
     (fun i _ ->
       let img = Html.getElementById (string_of_int i) in
@@ -309,7 +328,7 @@ let add_building_selection_listener state =
     textures
   |> ignore
 
-let save_game state _ =
+let save_game (state : state) _ =
   let div = Html.getElementById "save" in
   let new_link = Html.createA Html.document in
   let encode_url =
@@ -322,7 +341,7 @@ let save_game state _ =
   Dom.appendChild div new_link;
   Js._true
 
-let add_save_button_listener state =
+let add_save_button_listener (state : state) =
   Html.addEventListener save_button Html.Event.click
     (Dom.handler (save_game state))
     Js._false
@@ -346,7 +365,7 @@ let toggle_startup is_hidden =
   if is_hidden then startup##.classList##remove (Js.string "hidden")
   else startup##.classList##add (Js.string "hidden")
 
-let add_event_listeners state =
+let add_event_listeners (state : state) =
   add_highlight_listener state;
   add_plot_listener state;
   add_building_selection_listener state;
@@ -356,21 +375,26 @@ let draw_setup =
   update_slider_label;
   toggle_game false
 
-let setup_gui state =
-  reset_canvas state;
-  setup_canvas state;
+let update_statistics (state : state) =
   set_money_progress_bar state;
   set_food_progress_bar state;
   set_electricity_progress_bar state;
   set_iron_progress_bar state;
-  set_coal_progress_bar state;
+  set_coal_progress_bar state
+
+let setup_gui (state : state) =
+  reset_canvas state;
+  setup_canvas state;
+  update_statistics state;
   draw_building_selections;
   add_event_listeners state;
   draw_map state
 
-let rec game_loop state =
+let rec game_loop (state : state) =
+  update_statistics state;
+  next_state state;
   Html.window##requestAnimationFrame
-    (Js.wrap_callback (fun _ -> game_loop (next_state state)))
+    (Js.wrap_callback (fun _ -> game_loop state))
   |> ignore
 
 let handle_start_from_file _ =

@@ -22,10 +22,11 @@ let state_1 = from_string (read_file_as_string "map_1.json")
 let expected_cell_array_1 =
   let empty = Array.make_matrix 3 3 None in
   empty.(0).(0) <-
-    Building (new_building "mine" 0 0 1 "iron" 0 0 5 "electricity");
-  empty.(0).(1) <- Building (new_building "house" 0 0 0 "" 0 0 0 "");
+    Building
+      (new_building "mine" 0 0 ("iron", 1) 0 0 [ ("electricity", 5) ]);
+  empty.(0).(1) <- Building (new_building "house" 0 0 ("", 0) 0 0 []);
   empty.(2).(0) <-
-    Building (new_building "oats_plantation" 0 0 10 "oat" 0 0 0 "");
+    Building (new_building "oats_plantation" 0 0 ("oat", 10) 0 0 []);
   empty
 
 (** [expected_stockpile_1] is the expected stockpile extracted from file

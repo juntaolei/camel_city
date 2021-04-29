@@ -1,45 +1,63 @@
 {
-    "buildings" : [
-        {   "name" : "house",
-            "cost" : "0",
-            "maintenance" : "0",
-            "output" : {"amount" : "0", "name" : ""},
-            "tax" : "0",
-            "defense" : "0",
-            "resource_dependency" : [{"amount" : "0", "name" : ""}]
+    "buildings": [
+        {
+            "name": "house",
+            "cost": 0,
+            "maintenance": 0,
+            "output": {},
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": []
         },
-        {   "name" : "oats_plantation",
-            "cost" : "0",
-            "maintenance" : "0",
-            "output" : {"amount" : "10", "name" : "oat"},
-            "tax" : "0",
-            "defense" : "0",
-            "resource_dependency" : [{"amount" : "0", "name" : ""}]
+        {
+            "name": "oats_plantation",
+            "cost": 0,
+            "maintenance": 0,
+            "output": {
+                "amount": 10,
+                "name": "oat"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": []
         },
-        {   "name" : "power_plant",
-            "cost" : "0",
-            "maintenance" : "0",
-            "output" : {"amount" : "5", "name" : "electricity"},
-            "tax" : "0",
-            "defense" : "0",
-            "resource_dependency" : [{"amount" : "0", "name" : ""}]
+        {
+            "name": "power_plant",
+            "cost": 0,
+            "maintenance": 0,
+            "output": {
+                "amount": 5,
+                "name": "electricity"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": []
         },
-        {   "name" : "mine",
-            "cost" : "0",
-            "maintenance" : "0",
-            "output" : {"amount" : "1", "name" : "iron"},
-            "tax" : "0",
-            "defense" : "0",
-            "resource_dependency" : [{"amount" : "5", "name" : "electricity"}]
+        {
+            "name": "mine",
+            "cost": 0,
+            "maintenance": 0,
+            "output": {
+                "amount": 1,
+                "name": "iron"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "electricity"
+                }
+            ]
         },
-        {   "name" : "barrack",
-            "cost" : "0",
-            "maintenance" : "0",
-            "output" : {"amount" : "0", "name" : ""},
-            "tax" : "0",
-            "defense" : "0",
-            "resource_dependency" : [{"amount" : "0", "name" : ""}]
+        {
+            "name": "barrack",
+            "cost": 0,
+            "maintenance": 0,
+            "output": {},
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": []
         }
-        
     ]
 }

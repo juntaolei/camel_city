@@ -67,7 +67,7 @@ val buildings : state -> building list
 
 (** [next_state state update] is the new state by updating the existing
     [state ] with [update]. *)
-val next_state : state -> state
+val next_state : state -> unit
 
 val iter_buildings : Yojson.Basic.t list -> building list
 

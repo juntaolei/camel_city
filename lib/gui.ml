@@ -22,25 +22,32 @@ let fg_canvas = get_element_by_id "fg" Html.CoerceTo.canvas
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
 
-(** Module wide value for the HTML progress element for showing the
-    amount of money. *)
-let money_progres_bar = Html.getElementById "money"
+(** Module wide value for the HTML div element for showing the amount of
+    tick. *)
+let tick_div = Html.getElementById "tick"
 
-(** Module wide value for the HTML progress element for showing the
-    amount of food. *)
-let food_progres_bar = Html.getElementById "food"
+(** Module wide value for the HTML div element for showing the amount of
+    money. *)
+let money_div = Html.getElementById "money"
 
-(** Module wide value for the HTML progress element for showing the
-    amount of electricity. *)
-let electricity_progres_bar = Html.getElementById "electricity"
+(** Module wide value for the HTML div element for showing the amount of
+    food. *)
+let food_div = Html.getElementById "food"
 
-(** Module wide value for the HTML progress element for showing the
-    amount of iron. *)
-let iron_progres_bar = Html.getElementById "iron"
+(** Module wide value for the HTML div element for showing the amount of
+    electricity. *)
+let electricity_div = Html.getElementById "electricity"
 
-(** Module wide value for the HTML progress element for showing the
-    amount of coal. *)
-let coal_progres_bar = Html.getElementById "coal"
+(** Module wide value for the HTML div element for showing the amount of
+    iron. *)
+let iron_div = Html.getElementById "iron"
+
+(** Module wide value for the HTML div element for showing the amount of
+    coal. *)
+let coal_div = Html.getElementById "coal"
+
+(** Module wide value for the HTML div element for showing cell info. *)
+let info_div = Html.getElementById "info"
 
 (** Module wide value for the HTML input element for saving a game state
     to JSON. *)
@@ -65,6 +72,10 @@ let slider = get_element_by_id "cell_size" Html.CoerceTo.input
 (** Module wide value for the HTML input element for uploading the
     current game save. *)
 let game_save = get_element_by_id "game_save" Html.CoerceTo.input
+
+(** Module wide value for the HTML input element for starting the
+    current game save. *)
+let start_save = get_element_by_id "start_save" Html.CoerceTo.input
 
 (** List of texture names to be used in the GUI. *)
 let texture_names =
@@ -94,37 +105,43 @@ let find_texture name =
 
 (** [set_progress_bar state element name] changes the attributes of
     [element] to show some statistics about state. *)
-let set_progress_bar state element name =
-  element##setAttribute (Js.string "max") (Js.string "100");
-  element##setAttribute (Js.string "value")
-    (Js.string
-       (List.find (fun (k, _) -> k = name) (stockpile state)
-       |> snd |> string_of_int))
+let set_div state element name =
+  let attribute_value =
+    List.find (fun (k, _) -> k = name) (stockpile state) |> snd
+  in
+  let string_value = attribute_value |> string_of_int in
+  let inner_html =
+    String.capitalize_ascii name ^ ": " ^ string_value |> Js.string
+  in
+  element##.innerHTML := inner_html
 
-(** [set_money_progress_bar state] changes the attributes of the
-    progress HTML element to show money. *)
-let set_money_progress_bar state =
-  set_progress_bar state money_progres_bar "money"
+(** [set_tick_div state] changes the attributes of the div HTML element
+    to show tick. *)
+let set_tick_div state =
+  let string_value = state |> tick |> string_of_int in
+  let inner_html = "Tick: " ^ string_value |> Js.string in
+  tick_div##.innerHTML := inner_html
 
-(** [set_food_progress_bar state] changes the attributes of the progress
-    HTML element to show food. *)
-let set_food_progress_bar state =
-  set_progress_bar state food_progres_bar "oat"
+(** [set_money_div state] changes the attributes of the div HTML element
+    to show money. *)
+let set_money_div state = set_div state money_div "money"
 
-(** [set_electricity_progress_bar state] changes the attributes of the
-    progress HTML element to show food. *)
-let set_electricity_progress_bar state =
-  set_progress_bar state electricity_progres_bar "electricity"
+(** [set_food_div state] changes the attributes of the div HTML element
+    to show food. *)
+let set_food_div state = set_div state food_div "oat"
 
-(** [set_iron_progress_bar state] changes the attributes of the progress
-    HTML element to show food. *)
-let set_iron_progress_bar state =
-  set_progress_bar state iron_progres_bar "iron"
+(** [set_electricity_div state] changes the attributes of the div HTML
+    element to show food. *)
+let set_electricity_div state =
+  set_div state electricity_div "electricity"
 
-(** [set_coal_progress_bar state] changes the attributes of the progress
-    HTML element to show food. *)
-let set_coal_progress_bar state =
-  set_progress_bar state coal_progres_bar "coal"
+(** [set_iron_div state] changes the attributes of the div HTML element
+    to show food. *)
+let set_iron_div state = set_div state iron_div "iron"
+
+(** [set_coal_div state] changes the attributes of the div HTML element
+    to show food. *)
+let set_coal_div state = set_div state coal_div "coal"
 
 (** [reset_canvas state] clears everything from the foreground canvas
     and the background canvas.*)
@@ -227,6 +244,36 @@ let cell_positions state (event : Html.mouseEvent Js.t) =
   let y = (mouse_y -. (cell_height *. 2.)) /. cell_height in
   (y -. x |> floor |> int_of_float, y +. x |> floor |> int_of_float)
 
+(** [update_info state x y] updates the text information in the info div
+    when highlighting a cell in [state] with coordinates ([x], [y]). *)
+let update_info state x y =
+  let cells = cells state in
+  let cell = cells.(x).(y) in
+  match cell with
+  | None -> info_div##.innerHTML := Js.string "Sand"
+  | Road _ -> info_div##.innerHTML := Js.string "Road"
+  | Building building ->
+      let name = building_name building in
+      let output = output building in
+      let output_name = resource_name output in
+      let output_amount = resource_amount output in
+      let resource_dependency = resource_dependency building in
+      let resource_dependency_prettier =
+        List.fold_left
+          (fun acc (k, v) ->
+            acc ^ "(Dependency: " ^ k ^ ", Amount: " ^ string_of_int v
+            ^ ") | ")
+          "" resource_dependency
+      in
+      let info =
+        Js.string
+          ("Name: " ^ name ^ " | Output: " ^ output_name
+         ^ " | Output Amount: "
+          ^ string_of_int output_amount
+          ^ "| " ^ resource_dependency_prettier)
+      in
+      info_div##.innerHTML := info
+
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
 let highlight state (event : Html.mouseEvent Js.t) =
@@ -247,6 +294,13 @@ let highlight state (event : Html.mouseEvent Js.t) =
   then
     draw_cell state (fst positions) (snd positions)
       "hsla(60, 100%, 50%, 0.25)";
+  if
+    fst positions >= 0
+    && fst positions < map_length
+    && snd positions >= 0
+    && snd positions < map_length
+  then update_info state (fst positions) (snd positions)
+  else info_div##.innerHTML := Js.string "";
   Js._true
 
 (** [add_highlight_listener state] adds an event listener to the
@@ -361,6 +415,8 @@ let save_game state _ =
   new_link##.id := Js.string "download";
   new_link##.href := Js.string encode_url;
   new_link##.innerHTML := Js.string "Click this link to download";
+  new_link##setAttribute (Js.string "download")
+    (Js.string "game_save.json");
   Dom.appendChild div new_link;
   Js._true
 
@@ -412,11 +468,12 @@ let draw_setup =
 (** [update_statistics state] updates the various progress bars in the
     game GUI. *)
 let update_statistics state =
-  set_money_progress_bar state;
-  set_food_progress_bar state;
-  set_electricity_progress_bar state;
-  set_iron_progress_bar state;
-  set_coal_progress_bar state
+  set_tick_div state;
+  set_money_div state;
+  set_food_div state;
+  set_electricity_div state;
+  set_iron_div state;
+  set_coal_div state
 
 (** [setup_gui state] setups the game session based on the [state]. *)
 let setup_gui state =
@@ -442,25 +499,29 @@ let handle_start_from_file _ =
   let file_lst =
     Js.Optdef.get game_save##.files (fun _ -> raise Not_found)
   in
-  let file = Js.Opt.get (file_lst##item 0) (fun _ -> raise Not_found) in
-  let file_reader = new%js File.fileReader in
-  let file_load_handler e =
-    let evt = Js.Opt.get e##.target (fun _ -> raise Not_found) in
-    let result = evt##.result in
-    let state =
-      from_string
-        (Js.Opt.get (File.CoerceTo.string result) (fun _ ->
-             raise Not_found)
-        |> Js.to_string)
+  let normal_process =
+    let file =
+      Js.Opt.get (file_lst##item 0) (fun _ -> raise Not_found)
     in
-    toggle_startup false;
-    toggle_game true;
-    setup_gui state;
-    game_loop state;
-    Js._true
+    let file_reader = new%js File.fileReader in
+    let file_load_handler e =
+      let evt = Js.Opt.get e##.target (fun _ -> raise Not_found) in
+      let result = evt##.result in
+      let file_string =
+        Js.Opt.get (File.CoerceTo.string result) (fun _ ->
+            raise Not_found)
+      in
+      let state = file_string |> Js.to_string |> from_string in
+      toggle_startup false;
+      toggle_game true;
+      setup_gui state;
+      game_loop state;
+      Js._true
+    in
+    file_reader##.onload := Dom.handler file_load_handler;
+    file_reader##readAsText file
   in
-  file_reader##.onload := Dom.handler file_load_handler;
-  file_reader##readAsText file;
+  if file_lst##.length > 0 then normal_process;
   Js._true
 
 (** [handle_start_from_setup _] starts the game session from the user
@@ -480,7 +541,7 @@ let handle_start_from_setup _ =
 (** [start_game] registers the two main event handler that starts the
     game. *)
 let start_game =
-  game_save##.onchange := Dom.handler handle_start_from_file;
+  start_save##.onclick := Dom.handler handle_start_from_file;
   submit##.onclick := Dom.handler handle_start_from_setup
 
 let main =

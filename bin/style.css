@@ -38,6 +38,17 @@ header {
   margin: 2rem 0;
 }
 
+#stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#stats div {
+  margin: 0rem 2rem;
+}
+
 #main {
   position: relative;
   display: flex;

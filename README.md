@@ -1,27 +1,5 @@
 # Camel City
 
-## TODO (MS2)
-
-Target Line Count: 910 / 1000
-
-- [x] Implement placing buildings.
-
-- [X] Add a start page to pick game setting or upload JSON saves.
-
-  - [x] Add ability to pick game setting.
-
-  - [X] Add ability to upload JSON saves.
-
-- [x] Import buildings from JSON.
-
-- [X] Implement save to JSON.
-
-  - [x] Add ability to read from JSON file.
-
-  - [x] Create state from JSON.
-
-  - [x] Add ability to convert state to JSON.
-
 ## Instruction
 
 This assumes that the user is using the same OCaml switch as cs3110-2021sp.
@@ -33,6 +11,12 @@ opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx
 ```
   
 Compiling to JavaScript:
+
+For production:
+
+```bash
+make
+```
 
 For development: 
 

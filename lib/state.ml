@@ -145,10 +145,10 @@ let is_stockpile_sufficient building (stockpile : stockpile) : bool =
     the building generates to it's value in resource stockpile*)
 let subtract_maintenace building (stockpile : stockpile) : stockpile =
   let new_money = List.assoc "money" stockpile - maintenance building in
-  List.map
-    (fun (name, value) ->
-      if name = "money" then (name, new_money) else (name, value))
-    stockpile
+  let filter_money (name, value) =
+    if name = "money" then (name, new_money) else (name, value)
+  in
+  List.map filter_money stockpile
 
 (** [subtract_dependency building stockpile] subtracts the required
     resources that is needed by [building] from the [stockpile]. *)
@@ -160,14 +160,12 @@ let subtract_dependency building (stockpile : stockpile) : stockpile =
     | h :: t ->
         let output_name = resource_name h in
         let change = resource_amount h in
+        let filter_value (name, value) =
+          if name = output_name then (name, value - change)
+          else (name, value)
+        in
         if output_name = "" then stockpile
-        else
-          subtract_dependency_aux t
-            (List.map
-               (fun (name, value) ->
-                 if name = output_name then (name, value - change)
-                 else (name, value))
-               stockpile)
+        else subtract_dependency_aux t (List.map filter_value stockpile)
   in
   subtract_dependency_aux resource_dependency stockpile
 
@@ -227,8 +225,9 @@ let available_buildings state =
   |> List.flatten
 
 let next_state (state : state) =
-  state.stockpile <-
-    update_stockpile (available_buildings state) state.stockpile;
+  if state.tick mod 60 = 0 then
+    state.stockpile <-
+      update_stockpile (available_buildings state) state.stockpile;
   state.tick <- state.tick + 1
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]

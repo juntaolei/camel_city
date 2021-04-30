@@ -18,26 +18,22 @@
     <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
     <input type="submit" value="Submit" name="submit" id="submit">
     <input type="file" name="game_save" id="game_save">
+    <input type="submit" value="Submit" name="start_save" id="start_save">
   </div>
   <div id="main">
+    <div id="info"></div>
     <div id="stats">
-      <label for="tick">Tick: </label>
-      <progress id="tick"></progress>
+      <div id="tick">Tick: </div>
       |
-      <label for="money">Money: </label>
-      <progress id="money"></progress>
+      <div id="money">Money: </div>
       |
-      <label for="food">Food: </label>
-      <progress id="food"></progress>
+      <div id="food">Food: </div>
       |
-      <label for="electricity">Electricity: </label>
-      <progress id="electricity"></progress>
+      <div id="electricity">Electricity: </div>
       |
-      <label for="iron">Iron: </label>
-      <progress id="iron"></progress>
+      <div id="iron">Iron: </div>
       |
-      <label for="coal">Coal: </label>
-      <progress id="coal"></progress>
+      <div id="coal">Coal: </div>
     </div>
     <div id="save">
       <button id="save_button">Save Game</button>

@@ -27,7 +27,7 @@ make build
 Run tests:
 
 ```bash
-make test
+make runtest
 ```
 
 Create a zip of the source code:

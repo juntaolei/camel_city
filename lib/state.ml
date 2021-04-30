@@ -1,9 +1,9 @@
 open Buildings
 open Yojson.Basic.Util
-open Js_of_ocaml
 
 type stockpile = resource list
 
+(** [default_stockpile] is the stockpile on any fresh game sessions. *)
 let default_stockpile : stockpile =
   [
     ("money", 0);
@@ -32,18 +32,16 @@ type state = {
   mutable pause : bool;
 }
 
+(** [build_cell_lst width height] is an two dimensional array with
+    [width] and [height]. *)
+let build_cell_lst width height = Array.make_matrix width height None
+
 let current_selected state = state.selected_building
 
 let select_building state i = state.selected_building <- i
 
 let selected_building state = state.selected_building >= 0
 
-(** [build_cell_lst width height] is an two dimensional array with
-    [width] and [height]. *)
-let build_cell_lst width height = Array.make_matrix width height None
-
-(** [place_cell state cell x y] updates the old cell as indexed by [x]
-    and [y] in [state] with a new [cell]. *)
 let place_cell state cell x y = state.cells.(x).(y) <- cell
 
 let canvas_size state = state.canvas_size
@@ -56,22 +54,16 @@ let cells state = state.cells
 
 let buildings state = state.buildings
 
-let str_of_cell = function
-  | None -> ""
-  | Road _ -> "road"
-  | Building b -> building_name b
-
 let tick state = state.tick
 
 let population state = state.population
 
 let stockpile state = state.stockpile
 
-let get_buildings state = state.buildings
-
-let filename state = state.filename
-
-let get_index id lst = List.nth lst id
+let str_of_cell = function
+  | None -> ""
+  | Road _ -> "road"
+  | Building b -> building_name b
 
 (** [iter_buildings acc json] is the list of initialized [buildings]
     extracted from the json object [json]. *)
@@ -107,6 +99,8 @@ let iter_buildings json =
       :: acc)
     [] json
 
+(** [buildings_init] is a list of buildings initialized from a
+    configuration building list JSON file. *)
 let buildings_init =
   "buildings_init.json" |> Yojson.Basic.from_file |> member "buildings"
   |> to_list |> iter_buildings
@@ -134,6 +128,9 @@ let new_state
     pause = false;
   }
 
+(** [is_stockpile_sufficient building stockiple] will check if the
+    requirements for a building will make the values of [stockpile] to
+    be negative. *)
 let is_stockpile_sufficient building (stockpile : stockpile) : bool =
   resource_dependency building
   |> List.fold_left
@@ -144,7 +141,7 @@ let is_stockpile_sufficient building (stockpile : stockpile) : bool =
          if new_amount >= 0 then acc && true else acc && false)
        true
 
-(** [subtract_maintenace building stockpile] aubtracts the money that
+(** [subtract_maintenace building stockpile] subtracts the money that
     the building generates to it's value in resource stockpile*)
 let subtract_maintenace building (stockpile : stockpile) : stockpile =
   let new_money = List.assoc "money" stockpile - maintenance building in
@@ -153,6 +150,8 @@ let subtract_maintenace building (stockpile : stockpile) : stockpile =
       if name = "money" then (name, new_money) else (name, value))
     stockpile
 
+(** [subtract_dependency building stockpile] subtracts the required
+    resources that is needed by [building] from the [stockpile]. *)
 let subtract_dependency building (stockpile : stockpile) : stockpile =
   let resource_dependency = resource_dependency building in
   let rec subtract_dependency_aux resource_dependency stockpile =
@@ -195,6 +194,9 @@ let add_resource building (stockpile : stockpile) : stockpile =
         else (name, value))
       stockpile
 
+(** [update_stockpile lst stockpile] updates the current [stockpile]
+    after accounting for the output and dependencies of the buildings in
+    [lst]. *)
 let update_stockpile lst stockpile =
   let rec update_stockpile_aux stockpile = function
     | [] -> stockpile
@@ -211,7 +213,9 @@ let update_stockpile lst stockpile =
   in
   update_stockpile_aux stockpile lst
 
-let available_buildings (state : state) =
+(** [available_buildings state] is the list of buildings plotted inside
+    the cells in [state]. *)
+let available_buildings state =
   Array.fold_left
     (fun acc row ->
       Array.fold_left
@@ -226,9 +230,6 @@ let next_state (state : state) =
   state.stockpile <-
     update_stockpile (available_buildings state) state.stockpile;
   state.tick <- state.tick + 1
-(* new_state ~stockpile:new_stockpile ~tick:(state.tick + 1) (filename
-   state) (canvas_size state |> fst) (canvas_size state |> snd)
-   (map_length state) (cell_size state |> fst) (cell_size state |> snd) *)
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)
@@ -237,7 +238,7 @@ let init_stockpile json =
     (fun acc resource ->
       new_resource
         (resource |> member "name" |> to_string)
-        (resource |> member "amount" |> to_string |> int_of_string)
+        (resource |> member "amount" |> to_int)
       :: acc)
     [] json
 
@@ -249,8 +250,8 @@ let init_new_building name lst =
 (** [iter_cells s acc json] is the updated cells from information in
     [json]. *)
 let iter_cells state cells json =
-  let x cell = cell |> member "x" |> to_string |> int_of_string in
-  let y cell = cell |> member "y" |> to_string |> int_of_string in
+  let x cell = cell |> member "x" |> to_int in
+  let y cell = cell |> member "y" |> to_int in
   let obj cell = cell |> member "object" |> to_string in
   List.iter
     (fun cell ->
@@ -270,7 +271,7 @@ let generate_stockpile_lst stockpile =
     `Assoc
       [
         ("name", `String (resource_name resource));
-        ("amount", `String (resource_amount resource |> string_of_int));
+        ("amount", `Int (resource_amount resource));
       ]
   in
   List.fold_left
@@ -288,26 +289,26 @@ let generate_cell_lst cells =
   let json_of_cell i j cell =
     `Assoc
       [
-        ("x", `String (string_of_int i));
-        ("y", `String (string_of_int j));
+        ("x", `Int i);
+        ("y", `Int j);
         ("object", `String (str_of_cell cell));
       ]
   in
-  Array.fold_left (fun acc row -> Array.to_list row :: acc) [] cells
+  Array.fold_right (fun row acc -> Array.to_list row :: acc) cells []
   |> List.mapi (fun i row ->
          List.mapi (fun j cell -> json_of_cell i j cell) row)
   |> List.flatten
 
 let from_string string =
   let json = Yojson.Basic.from_string string in
-  let get_field name coord =
-    json |> member name |> member coord |> to_string |> int_of_string
+  let get_field name coordinate =
+    json |> member name |> member coordinate |> to_int
   in
   let init_state =
     new_state string
       (get_field "canvas_size" "x")
       (get_field "canvas_size" "y")
-      (json |> member "map_length" |> to_string |> int_of_string)
+      (json |> member "map_length" |> to_int)
       (get_field "cell_size" "x")
       (get_field "cell_size" "y")
   in
@@ -318,8 +319,7 @@ let from_string string =
         (json |> member "cells" |> to_list);
     stockpile =
       List.rev (init_stockpile (json |> member "stockpile" |> to_list));
-    population =
-      json |> member "population" |> to_string |> int_of_string;
+    population = json |> member "population" |> to_int;
   }
 
 let save_state s =
@@ -329,18 +329,18 @@ let save_state s =
       ( "canvas_size",
         `Assoc
           [
-            ("x", `String (string_of_int (canvas_size s |> fst)));
-            ("y", `String (string_of_int (canvas_size s |> snd)));
+            ("x", `Int (canvas_size s |> fst));
+            ("y", `Int (canvas_size s |> snd));
           ] );
-      ("map_length", `String (string_of_int (map_length s)));
+      ("map_length", `Int (map_length s));
       ( "cell_size",
         `Assoc
           [
-            ("x", `String (string_of_int (cell_size s |> fst)));
-            ("y", `String (string_of_int (cell_size s |> snd)));
+            ("x", `Int (cell_size s |> fst));
+            ("y", `Int (cell_size s |> snd));
           ] );
       ("cells", `List (generate_cell_lst s.cells));
-      ("population", `String (string_of_int (population s)));
+      ("population", `Int (population s));
       ("stockpile", `List (generate_stockpile_lst [] s.stockpile));
     ]
   |> Yojson.to_string

@@ -1,3 +1,6 @@
+all:
+	make build-release
+
 build:
 	dune build --profile dev
 

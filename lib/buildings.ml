@@ -25,11 +25,6 @@ let resource_name (resource : resource) = fst resource
 
 let resource_amount (resource : resource) = snd resource
 
-(* let resource_dependency building name = let rec find_resource (lst :
-   resource list) = match lst with | [] -> 0 | h :: _ when h.name = name
-   -> h.amount | _ :: t -> find_resource t in find_resource
-   building.resource_dependency *)
-
 let new_building
     name
     cost

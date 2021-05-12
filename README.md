@@ -1,5 +1,18 @@
 # Camel City
 
+## TODO: Features
+
+* [ ] Beautify GUI
+* [ ] Finalizing GUI inputs and displays
+* [ ] Random Events (e.g. Random Attacks, Nature Disasters, etc...)
+* [ ] Add Happiness
+* [ ] Refine Building Attributes
+* [ ] Update Documentation
+* [ ] Add More Test Cases
+* [ ] Add Game Pausing
+* [ ] Add Endgame Building
+* [ ] Add Gameover States
+
 ## Instruction
 
 This assumes that the user is using the same OCaml switch as cs3110-2021sp.

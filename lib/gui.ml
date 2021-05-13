@@ -22,6 +22,14 @@ let fg_canvas = get_element_by_id "fg" Html.CoerceTo.canvas
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
 
+let main_div = Html.getElementById "main"
+
+let startup_div = Html.getElementById "startup"
+
+let game_div = Html.getElementById "game"
+
+let navbar_buttons_div = Html.getElementById "navbar_buttons"
+
 (** Module wide value for the HTML div element for showing the amount of
     tick. *)
 let tick_div = Html.getElementById "tick"
@@ -398,26 +406,39 @@ let add_building_selection_listener state =
 
 (** [save_game state _] converts the current game state to a JSON file. *)
 let save_game state _ =
-  let div = Html.getElementById "save" in
-  let possible_existing_link = Html.getElementById_opt "download" in
-  if match possible_existing_link with None -> false | Some _ -> true
-  then
-    Dom.removeChild div
-      (match possible_existing_link with
-      | None -> failwith ""
-      | Some link -> link);
+  let modal = Html.createDiv Html.document in
+  let modal_background = Html.createDiv Html.document in
+  let modal_content = Html.createDiv Html.document in
+  let modal_button = Html.createButton Html.document in
   let new_link = Html.createA Html.document in
   let encode_url =
     "data:text/json;charset=utf-8,"
     ^ Js.to_string
         (Js.encodeURIComponent (Js.string (save_state state)))
   in
+  Firebug.console##log modal;
+  modal##.className := Js.string "modal is-active";
+  modal_background##.className := Js.string "modal-background";
+  modal_content##.className
+  := Js.string "modal-content is-flex is-justify-content-center";
+  modal_button##.className := Js.string "modal-close is-large";
+  Html.addEventListener modal_button Html.Event.click
+    (Dom.handler (fun _ ->
+         Dom.removeChild main_div modal;
+         Js._true))
+    Js._false
+  |> ignore;
   new_link##.id := Js.string "download";
   new_link##.href := Js.string encode_url;
-  new_link##.innerHTML := Js.string "Click this link to download";
+  new_link##.innerHTML := Js.string "Download";
+  new_link##.className := Js.string "button is-success";
   new_link##setAttribute (Js.string "download")
     (Js.string "game_save.json");
-  Dom.appendChild div new_link;
+  Dom.appendChild modal modal_background;
+  Dom.appendChild modal modal_content;
+  Dom.appendChild modal modal_button;
+  Dom.appendChild modal_content new_link;
+  Dom.appendChild main_div modal;
   Js._true
 
 (** [add_save_button_listener] adds an event listener to the save game
@@ -440,17 +461,18 @@ let update_slider_label =
 
 (** [toggle_game is_hidden] hides the game session based on if it
     [is_hidden]. *)
-let toggle_game is_hidden =
-  let main_div = Html.getElementById "main" in
-  if is_hidden then main_div##.classList##remove (Js.string "hidden")
-  else main_div##.classList##add (Js.string "hidden")
+let toggle_game is_shown =
+  if is_shown then Dom.appendChild navbar_buttons_div save_button
+  else Dom.removeChild navbar_buttons_div save_button;
+  if is_shown then Dom.appendChild main_div game_div
+  else Dom.removeChild main_div game_div
 
 (** [toggle_startup is_hidden] hides the game setup screen based on if
     it [is_hidden]. *)
-let toggle_startup is_hidden =
-  let startup = Html.getElementById "startup" in
-  if is_hidden then startup##.classList##remove (Js.string "hidden")
-  else startup##.classList##add (Js.string "hidden")
+let toggle_startup is_shown =
+  Firebug.console##log is_shown;
+  if is_shown then Dom.appendChild main_div startup_div
+  else Dom.removeChild main_div startup_div
 
 (** [add_event_listeners state] registers all event listeners for the
     GUI. *)
@@ -463,6 +485,7 @@ let add_event_listeners state =
 (** [draw_setup] creates the initial game setup screen. *)
 let draw_setup =
   update_slider_label;
+  toggle_startup true;
   toggle_game false
 
 (** [update_statistics state] updates the various progress bars in the

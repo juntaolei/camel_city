@@ -6,43 +6,74 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
   <title>Camel City</title>
 </head>
 
 <body>
-  <header>
-    <h1 id="title">Camel City</h1>
-  </header>
-  <div id="startup">
-    <label for="cell_size" id="cell_size_label">Cell Size: 9</label>
-    <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
-    <input type="submit" value="Submit" name="submit" id="submit">
-    <input type="file" name="game_save" id="game_save">
-    <input type="submit" value="Submit" name="start_save" id="start_save">
-  </div>
-  <div id="main">
-    <div id="info"></div>
-    <div id="stats">
-      <div id="tick">Tick: </div>
-      |
-      <div id="money">Money: </div>
-      |
-      <div id="food">Food: </div>
-      |
-      <div id="electricity">Electricity: </div>
-      |
-      <div id="iron">Iron: </div>
-      |
-      <div id="coal">Coal: </div>
+  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <span class="navbar-item is-size-5 has-text-weight-bold">Camel City</span>
+      </div>
+      <div class="navbar-menu">
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons" id="navbar_buttons">
+              <button class="button is-primary" id="save_button">
+                <strong>Save</strong>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="save">
-      <button id="save_button">Save Game</button>
+  </nav>
+  <div class="container mt-6 px-6" id="main">
+    <div id="startup">
+      <div class="field">
+        <label class="label" id="cell_size_label">Cell Size: 9</label>
+        <div class="control mb-3">
+          <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
+        </div>
+        <div class="control">
+          <input class="button is-primary" type="submit" value="Start Game" name="submit" id="submit">
+        </div>
+      </div>
+      <hr>
+      <div class="field">
+        <div class="control mb-3">
+          <div class="file is-normal">
+            <label class="file-label">
+              <input class="file-input" type="file" name="game_save" id="game_save">
+              <span class="file-cta">
+                <span class="file-label">Choose a file...</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="control">
+          <input class="button is-primary" type="submit" value="Restore Save" name="start_save" id="start_save">
+        </div>
+      </div>
     </div>
-    <div id="gui">
-      <canvas id="bg"></canvas>
-      <canvas id="fg"></canvas>
+    <div id="game">
+      <div class="my-3 tags are-medium" id="stats">
+        <span class="tag is-info" id="tick">Tick: </span>
+        <span class="tag is-info" id="money">Money: </span>
+        <span class="tag is-info" id="food">Food: </span>
+        <span class="tag is-info" id="electricity">Electricity: </span>
+        <span class="tag is-info" id="iron">Iron: </span>
+        <span class="tag is-info" id="coal">Coal: </span>
+        <span class="tag is-info" id="info"></span>
+      </div>
+      <div class="my-3 is-flex is-flex-direction-row is-flex-wrap-wrap is-justify-content-center is-align-items-center"
+        id="building_selection" style="overflow: auto; width: 100%;"></div>
+      <div class="my-3" id="gui" style="height: 100%; width: 100%; flex: 1; overflow: auto;">
+        <canvas class="is-block" id="bg" style="position: absolute;"></canvas>
+        <canvas class="is-block" id="fg" style="position: absolute;"></canvas>
+      </div>
     </div>
-    <div id="building_selection"></div>
   </div>
   <script text="text/javascript" src="main.js"></script>
 </body>

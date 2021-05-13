@@ -354,15 +354,25 @@ let add_plot_listener state =
     can be plotted on the GUI. *)
 let draw_building_selections =
   List.mapi
-    (fun i (n, t) ->
-      let new_div = Html.createDiv Html.document in
-      let label = Html.createLabel Html.document in
-      label##.innerHTML := Js.string n;
-      new_div##.style##.display := Js.string "block";
-      t##.id := i |> string_of_int |> Js.string;
-      Dom.appendChild building_selection new_div;
-      Dom.appendChild new_div t;
-      Dom.appendChild new_div label)
+    (fun i (n, img) ->
+      let box = Html.createDiv Html.document in
+      let span = Html.createSpan Html.document in
+      span##.innerHTML := Js.string n;
+      span##.className := Js.string "is-size-7 has-text-weight-light";
+      span##.id := i |> string_of_int |> Js.string;
+      box##.className :=
+        Js.string
+          "block mr-3 my-3 p-2 is-flex is-flex-direction-column \
+           is-justify-content-space-between is-align-items-center";
+      box##.style##.minWidth := Js.string "100px";
+      box##.id := i |> string_of_int |> Js.string;
+      box##.style##.border := Js.string "1px solid hsl(0, 0%, 96%)";
+      box##.style##.borderRadius := Js.string "5px";
+      img##.id := i |> string_of_int |> Js.string;
+      img##.className := Js.string "image is-64x64";
+      Dom.appendChild building_selection box;
+      Dom.appendChild box img;
+      Dom.appendChild box span)
     textures
   |> ignore
 

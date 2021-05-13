@@ -11,70 +11,84 @@
 </head>
 
 <body>
-  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-    <div class="container">
-      <div class="navbar-brand">
-        <span class="navbar-item is-size-5 has-text-weight-bold">Camel City</span>
-      </div>
-      <div class="navbar-menu">
-        <div class="navbar-end">
-          <div class="navbar-item">
-            <div class="buttons" id="navbar_buttons">
-              <button class="button is-primary" id="save_button">
-                <strong>Save</strong>
-              </button>
+  <section class="hero is-fullheight is-white">
+    <div class="hero-head">
+      <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+        <div class="container">
+          <div class="navbar-brand">
+            <span class="navbar-item is-size-5 has-text-weight-bold">Camel City</span>
+          </div>
+          <div class="navbar-menu">
+            <div class="navbar-end">
+              <div class="navbar-item">
+                <div class="buttons" id="navbar_buttons">
+                  <button class="button is-primary" id="save_button">
+                    <strong>Save</strong>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
-  </nav>
-  <div class="container mt-6 px-6" id="main">
-    <div id="startup">
-      <div class="field">
-        <label class="label" id="cell_size_label">Cell Size: 9</label>
-        <div class="control mb-3">
-          <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
-        </div>
-        <div class="control">
-          <input class="button is-primary" type="submit" value="Start Game" name="submit" id="submit">
-        </div>
-      </div>
-      <hr>
-      <div class="field">
-        <div class="control mb-3">
-          <div class="file is-normal">
-            <label class="file-label">
-              <input class="file-input" type="file" name="game_save" id="game_save">
-              <span class="file-cta">
-                <span class="file-label">Choose a file...</span>
-              </span>
-            </label>
+
+    <div class="hero-body p-1" id="main">
+      <div class="container container has-text-centered" id="startup">
+        <div class="field">
+          <label class="label" id="cell_size_label">Cell Size: 9</label>
+          <div class="control mb-3">
+            <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
+          </div>
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Start Game" name="submit" id="submit">
           </div>
         </div>
-        <div class="control">
-          <input class="button is-primary" type="submit" value="Restore Save" name="start_save" id="start_save">
+        <hr class="has-background-light">
+        <div class="field">
+          <div class="control mb-3">
+            <div class="file is-normal is-justify-content-center">
+              <label class="file-label">
+                <input class="file-input" type="file" name="game_save" id="game_save">
+                <span class="file-cta">
+                  <span class="file-label">Choose a file...</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Restore Game Save" name="start_save" id="start_save">
+          </div>
+        </div>
+      </div>
+      <div class="container container has-text-centered" id="game">
+        <div class="block my-3 tags are-medium" id="stats">
+          <span class="tag is-info" id="tick">Tick: </span>
+          <span class="tag is-info" id="money">Money: </span>
+          <span class="tag is-info" id="food">Food: </span>
+          <span class="tag is-info" id="electricity">Electricity: </span>
+          <span class="tag is-info" id="iron">Iron: </span>
+          <span class="tag is-info" id="coal">Coal: </span>
+          <span class="tag is-info" id="info"></span>
+        </div>
+        <div class="block is-flex is-justify-content-center is-align-items-center">
+          <div class="my-3" id="gui" style="height: 750px; width: 1200px;">
+            <canvas class="is-block" id="bg" style="position: absolute;"></canvas>
+            <canvas class="is-block" id="fg" style="position: absolute;"></canvas>
+          </div>
+        </div>
+        <div class="block is-flex is-flex-direction-row is-justify-content-space-around" id="building_selection"
+          style="overflow-x: auto;">
         </div>
       </div>
     </div>
-    <div id="game">
-      <div class="my-3 tags are-medium" id="stats">
-        <span class="tag is-info" id="tick">Tick: </span>
-        <span class="tag is-info" id="money">Money: </span>
-        <span class="tag is-info" id="food">Food: </span>
-        <span class="tag is-info" id="electricity">Electricity: </span>
-        <span class="tag is-info" id="iron">Iron: </span>
-        <span class="tag is-info" id="coal">Coal: </span>
-        <span class="tag is-info" id="info"></span>
-      </div>
-      <div class="my-3 is-flex is-flex-direction-row is-flex-wrap-wrap is-justify-content-center is-align-items-center"
-        id="building_selection" style="overflow: auto; width: 100%;"></div>
-      <div class="my-3" id="gui" style="height: 100%; width: 100%; flex: 1; overflow: auto;">
-        <canvas class="is-block" id="bg" style="position: absolute;"></canvas>
-        <canvas class="is-block" id="fg" style="position: absolute;"></canvas>
+
+    <div class="hero-foot p-6">
+      <div class="container has-text-centered">
+        <a class="has-text-weight-light has-text-link" href="https://github.com/juntaolei/camel_city">GitHub</a>
       </div>
     </div>
-  </div>
+  </section>
   <script text="text/javascript" src="main.js"></script>
 </body>
 

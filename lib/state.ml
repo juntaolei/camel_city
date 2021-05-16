@@ -343,3 +343,48 @@ let save_state s =
       ("stockpile", `List (generate_stockpile_lst [] s.stockpile));
     ]
   |> Yojson.to_string
+
+(** [iter_resources lst] is the resource list extracted from the json list 
+    [lst]. *)
+let iter_resources lst = 
+  List.fold_left
+  (fun acc res ->
+    let name = res |> member "name" |> to_string in
+    let amount = res |> member "amount" |> to_int in
+    let new_res = new_resource name amount in
+    new_res :: acc)
+  [] lst
+
+(** [iter_events json] is the [(string * resource list) list] extracted from 
+    the json list [json]. *)
+let iter_events json =
+  List.fold_left
+  (fun acc event ->
+    let text = event |> member "text" |> to_string in
+    let resource_lst = event |> member "resource" |> to_list |> iter_resources
+    in
+    (text, resource_lst)
+    :: acc)
+  [] json
+
+(** [load_events] extracts the lists of easy, medium and hard events from the
+    json file provided. *)
+let load_events =
+  let json_e = "events_init.json" |> Yojson.Basic.from_file |> member "easy"
+  |> to_list |> iter_events in
+  let json_m = "events_init.json" |> Yojson.Basic.from_file |> member "medium"
+  |> to_list |> iter_events in
+  let json_h = "events_init.json" |> Yojson.Basic.from_file |> member "hard"
+  |> to_list |> iter_events in
+  [("easy", json_e);("medium", json_m);("hard", json_h)]
+
+let generate_event st = 
+  let events = load_events in
+  let level = List.assoc "money" (stockpile st) in
+  let str = begin
+    if level < 300 then "easy"
+    else if level < 1000 then "medium"
+    else "hard"
+  end in
+  let lst_e = List.assoc str events in
+  List.nth lst_e (Random.int (List.length lst_e))

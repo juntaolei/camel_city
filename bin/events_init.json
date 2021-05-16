@@ -1,0 +1,83 @@
+{
+    "easy": [
+        {
+            "text": "Bonus: +50 money, +50 oats, +20 iron. ",
+            "resource": [
+                {
+                    "amount": 50,
+                    "name": "money"
+                },
+                {
+                    "amount": 50,
+                    "name": "oats"
+                },
+                {
+                    "amount": 20,
+                    "name": "iron"
+                }
+            ]
+        },
+        {
+            "text": "Minus: -50 money, -30 oats. ",
+            "resource": [
+                {
+                    "amount": -50,
+                    "name": "money"
+                },
+                {
+                    "amount": -30,
+                    "name": "oats"
+                }
+            ]
+        }
+    ],
+    "medium": [
+        {
+            "text": "Bonus: +60 iron. ",
+            "resource": [
+                {
+                    "amount": 60,
+                    "name": "iron"
+                }
+            ]
+        },
+        {
+            "text": "Minus: -300 money. ",
+            "resource": [
+                {
+                    "amount": -300,
+                    "name": "money"
+                }
+            ]
+        }
+    ],
+    "hard": [
+        {
+            "text": "Bonus: +2000 money. ",
+            "resource": [
+                {
+                    "amount": 2000,
+                    "name": "money"
+                }
+            ]
+        },
+        {
+            "text": "Minus: -2500 money. ",
+            "resource": [
+                {
+                    "amount": -2500,
+                    "name": "money"
+                }
+            ]
+        },
+        {
+            "text": "Minus: -1000 iron. ",
+            "resource": [
+                {
+                    "amount": -1000,
+                    "name": "iron"
+                }
+            ]
+        }
+    ]
+}

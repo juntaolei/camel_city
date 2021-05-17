@@ -65,6 +65,9 @@ val tick : state -> int
 (** [stockpile state] is the stockpile of [state]. *)
 val stockpile : state -> stockpile
 
+(** [text state] is the text of [state]. *)
+val text : state -> string
+
 (** [str_of_cell cel] is the string representation of [cel]. *)
 val str_of_cell : cell -> string
 

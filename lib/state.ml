@@ -19,6 +19,7 @@ type cell =
   | None
 
 type state = {
+  mutable text : string;
   mutable filename : string;
   mutable tick : int;
   mutable canvas_size : int * int;
@@ -59,6 +60,8 @@ let tick state = state.tick
 let population state = state.population
 
 let stockpile state = state.stockpile
+
+let text state = state.text
 
 let str_of_cell = function
   | None -> ""
@@ -117,6 +120,7 @@ let new_state
   {
     tick;
     filename;
+    text = "";
     canvas_size = (canvas_width, canvas_height);
     map_length;
     cell_size = (cell_width, cell_height);
@@ -223,12 +227,6 @@ let available_buildings state =
       :: acc)
     [] state.cells
   |> List.flatten
-
-let next_state (state : state) =
-  if state.tick mod 60 = 0 then
-    state.stockpile <-
-      update_stockpile (available_buildings state) state.stockpile;
-  state.tick <- state.tick + 1
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)
@@ -378,6 +376,16 @@ let load_events =
   |> to_list |> iter_events in
   [("easy", json_e);("medium", json_m);("hard", json_h)]
 
+let rec merge_stock pile = function
+| [] -> pile
+| h :: t ->  
+  let r_name = resource_name h in
+  let r_amount = resource_amount h in
+  let filter_resource (name, value) =
+    if name = r_name then (name, value + r_amount) else (name, value)
+  in
+  merge_stock (List.map filter_resource pile) t
+
 let generate_event st = 
   let events = load_events in
   let level = List.assoc "money" (stockpile st) in
@@ -387,4 +395,16 @@ let generate_event st =
     else "hard"
   end in
   let lst_e = List.assoc str events in
-  List.nth lst_e (Random.int (List.length lst_e))
+  let pair = List.nth lst_e (Random.int (List.length lst_e)) in
+  (fst pair, merge_stock st.stockpile (snd pair))
+  
+let next_state (state : state) =
+  if state.tick mod 60 = 0 then 
+    let new_state = 
+      update_stockpile (available_buildings state) state.stockpile in
+    state.stockpile <- new_state;
+    if state.tick mod 2400 = 0 then
+      let pair = generate_event state in
+        state.text <- fst pair;
+        state.stockpile <- snd pair;
+  state.tick <- state.tick + 1

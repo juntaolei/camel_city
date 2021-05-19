@@ -62,3 +62,7 @@ val maintenance : building -> int
 
 (** [defense building] is the [defense] level of [building]. *)
 val defense : building -> int
+
+(** [dec_defense building i] is the [building] with defense level decreased
+    by [i]. *)
+val dec_defense : building -> int -> building

@@ -361,7 +361,8 @@ let iter_events json =
     let text = event |> member "text" |> to_string in
     let resource_lst = event |> member "resource" |> to_list |> iter_resources
     in
-    (text, resource_lst)
+    let damage = event |> member "defense" |> to_int in
+    (text, resource_lst, damage)
     :: acc)
   [] json
 
@@ -376,6 +377,8 @@ let load_events =
   |> to_list |> iter_events in
   [("easy", json_e);("medium", json_m);("hard", json_h)]
 
+(** [merge_stock pile stockpile] is the updated [stockpile] after adding or
+    subtracting resources from [pile]. *)
 let rec merge_stock pile = function
 | [] -> pile
 | h :: t ->  
@@ -386,6 +389,22 @@ let rec merge_stock pile = function
   in
   merge_stock (List.map filter_resource pile) t
 
+(** [update_cells arr def] updates arr by decreasing defense levels of all 
+    building by def and removes buildings with zero defense. *)
+  let update_cells arr def =
+  for i = 0 to Array.length arr do
+    for j = 0 to Array.length arr.(0) do
+      match arr.(i).(j) with
+      | Building b -> begin
+        let curr = defense b in
+        if curr > def then
+          arr.(i).(j) <- Building (dec_defense b def)
+        else arr.(i).(j) <- None
+      end
+      | _ -> ()
+    done
+  done
+
 let generate_event st = 
   let events = load_events in
   let level = List.assoc "money" (stockpile st) in
@@ -395,8 +414,8 @@ let generate_event st =
     else "hard"
   end in
   let lst_e = List.assoc str events in
-  let pair = List.nth lst_e (Random.int (List.length lst_e)) in
-  (fst pair, merge_stock st.stockpile (snd pair))
+  let (f, s, t) = List.nth lst_e (Random.int (List.length lst_e)) in
+  (f, merge_stock st.stockpile s, t)
   
 let next_state (state : state) =
   if state.tick mod 60 = 0 then 
@@ -404,7 +423,8 @@ let next_state (state : state) =
       update_stockpile (available_buildings state) state.stockpile in
     state.stockpile <- new_state;
     if state.tick mod 2400 = 0 then
-      let pair = generate_event state in
-        state.text <- fst pair;
-        state.stockpile <- snd pair;
+      let (t, s, c) = generate_event state in
+        state.text <- t;
+        state.stockpile <- s;
+        update_cells state.cells c;
   state.tick <- state.tick + 1

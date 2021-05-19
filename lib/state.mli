@@ -90,6 +90,7 @@ val from_string : string -> state
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
 
-(** [generate_event st] is the text displayed and corresponding stockpile
-    addition or subtraction based on conditions of state [st]. *)
-val generate_event : state -> (string * stockpile)
+(** [generate_event st] is the text displayed, corresponding stockpile
+    addition or subtraction, and damage in defense, based on conditions 
+    of state [st]. *)
+val generate_event : state -> (string * stockpile * int)

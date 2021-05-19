@@ -15,7 +15,8 @@
                     "amount": 20,
                     "name": "iron"
                 }
-            ]
+            ],
+            "defense": 0
         },
         {
             "text": "Minus: -50 money, -30 oats. ",
@@ -28,7 +29,8 @@
                     "amount": -30,
                     "name": "oats"
                 }
-            ]
+            ],
+            "defense": 0
         }
     ],
     "medium": [
@@ -39,7 +41,8 @@
                     "amount": 60,
                     "name": "iron"
                 }
-            ]
+            ],
+            "defense": 0
         },
         {
             "text": "Minus: -300 money. ",
@@ -48,7 +51,8 @@
                     "amount": -300,
                     "name": "money"
                 }
-            ]
+            ],
+            "defense": 0
         }
     ],
     "hard": [
@@ -59,7 +63,8 @@
                     "amount": 2000,
                     "name": "money"
                 }
-            ]
+            ],
+            "defense": 2
         },
         {
             "text": "Minus: -2500 money. ",
@@ -68,16 +73,18 @@
                     "amount": -2500,
                     "name": "money"
                 }
-            ]
+            ],
+            "denfense": 1
         },
         {
-            "text": "Minus: -1000 iron. ",
+            "text": "Minus: -1000 iron, 1 defense. ",
             "resource": [
                 {
                     "amount": -1000,
                     "name": "iron"
                 }
-            ]
+            ],
+            "defense": 0
         }
     ]
 }

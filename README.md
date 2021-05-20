@@ -2,9 +2,9 @@
 
 ## TODO: Features
 
-* [ ] Beautify GUI
+* [x] Beautify GUI
 * [ ] Finalizing GUI inputs and displays
-* [ ] Random Events (e.g. Random Attacks, Nature Disasters, etc...)
+* [x] Random Events (e.g. Random Attacks, Nature Disasters, etc...)
 * [ ] Add Happiness
 * [ ] Refine Building Attributes
 * [ ] Update Documentation
@@ -22,7 +22,7 @@ Install the required dependencies:
 ```bash
 opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx
 ```
-  
+
 Compiling to JavaScript:
 
 For production:
@@ -31,7 +31,7 @@ For production:
 make
 ```
 
-For development: 
+For development:
 
 ```bash
 make build

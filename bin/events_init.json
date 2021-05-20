@@ -1,7 +1,7 @@
 {
     "easy": [
         {
-            "text": "The camel farmers have collected 50 extra units of oat for harvest season. ",
+            "text": "The camel farmers have collected 50 extra units of oat for harvest season.",
             "resource": [
                 {
                     "amount": 50,
@@ -11,7 +11,7 @@
             "defense": 0
         },
         {
-            "text": "Kind camel citizens has donated 100 units of money for national defense. ",
+            "text": "Kind camel citizens has donated 100 units of money for national defense.",
             "resource": [
                 {
                     "amount": 100,
@@ -21,7 +21,7 @@
             "defense": 0
         },
         {
-            "text": "An Earthquake has caused power plant leaks and the city lost 50 units of electricity. ",
+            "text": "An Earthquake has caused power plant leaks and the city lost 50 units of electricity.",
             "resource": [
                 {
                     "amount": -50,

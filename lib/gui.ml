@@ -426,7 +426,6 @@ let save_game state _ =
     ^ Js.to_string
         (Js.encodeURIComponent (Js.string (save_state state)))
   in
-  Firebug.console##log modal;
   modal##.className := Js.string "modal is-active";
   modal_background##.className := Js.string "modal-background";
   modal_content##.className
@@ -480,7 +479,6 @@ let toggle_game is_shown =
 (** [toggle_startup is_hidden] hides the game setup screen based on if
     it [is_hidden]. *)
 let toggle_startup is_shown =
-  Firebug.console##log is_shown;
   if is_shown then Dom.appendChild main_div startup_div
   else Dom.removeChild main_div startup_div
 
@@ -506,7 +504,8 @@ let update_statistics state =
   set_food_div state;
   set_electricity_div state;
   set_iron_div state;
-  set_coal_div state
+  set_coal_div state;
+  if String.length (text state) <> 0 then draw_map state
 
 (** [setup_gui state] setups the game session based on the [state]. *)
 let setup_gui state =

@@ -1,4 +1,5 @@
 open Buildings
+open Js_of_ocaml
 open Yojson.Basic.Util
 
 type stockpile = resource list
@@ -398,8 +399,8 @@ let rec merge_stock pile = function
 (** [update_cells arr def] updates arr by decreasing defense levels of
     all building by def and removes buildings with zero defense. *)
 let update_cells arr def =
-  for i = 0 to Array.length arr do
-    for j = 0 to Array.length arr.(0) do
+  for i = 0 to Array.length arr - 1 do
+    for j = 0 to Array.length arr.(0) - 1 do
       match arr.(i).(j) with
       | Building b ->
           let curr = defense b in
@@ -422,6 +423,7 @@ let generate_event st =
   (f, merge_stock st.stockpile s, t)
 
 let next_state (state : state) =
+  state.tick <- state.tick + 1;
   if state.tick mod 60 = 0 then (
     let new_state =
       update_stockpile (available_buildings state) state.stockpile
@@ -432,4 +434,4 @@ let next_state (state : state) =
       state.text <- t;
       state.stockpile <- s;
       update_cells state.cells c;
-      state.tick <- state.tick + 1))
+      Firebug.console##log (t, s, c)))

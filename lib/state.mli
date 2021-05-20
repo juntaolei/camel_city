@@ -65,6 +65,9 @@ val tick : state -> int
 (** [stockpile state] is the stockpile of [state]. *)
 val stockpile : state -> stockpile
 
+(** [text state] is the text of [state]. *)
+val text : state -> string
+
 (** [str_of_cell cel] is the string representation of [cel]. *)
 val str_of_cell : cell -> string
 
@@ -86,3 +89,8 @@ val from_string : string -> state
 (** [save_state st] saves the state [st] into a json file in the same
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
+
+(** [generate_event st] is the text displayed, corresponding stockpile
+    addition or subtraction, and damage in defense, based on conditions 
+    of state [st]. *)
+val generate_event : state -> (string * stockpile * int)

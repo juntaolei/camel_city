@@ -1,0 +1,106 @@
+{
+    "easy": [
+        {
+            "text": "The camel farmers have collected 50 extra units of oat for harvest season. ",
+            "resource": [
+                {
+                    "amount": 50,
+                    "name": "oat"
+                }
+            ],
+            "defense": 0
+        },
+        {
+            "text": "Kind camel citizens has donated 100 units of money for national defense. ",
+            "resource": [
+                {
+                    "amount": 100,
+                    "name": "money"
+                }
+            ],
+            "defense": 0
+        },
+        {
+            "text": "An Earthquake has caused power plant leaks and the city lost 50 units of electricity. ",
+            "resource": [
+                {
+                    "amount": -50,
+                    "name": "electricity"
+                }
+            ],
+            "defense": 0
+        }
+    ],
+    "medium": [
+        {
+            "text": "Camel miners have found 60 units of iron in an ancient underground ruin. ",
+            "resource": [
+                {
+                    "amount": 60,
+                    "name": "iron"
+                }
+            ],
+            "defense": 0
+        },
+        {
+            "text": "Python hackers have stolen 500 units of money from the treasury.",
+            "resource": [
+                {
+                    "amount": -500,
+                    "name": "money"
+                }
+            ],
+            "defense": 0
+        },
+        {
+            "text": "The planatation was raided by hungry alpacas and 300 units of oats were damaged.",
+            "resource": [
+                {
+                    "amount": -300,
+                    "name": "oat"
+                }
+            ],
+            "defense": 0
+        }
+    ],
+    "hard": [
+        {
+            "text": "The king of Llama Land has offered 2000 units of money and 100 units of oats to camel city. ",
+            "resource": [
+                {
+                    "amount": 2000,
+                    "name": "money"
+                },
+                {
+                    "amount": 1000,
+                    "name": "oat"
+                }
+            ],
+            "defense": 0
+        },
+        {
+            "text": "A hurricane has swept the city, building defense dropped by 2 units, 1000 units of iron and 1000 units of oats were lost. ",
+            "resource": [
+                {
+                    "amount": -1000,
+                    "name": "iron"
+                },
+                {
+                    "amount": -1000,
+                    "name": "oat"
+                }
+            ],
+            "denfense": 1
+        },
+        {
+            "text": "The imperials have planned a large-scale invasion, building defense dropped by 2 units and 2000 units of money were stolen from the treasury. ",
+            "resource": [
+                {
+                    "amount": -2000,
+                    "name": "money"
+                }
+            ],
+            "defense": 2
+        }
+    ]
+}

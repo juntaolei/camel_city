@@ -19,6 +19,7 @@ type cell =
   | None
 
 type state = {
+  mutable text : string;
   mutable filename : string;
   mutable tick : int;
   mutable canvas_size : int * int;
@@ -59,6 +60,8 @@ let tick state = state.tick
 let population state = state.population
 
 let stockpile state = state.stockpile
+
+let text state = state.text
 
 let str_of_cell = function
   | None -> ""
@@ -117,6 +120,7 @@ let new_state
   {
     tick;
     filename;
+    text = "";
     canvas_size = (canvas_width, canvas_height);
     map_length;
     cell_size = (cell_width, cell_height);
@@ -223,12 +227,6 @@ let available_buildings state =
       :: acc)
     [] state.cells
   |> List.flatten
-
-let next_state (state : state) =
-  if state.tick mod 60 = 0 then
-    state.stockpile <-
-      update_stockpile (available_buildings state) state.stockpile;
-  state.tick <- state.tick + 1
 
 (** [init_stockpile acc json] is the list of initialized [stockpile]
     extracted from the json object [json]. *)
@@ -343,3 +341,90 @@ let save_state s =
       ("stockpile", `List (generate_stockpile_lst [] s.stockpile));
     ]
   |> Yojson.to_string
+
+(** [iter_resources lst] is the resource list extracted from the json list 
+    [lst]. *)
+let iter_resources lst = 
+  List.fold_left
+  (fun acc res ->
+    let name = res |> member "name" |> to_string in
+    let amount = res |> member "amount" |> to_int in
+    let new_res = new_resource name amount in
+    new_res :: acc)
+  [] lst
+
+(** [iter_events json] is the [(string * resource list) list] extracted from 
+    the json list [json]. *)
+let iter_events json =
+  List.fold_left
+  (fun acc event ->
+    let text = event |> member "text" |> to_string in
+    let resource_lst = event |> member "resource" |> to_list |> iter_resources
+    in
+    let damage = event |> member "defense" |> to_int in
+    (text, resource_lst, damage)
+    :: acc)
+  [] json
+
+(** [load_events] extracts the lists of easy, medium and hard events from the
+    json file provided. *)
+let load_events =
+  let json_e = "events_init.json" |> Yojson.Basic.from_file |> member "easy"
+  |> to_list |> iter_events in
+  let json_m = "events_init.json" |> Yojson.Basic.from_file |> member "medium"
+  |> to_list |> iter_events in
+  let json_h = "events_init.json" |> Yojson.Basic.from_file |> member "hard"
+  |> to_list |> iter_events in
+  [("easy", json_e);("medium", json_m);("hard", json_h)]
+
+(** [merge_stock pile stockpile] is the updated [stockpile] after adding or
+    subtracting resources from [pile]. *)
+let rec merge_stock pile = function
+| [] -> pile
+| h :: t ->  
+  let r_name = resource_name h in
+  let r_amount = resource_amount h in
+  let filter_resource (name, value) =
+    if name = r_name then (name, value + r_amount) else (name, value)
+  in
+  merge_stock (List.map filter_resource pile) t
+
+(** [update_cells arr def] updates arr by decreasing defense levels of all 
+    building by def and removes buildings with zero defense. *)
+  let update_cells arr def =
+  for i = 0 to Array.length arr do
+    for j = 0 to Array.length arr.(0) do
+      match arr.(i).(j) with
+      | Building b -> begin
+        let curr = defense b in
+        if curr > def then
+          arr.(i).(j) <- Building (dec_defense b def)
+        else arr.(i).(j) <- None
+      end
+      | _ -> ()
+    done
+  done
+
+let generate_event st = 
+  let events = load_events in
+  let level = List.assoc "money" (stockpile st) in
+  let str = begin
+    if level < 300 then "easy"
+    else if level < 1000 then "medium"
+    else "hard"
+  end in
+  let lst_e = List.assoc str events in
+  let (f, s, t) = List.nth lst_e (Random.int (List.length lst_e)) in
+  (f, merge_stock st.stockpile s, t)
+  
+let next_state (state : state) =
+  if state.tick mod 60 = 0 then 
+    let new_state = 
+      update_stockpile (available_buildings state) state.stockpile in
+    state.stockpile <- new_state;
+    if state.tick mod 2400 = 0 then
+      let (t, s, c) = generate_event state in
+        state.text <- t;
+        state.stockpile <- s;
+        update_cells state.cells c;
+  state.tick <- state.tick + 1

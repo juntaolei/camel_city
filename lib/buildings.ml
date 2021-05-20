@@ -60,3 +60,6 @@ let income building = building.income
 let maintenance building = building.maintenance
 
 let defense building = building.defense
+
+let dec_defense building i = 
+  {building with defense = building.defense - i; }

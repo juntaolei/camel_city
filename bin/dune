@@ -20,7 +20,9 @@
    -I
    ./
    --file
-   %{dep:buildings_init.json})))
+   %{dep:buildings_init.json}
+   --file
+   %{dep:events_init.json})))
 
 (alias
  (name default)

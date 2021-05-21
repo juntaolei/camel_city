@@ -362,14 +362,21 @@ let add_plot_listener state =
     Js._false
   |> ignore
 
+(** [find_cost lst name] is the cost of [name] as specified in [lst]. *)
+let find_cost lst name = 
+  try lst |> List.find (fun b -> building_name b = name) 
+      |> cost |> string_of_int
+  with Not_found -> "0"
+
 (** [draw_building_selections] draw the list of available buildings that
     can be plotted on the GUI. *)
-let draw_building_selections =
+let draw_building_selections lst =
   List.mapi
     (fun i (n, img) ->
       let box = Html.createDiv Html.document in
       let span = Html.createSpan Html.document in
-      span##.innerHTML := Js.string n;
+      span##.innerHTML := 
+        Js.string (n ^ " $" ^ find_cost lst n);
       span##.className := Js.string "is-size-7 has-text-weight-light";
       span##.id := i |> string_of_int |> Js.string;
       box##.className :=
@@ -524,7 +531,7 @@ let setup_gui state =
   reset_canvas state;
   setup_canvas state;
   update_statistics state;
-  draw_building_selections;
+  draw_building_selections (buildings state);
   add_event_listeners state;
   draw_map state
 

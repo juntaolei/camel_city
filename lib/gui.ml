@@ -320,6 +320,21 @@ let add_highlight_listener state =
     Js._false
   |> ignore
 
+(** [place_bld state a positions] places building [a] to [positions] and
+    minus the cost from the stockpile in [state]. *)
+let place_bld state a positions =
+  let bld_cost = cost
+      (List.find (fun b -> building_name b = a) (buildings state)) in
+  match minus_cost (stockpile state) bld_cost with
+    | None -> ()
+    | Some s -> begin
+      place_cell state
+        (Building
+          (List.find (fun b -> building_name b = a) (buildings state)))
+        (fst positions) (snd positions);
+      update_stock state s
+    end
+
 (** [plot_cell state event] plots a cell on [state] when a cell's event
     handler is triggered by a click [event]. *)
 let plot_cell state (event : Html.mouseEvent Js.t) =
@@ -329,10 +344,7 @@ let plot_cell state (event : Html.mouseEvent Js.t) =
     else List.nth textures (current_selected state) |> fst
   in
   if selected_building state && a <> "road" && a <> "sand" then
-    place_cell state
-      (Building
-         (List.find (fun b -> building_name b = a) (buildings state)))
-      (fst positions) (snd positions);
+    place_bld state a positions;
   if selected_building state && a = "road" then
     place_cell state
       (Road (new_road 0 (fst positions) (snd positions)))

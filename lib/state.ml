@@ -7,7 +7,7 @@ type stockpile = resource list
 (** [default_stockpile] is the stockpile on any fresh game sessions. *)
 let default_stockpile : stockpile =
   [
-    ("money", 0);
+    ("money", 200);
     ("electricity", 0);
     ("oat", 0);
     ("iron", 0);
@@ -45,6 +45,8 @@ let select_building state i = state.selected_building <- i
 let selected_building state = state.selected_building >= 0
 
 let place_cell state cell x y = state.cells.(x).(y) <- cell
+
+let update_stock state pile = state.stockpile <- pile
 
 let canvas_size state = state.canvas_size
 
@@ -414,8 +416,8 @@ let generate_event st =
   let events = load_events in
   let level = List.assoc "money" (stockpile st) in
   let str =
-    if level < 300 then "easy"
-    else if level < 1000 then "medium"
+    if level < 1000 then "easy"
+    else if level < 2000 then "medium"
     else "hard"
   in
   let lst_e = List.assoc str events in
@@ -429,9 +431,31 @@ let next_state (state : state) =
       update_stockpile (available_buildings state) state.stockpile
     in
     state.stockpile <- new_state;
-    if state.tick mod 2400 = 0 then (
+    if state.tick mod 300 = 0 then (
       let t, s, c = generate_event state in
       state.text <- t;
       state.stockpile <- s;
       update_cells state.cells c;
       Firebug.console##log (t, s, c)))
+
+let is_sufficient pile cost = 
+  not (
+  List.fold_left
+  (fun acc r ->
+    let name = resource_name r in
+    let amount = resource_amount r in
+    if name = "money" && amount >= cost then
+      false && acc else true && acc
+  )
+  true pile)
+
+let minus_cost pile cost : stockpile option = 
+  match is_sufficient pile cost with
+  | false -> None
+  | true -> Some (List.fold_left
+    (fun acc r ->
+      let name = resource_name r in
+      let amount = resource_amount r in
+      if name = "money" then 
+        (name, amount - cost)::acc else r :: acc)
+    [] pile)

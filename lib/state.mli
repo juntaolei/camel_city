@@ -71,6 +71,14 @@ val text : state -> string
 (** [str_of_cell cel] is the string representation of [cel]. *)
 val str_of_cell : cell -> string
 
+(** [minus_cost pile cost] is [None] if resources in pile cannot afford [cost], 
+    or [Some p] where p is the updated stockpile after deducting costs from 
+    [pile]. *)
+val minus_cost : stockpile -> int -> stockpile option
+
+(** [update_stock state pile] updates the stockpile of [state] with [pile]. *)
+val update_stock : state -> stockpile -> unit
+
 (** [buildings state] is the available building list of [state]. *)
 val buildings : state -> building list
 

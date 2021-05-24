@@ -5,12 +5,14 @@ open Lib.Buildings
    including functions for resources, roads, and buildings. *)
 let water = new_resource "water" 1
 
-let road_1 = new_road 10 1 2
+let road = new_road 1 2
 
-let planation_bld = new_building "oat plantation" 10 5 ("oat", 5) 6 7 []
+let plantation_building =
+  new_building "oat plantation" 10 5 ("oat", 5) 6 7 [] 0 0 0 0 false
 
-let mine_bld =
-  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ]
+let mine_building =
+  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ] 0 0
+    0 0 false
 
 let electricity_resource = new_resource "electricity" 3
 
@@ -25,35 +27,34 @@ let resource_tests =
 let building_tests =
   [
     ( "building name of oat plantation is \"oat plantation\""
-    >:: fun _ ->
-      assert_equal (building_name planation_bld) "oat plantation" );
+    >:: fun _ -> assert_equal plantation_building.name "oat plantation"
+    );
     ( "cost of oat plantation is 10" >:: fun _ ->
-      assert_equal (cost planation_bld) 10 );
+      assert_equal plantation_building.cost 10 );
     ( "maintenance of oat plantation is 5" >:: fun _ ->
-      assert_equal (maintenance planation_bld) 5 );
+      assert_equal plantation_building.maintenance 5 );
     ( "resource output of oat plantation is \"oat\"" >:: fun _ ->
-      assert_equal (resource_name (output planation_bld)) "oat" );
+      assert_equal (resource_name plantation_building.output) "oat" );
     ( "amount of resource output of oat plantation is 5" >:: fun _ ->
-      assert_equal (resource_amount (output planation_bld)) 5 );
+      assert_equal (resource_amount plantation_building.output) 5 );
     ( "income of oat plantation is 6" >:: fun _ ->
-      assert_equal (income planation_bld) 6 );
+      assert_equal plantation_building.income 6 );
     ( "defense of oat plantation is 7" >:: fun _ ->
-      assert_equal (defense planation_bld) 7 );
+      assert_equal plantation_building.defense 7 );
     ( "plantation has no resource dependency" >:: fun _ ->
-      assert_equal (resource_dependency planation_bld) [] );
+      assert_equal plantation_building.resource_dependency [] );
     ( "building name of mine is \"mine\"" >:: fun _ ->
-      assert_equal (building_name mine_bld) "mine" );
-    ("cost of min is 30" >:: fun _ -> assert_equal (cost mine_bld) 30);
+      assert_equal mine_building.name "mine" );
+    ("cost of min is 30" >:: fun _ -> assert_equal mine_building.cost 30);
     ( "mine requires 3 units of electricity" >:: fun _ ->
-      assert_equal
-        (resource_dependency mine_bld)
+      assert_equal mine_building.resource_dependency
         [ electricity_resource ] );
   ]
 
 let road_tests =
   [
-    ( "cost of road_1 is 10" >:: fun _ ->
-      assert_equal (cost_rd road_1) 10 );
+    ("x coordinate of road is 1" >:: fun _ -> assert_equal (fst road) 1);
+    ("y coordinate of road is 2" >:: fun _ -> assert_equal (snd road) 2);
   ]
 
 let test_suite =

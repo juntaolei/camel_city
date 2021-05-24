@@ -1,6 +1,6 @@
 (library
  (name lib)
- (libraries yojson)
+ (libraries yojson unix)
  (preprocess
   (pps js_of_ocaml-ppx)))
 

@@ -13,7 +13,7 @@ let read_file_as_string filename =
 (* This test suite covers the most basic commands in [state.ml]
    including functions for creating and updating states. *)
 
-let state_0 = new_state "test_state.json" 1000 900 10 128 64
+let state_0 = new_state 1000 900 10 128 64
 
 let state_1 = from_string (read_file_as_string "map_1.json")
 
@@ -23,10 +23,14 @@ let expected_cell_array_1 =
   let empty = Array.make_matrix 3 3 None in
   empty.(0).(0) <-
     Building
-      (new_building "mine" 0 0 ("iron", 1) 0 0 [ ("electricity", 5) ]);
-  empty.(0).(1) <- Building (new_building "house" 0 0 ("", 0) 0 0 []);
+      (new_building "mine" 0 0 ("iron", 1) 0 0 [ ("electricity", 5) ] 0
+         0 0 0 false);
+  empty.(0).(1) <-
+    Building (new_building "house" 0 0 ("", 0) 0 0 [] 0 0 0 0 false);
   empty.(2).(0) <-
-    Building (new_building "oats_plantation" 0 0 ("oat", 10) 0 0 []);
+    Building
+      (new_building "oats_plantation" 0 0 ("oat", 10) 0 0 [] 0 0 0 0
+         false);
   empty
 
 (** [expected_stockpile_1] is the expected stockpile extracted from file
@@ -74,32 +78,32 @@ let rec string_of_stockpile acc = function
         (acc ^ resource_name h ^ ":" ^ string_of_int (resource_amount h))
         t
 
-let canvas_size_test name st expected : test =
+let canvas_size_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (canvas_size st) ~printer:(fun (a, b) ->
+  assert_equal expected state.canvas_size ~printer:(fun (a, b) ->
       string_of_int a ^ string_of_int b)
 
-let cell_size_test name st expected : test =
+let cell_size_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (cell_size st) ~printer:(fun (a, b) ->
+  assert_equal expected state.cell_size ~printer:(fun (a, b) ->
       string_of_int a ^ string_of_int b)
 
-let map_length_test name st expected : test =
+let map_length_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (map_length st) ~printer:string_of_int
+  assert_equal expected state.map_length ~printer:string_of_int
 
-let population_test name st expected : test =
+let population_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (population st) ~printer:string_of_int
+  assert_equal expected state.population ~printer:string_of_int
 
-let cell_test name st expected : test =
+let cell_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (cells st) ~printer:(fun x ->
+  assert_equal expected state.cells ~printer:(fun x ->
       string_of_lst_lst "" (lst_of_array_array x))
 
-let stockpile_test name st expected : test =
+let stockpile_test name state expected : test =
   name >:: fun _ ->
-  assert_equal expected (stockpile st) ~printer:(fun x ->
+  assert_equal expected state.stockpile ~printer:(fun x ->
       string_of_stockpile "" x)
 
 let state_test =

@@ -1,29 +1,25 @@
-type resource = string * int
-
-type road = {
-  cost : int;
-  x : int;
-  y : int;
-}
-
 type building = {
   name : string;
   cost : int;
   maintenance : int;
-  output : resource;
+  output : string * int;
   income : int;
   defense : int;
-  resource_dependency : resource list;
+  resource_dependency : (string * int) list;
+  happiness : int;
+  population_dependency : int;
+  housing : int;
+  entertainment : int;
+  is_final_building : bool;
 }
 
-type camel = { food : int }
+type road = int * int
 
-let new_resource (name : string) (amount : int) : resource =
-  (name, amount)
+let new_resource name amount = (name, amount)
 
-let resource_name (resource : resource) = fst resource
+let resource_name resource = fst resource
 
-let resource_amount (resource : resource) = snd resource
+let resource_amount resource = snd resource
 
 let new_building
     name
@@ -32,7 +28,12 @@ let new_building
     output
     income
     defense
-    resource_dependency =
+    resource_dependency
+    happiness
+    population_dependency
+    housing
+    entertainment
+    is_final_building =
   {
     name;
     cost;
@@ -41,25 +42,14 @@ let new_building
     income;
     defense;
     resource_dependency;
+    happiness;
+    population_dependency;
+    housing;
+    entertainment;
+    is_final_building;
   }
 
-let new_road c x_coord y_coord = { cost = c; x = x_coord; y = y_coord }
+let new_road x y = (x, y)
 
-let cost_rd (r : road) = r.cost
-
-let building_name building = building.name
-
-let output building = building.output
-
-let cost building = building.cost
-
-let resource_dependency building = building.resource_dependency
-
-let income building = building.income
-
-let maintenance building = building.maintenance
-
-let defense building = building.defense
-
-let dec_defense building i = 
-  {building with defense = building.defense - i; }
+let decrease_defense building damage =
+  { building with defense = building.defense - damage }

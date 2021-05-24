@@ -1,9 +1,5 @@
 open Buildings
 
-(** The type [stockpile] is a resource list that coresponds with the
-    amount of resources the play has. *)
-type stockpile = resource list
-
 (* * The type [cell] represents the most basic unit in construction that
    holds either a building, a road, or nothing. *)
 type cell =
@@ -13,14 +9,59 @@ type cell =
 
 (** The type [state] records condition of the game at a certain instance
     of time. *)
-type state
+type state = {
+  mutable tick : int;
+  mutable interval_time : float;
+  mutable last_updated : float;
+  mutable text : string;
+  mutable canvas_size : int * int;
+  mutable map_length : int;
+  mutable cell_size : int * int;
+  mutable buildings : building list;
+  mutable cells : cell array array;
+  mutable selected_cell : int;
+  mutable housing_capacity : int;
+  mutable military_strength : int;
+  mutable population : int;
+  mutable food : int;
+  mutable money : int;
+  mutable deficit_counter : int;
+  mutable starvation_counter : int;
+  mutable revolt_counter : int;
+  mutable happiness : float;
+  mutable is_paused : bool;
+  mutable is_game_over : bool;
+  mutable is_in_deficit : bool;
+  mutable is_in_starvation : bool;
+  mutable is_out_of_time : bool;
+  mutable is_in_revolt : bool;
+  mutable is_defeated : bool;
+  mutable is_final_building_placed : bool;
+  mutable game_over_message : string;
+  mutable stockpile : (string * int) list;
+}
 
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
 val new_state :
-  ?stockpile:stockpile ->
   ?tick:int ->
-  string ->
+  ?housing_capacity:int ->
+  ?military_strength:int ->
+  ?population:int ->
+  ?food:int ->
+  ?money:int ->
+  ?deficit_counter:int ->
+  ?starvation_counter:int ->
+  ?revolt_counter:int ->
+  ?happiness:float ->
+  ?is_paused:bool ->
+  ?is_game_over:bool ->
+  ?is_in_deficit:bool ->
+  ?is_in_starvation:bool ->
+  ?is_out_of_time:bool ->
+  ?is_in_revolt:bool ->
+  ?is_defeated:bool ->
+  ?is_final_building_placed:bool ->
   int ->
   int ->
   int ->
@@ -28,59 +69,16 @@ val new_state :
   int ->
   state
 
-(** [current_selected state] is the ID of the currently selected
-    building from the building selection pane. *)
-val current_selected : state -> int
-
-(** [select_building state i] is the current selected building from the
+(** [select_cell state i] is the current selected building from the
     building selection pane. *)
-val select_building : state -> int -> unit
+val select_cell : state -> int -> unit
 
-(** [selected_building state] is if a building is currently selected
-    from the building selection pane. *)
-val selected_building : state -> bool
-
-(** [canvas_size state] is the canvas size of the HTML Canvas as defined
-    in [state]. *)
-val canvas_size : state -> int * int
-
-(** [map_length state] is the map length of the game map as defined in
-    [state]. *)
-val map_length : state -> int
-
-(** [cell_size state] is the cell size of the game cell as defined in
-    [state]. *)
-val cell_size : state -> int * int
-
-(** [population state] is the population of [state]. *)
-val population : state -> int
-
-(** [cells state] is a two dimensional array of cells as defined in
-    [state]. *)
-val cells : state -> cell array array
-
-(** [tick state] is the current tick of the [state]. *)
-val tick : state -> int
-
-(** [stockpile state] is the stockpile of [state]. *)
-val stockpile : state -> stockpile
-
-(** [text state] is the text of [state]. *)
-val text : state -> string
+(** [is_selected state] is if a building is currently selected from the
+    building selection pane. *)
+val is_selected : state -> bool
 
 (** [str_of_cell cel] is the string representation of [cel]. *)
 val str_of_cell : cell -> string
-
-(** [minus_cost pile cost] is [None] if resources in pile cannot afford [cost], 
-    or [Some p] where p is the updated stockpile after deducting costs from 
-    [pile]. *)
-val minus_cost : stockpile -> int -> stockpile option
-
-(** [update_stock state pile] updates the stockpile of [state] with [pile]. *)
-val update_stock : state -> stockpile -> unit
-
-(** [buildings state] is the available building list of [state]. *)
-val buildings : state -> building list
 
 (** [place_cell state cell x y] places a [cell] inside [state] by its
     [x] and [y] coordinates. *)
@@ -98,7 +96,4 @@ val from_string : string -> state
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
 
-(** [generate_event st] is the text displayed, corresponding stockpile
-    addition or subtraction, and damage in defense, based on conditions 
-    of state [st]. *)
-val generate_event : state -> (string * stockpile * int)
+val place_building : state -> string -> int -> int -> unit

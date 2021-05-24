@@ -115,7 +115,7 @@ let find_texture name =
     [element] to show some statistics about state. *)
 let set_div state element name =
   let attribute_value =
-    List.find (fun (k, _) -> k = name) (stockpile state) |> snd
+    List.find (fun (k, _) -> k = name) state.stockpile |> snd
   in
   let string_value = attribute_value |> string_of_int in
   let inner_html =
@@ -126,7 +126,7 @@ let set_div state element name =
 (** [set_tick_div state] changes the attributes of the div HTML element
     to show tick. *)
 let set_tick_div state =
-  let string_value = state |> tick |> string_of_int in
+  let string_value = state.tick |> string_of_int in
   let inner_html = "Tick: " ^ string_value |> Js.string in
   tick_div##.innerHTML := inner_html
 
@@ -155,31 +155,31 @@ let set_coal_div state = set_div state coal_div "coal"
     and the background canvas.*)
 let reset_canvas state =
   bg_ctx##clearRect 0. 0.
-    (state |> canvas_size |> fst |> float_of_int)
-    (state |> canvas_size |> snd |> float_of_int);
+    (state.canvas_size |> fst |> float_of_int)
+    (state.canvas_size |> snd |> float_of_int);
   fg_ctx##clearRect 0. 0.
-    (state |> canvas_size |> fst |> float_of_int)
-    (state |> canvas_size |> snd |> float_of_int)
+    (state.canvas_size |> fst |> float_of_int)
+    (state.canvas_size |> snd |> float_of_int)
 
 (** [setup_canvas state] setups the foreground canvas and the background
     canvas based on properties from [state]. *)
 let setup_canvas state =
-  bg_canvas##.width := state |> canvas_size |> fst;
-  bg_canvas##.height := state |> canvas_size |> snd;
-  fg_canvas##.width := state |> canvas_size |> fst;
-  fg_canvas##.height := state |> canvas_size |> snd;
+  bg_canvas##.width := state.canvas_size |> fst;
+  bg_canvas##.height := state.canvas_size |> snd;
+  fg_canvas##.width := state.canvas_size |> fst;
+  fg_canvas##.height := state.canvas_size |> snd;
   bg_ctx##translate
     (float_of_int bg_canvas##.width /. 2.)
-    ((state |> cell_size |> snd |> float_of_int) *. 2.);
+    ((state.cell_size |> snd |> float_of_int) *. 2.);
   fg_ctx##translate
     (float_of_int fg_canvas##.width /. 2.)
-    ((state |> cell_size |> snd |> float_of_int) *. 2.)
+    ((state.cell_size |> snd |> float_of_int) *. 2.)
 
 (** [draw_cell state x y color] colors a cell of indices [x] and [y] in
     [state] with [color] on the foreground canvas. *)
 let draw_cell state x y color =
-  let cell_width = state |> cell_size |> fst in
-  let cell_height = state |> cell_size |> snd in
+  let cell_width = state.cell_size |> fst in
+  let cell_height = state.cell_size |> snd in
   fg_ctx##save;
   fg_ctx##translate
     ((float_of_int y -. float_of_int x) *. float_of_int cell_width /. 2.)
@@ -204,8 +204,8 @@ let draw_cell state x y color =
 (** [draw_img state x y texture] draws the [texture] that represents a
     cell of indices [x] and [y] in [state] on the background canvas. *)
 let draw_img state x y texture =
-  let cell_width = state |> cell_size |> fst |> float_of_int in
-  let cell_height = state |> cell_size |> snd |> float_of_int in
+  let cell_width = state.cell_size |> fst |> float_of_int in
+  let cell_height = state.cell_size |> snd |> float_of_int in
   bg_ctx##save;
   bg_ctx##translate
     ((float_of_int y -. float_of_int x) *. cell_width /. 2.)
@@ -222,19 +222,19 @@ let draw_map state =
           let texture =
             match c with
             | Road _ -> find_texture "road"
-            | Building b -> find_texture (building_name b)
+            | Building building -> find_texture building.name
             | None -> find_texture "sand"
           in
           draw_img state i j texture))
-    (cells state)
+    state.cells
 
 (** [cell_positions state event] are the x and y indices of a cell in
     [state] that the mouse through [event] is currently hovering over. *)
 let cell_positions state (event : Html.mouseEvent Js.t) =
-  let canvas_width = state |> canvas_size |> fst |> float_of_int in
-  let cell_width = state |> cell_size |> fst |> float_of_int in
-  let cell_height = state |> cell_size |> snd |> float_of_int in
-  let map_length = state |> map_length |> float_of_int in
+  let canvas_width = state.canvas_size |> fst |> float_of_int in
+  let cell_width = state.cell_size |> fst |> float_of_int in
+  let cell_height = state.cell_size |> snd |> float_of_int in
+  let map_length = state.map_length |> float_of_int in
   let padding_width =
     (canvas_width -. (cell_width *. map_length)) /. 2.
   in
@@ -255,17 +255,17 @@ let cell_positions state (event : Html.mouseEvent Js.t) =
 (** [update_info state x y] updates the text information in the info div
     when highlighting a cell in [state] with coordinates ([x], [y]). *)
 let update_info state x y =
-  let cells = cells state in
+  let cells = state.cells in
   let cell = cells.(x).(y) in
   match cell with
   | None -> info_div##.innerHTML := Js.string "Sand"
   | Road _ -> info_div##.innerHTML := Js.string "Road"
   | Building building ->
-      let name = building_name building in
-      let output = output building in
+      let name = building.name in
+      let output = building.output in
       let output_name = resource_name output in
       let output_amount = resource_amount output in
-      let resource_dependency = resource_dependency building in
+      let resource_dependency = building.resource_dependency in
       let resource_dependency_prettier =
         List.fold_left
           (fun acc (k, v) ->
@@ -285,9 +285,9 @@ let update_info state x y =
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
 let highlight state (event : Html.mouseEvent Js.t) =
-  let canvas_width = state |> canvas_size |> fst in
-  let canvas_height = state |> canvas_size |> snd in
-  let map_length = state |> map_length in
+  let canvas_width = state.canvas_size |> fst in
+  let canvas_height = state.canvas_size |> snd in
+  let map_length = state.map_length in
   let positions = cell_positions state event in
   fg_ctx##clearRect
     (float_of_int (-canvas_width))
@@ -320,36 +320,21 @@ let add_highlight_listener state =
     Js._false
   |> ignore
 
-(** [place_bld state a positions] places building [a] to [positions] and
-    minus the cost from the stockpile in [state]. *)
-let place_bld state a positions =
-  let bld_cost = cost
-      (List.find (fun b -> building_name b = a) (buildings state)) in
-  match minus_cost (stockpile state) bld_cost with
-    | None -> ()
-    | Some s -> begin
-      place_cell state
-        (Building
-          (List.find (fun b -> building_name b = a) (buildings state)))
-        (fst positions) (snd positions);
-      update_stock state s
-    end
-
 (** [plot_cell state event] plots a cell on [state] when a cell's event
     handler is triggered by a click [event]. *)
 let plot_cell state (event : Html.mouseEvent Js.t) =
   let positions = cell_positions state event in
-  let a =
-    if not (selected_building state) then "sand"
-    else List.nth textures (current_selected state) |> fst
+  let name =
+    if not (is_selected state) then "sand"
+    else List.nth textures state.selected_cell |> fst
   in
-  if selected_building state && a <> "road" && a <> "sand" then
-    place_bld state a positions;
-  if selected_building state && a = "road" then
+  if is_selected state && name <> "road" && name <> "sand" then
+    place_building state name (fst positions) (snd positions);
+  if is_selected state && name = "road" then
     place_cell state
-      (Road (new_road 0 (fst positions) (snd positions)))
+      (Road (new_road (fst positions) (snd positions)))
       (fst positions) (snd positions);
-  if selected_building state && a = "sand" then
+  if is_selected state && name = "sand" then
     place_cell state None (fst positions) (snd positions);
   draw_map state;
   Js._true
@@ -363,9 +348,8 @@ let add_plot_listener state =
   |> ignore
 
 (** [find_cost lst name] is the cost of [name] as specified in [lst]. *)
-let find_cost lst name = 
-  try lst |> List.find (fun b -> building_name b = name) 
-      |> cost |> string_of_int
+let find_cost lst name =
+  try (List.find (fun b -> b.name = name) lst).cost |> string_of_int
   with Not_found -> "0"
 
 (** [draw_building_selections] draw the list of available buildings that
@@ -375,8 +359,7 @@ let draw_building_selections lst =
     (fun i (n, img) ->
       let box = Html.createDiv Html.document in
       let span = Html.createSpan Html.document in
-      span##.innerHTML := 
-        Js.string (n ^ " $" ^ find_cost lst n);
+      span##.innerHTML := Js.string (n ^ " $" ^ find_cost lst n);
       span##.className := Js.string "is-size-7 has-text-weight-light";
       span##.id := i |> string_of_int |> Js.string;
       box##.className :=
@@ -404,7 +387,7 @@ let select state (event : Html.mouseEvent Js.t) =
   let event_id = Js.to_string event_target##.id in
   let current = Html.getElementById event_id in
   let previous =
-    Html.getElementById_opt (string_of_int (current_selected state))
+    Html.getElementById_opt (string_of_int state.selected_cell)
   in
   if match previous with None -> false | Some _ -> true then
     (match previous with
@@ -412,11 +395,11 @@ let select state (event : Html.mouseEvent Js.t) =
     | Some element -> element)##.classList##remove
       (Js.string "selected");
   if
-    selected_building state
-    && event_id = (current_selected state |> string_of_int)
-  then select_building state (-1)
-  else select_building state (int_of_string event_id);
-  if selected_building state then
+    is_selected state
+    && event_id = (state.selected_cell |> string_of_int)
+  then select_cell state (-1)
+  else select_cell state (int_of_string event_id);
+  if is_selected state then
     current##.classList##add (Js.string "selected");
   Js._true
 
@@ -524,25 +507,35 @@ let update_statistics state =
   set_electricity_div state;
   set_iron_div state;
   set_coal_div state;
-  if String.length (text state) <> 0 then draw_map state
+  if String.length state.text <> 0 then draw_map state
 
 (** [setup_gui state] setups the game session based on the [state]. *)
 let setup_gui state =
   reset_canvas state;
   setup_canvas state;
   update_statistics state;
-  draw_building_selections (buildings state);
+  draw_building_selections state.buildings;
   add_event_listeners state;
   draw_map state
+
+let next_state_timer state =
+  let initial_time = state.last_updated in
+  let update_time = initial_time +. state.interval_time in
+  let current_time = Unix.gettimeofday () in
+  let is_next_state = current_time > update_time in
+  if is_next_state then next_state state;
+  if is_next_state then state.last_updated <- current_time
 
 (** [game_loop state] is the main recursive game loop in which parts of
     the GUI is updated when the [state] is updated. *)
 let rec game_loop state =
-  update_statistics state;
-  next_state state;
-  Html.window##requestAnimationFrame
-    (Js.wrap_callback (fun _ -> game_loop state))
-  |> ignore
+  if not state.is_game_over then begin
+    update_statistics state;
+    next_state_timer state;
+    Html.window##requestAnimationFrame
+      (Js.wrap_callback (fun _ -> game_loop state))
+    |> ignore
+  end
 
 (** [handle_start_from_file _] starts the game session from an user
     provided save file. *)
@@ -579,7 +572,7 @@ let handle_start_from_file _ =
     provided settings. *)
 let handle_start_from_setup _ =
   let state =
-    new_state "game_state.json" 1200 750
+    new_state 1200 750
       (slider##.value |> Js.to_string |> int_of_string)
       128 64
   in

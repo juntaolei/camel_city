@@ -1,7 +1,7 @@
 {
     "buildings": [
         {
-            "name": "house",
+            "name": "apartment",
             "cost": 50,
             "maintenance": 0,
             "output": {},
@@ -13,15 +13,47 @@
             "is_final_building": false
         },
         {
+            "name": "nice apartment",
+            "cost": 150,
+            "maintenance": 0,
+            "output": {},
+            "tax": 20,
+            "defense": 2,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "electricity"
+                }
+            ],
+            "population_dependency": 0,
+            "housing": 10,
+            "is_final_building": false
+        },
+        {
             "name": "oats_plantation",
             "cost": 50,
             "maintenance": 0,
             "output": {
-                "amount": 10,
+                "amount": 20,
                 "name": "food"
             },
-            "tax": 5,
+            "tax": 3,
             "defense": 1,
+            "resource_dependency": [],
+            "population_dependency": 3,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "coal mine",
+            "cost": 200,
+            "maintenance": 0,
+            "output": {
+                "amount": 15,
+                "name": "coal"
+            },
+            "tax": 0,
+            "defense": 0,
             "resource_dependency": [],
             "population_dependency": 3,
             "housing": 0,
@@ -30,14 +62,19 @@
         {
             "name": "power_plant",
             "cost": 200,
-            "maintenance": 0,
+            "maintenance": 5,
             "output": {
-                "amount": 5,
+                "amount": 30,
                 "name": "electricity"
             },
-            "tax": 5,
+            "tax": 0,
             "defense": 3,
-            "resource_dependency": [],
+            "resource_dependency": [
+                {
+                    "amount": 10,
+                    "name": "coal"
+                }
+            ],
             "population_dependency": 5,
             "housing": 0,
             "is_final_building": false
@@ -58,24 +95,156 @@
                     "name": "electricity"
                 }
             ],
+            "population_dependency": 5,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "steel mill",
+            "cost": 50,
+            "maintenance": 5,
+            "output": {
+                "amount": 5,
+                "name": "steel"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "electricity"
+                },
+                {
+                    "amount": 5,
+                    "name": "iorn"
+                },
+                {
+                    "amount": 5,
+                    "name": "coal"
+                }
+            ],
             "population_dependency": 10,
             "housing": 0,
             "is_final_building": false
         },
         {
-            "name": "barrack",
+            "name": "canned oat factory",
             "cost": 50,
+            "maintenance": 10,
+            "output": {
+                "amount": 10,
+                "name": "canned oats"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": [                
+                {
+                "amount": 5,
+                "name": "electricity"
+                },
+                {
+                    "amount": 10,
+                    "name": "food"
+                }
+            ],
+            "population_dependency": 7,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "steel market",
+            "cost": 200,
+            "maintenance": 5,
+            "output": {
+                "amount": 75,
+                "name": "money"
+            },
+            "tax": 0,
+            "defense": 0,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "steel"
+                }
+            ],
+            "population_dependency": 5,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "iorn market",
+            "cost": 100,
+            "maintenance": 3,
+            "output": {
+                "amount": 25,
+                "name": "money"
+            },
+            "tax": 1,
+            "defense": 0,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "iorn"
+                }
+            ],
+            "population_dependency": 5,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "canned oats market",
+            "cost": 150,
+            "maintenance": 5,
+            "output": {
+                "amount": 30,
+                "name": "money"
+            },
+            "tax": 1,
+            "defense": 0,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "canned oats"
+                }
+            ],
+            "population_dependency": 5,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "barracks",
+            "cost": 200,
+            "maintenance": 5,
+            "output": {
+                "amount": 0,
+                "name": "money"
+            },
+            "tax": 0,
+            "defense": 25,
+            "resource_dependency": [
+                {
+                    "amount": 5,
+                    "name": "electricity"
+                }
+            ],
+            "population_dependency": 10,
+            "housing": 0,
+            "is_final_building": false
+        },
+        {
+            "name": "the wonder",
+            "cost": 20000,
             "maintenance": 0,
             "output": {
                 "amount": 50,
                 "name": "money"
             },
             "tax": 0,
-            "defense": 20,
+            "defense": 100,
             "resource_dependency": [],
-            "population_dependency": 10,
+            "population_dependency": 50,
             "housing": 0,
-            "is_final_building": false
+            "is_final_building": true
         }
     ]
 }

@@ -191,6 +191,19 @@ let available_buildings state =
     [] state.cells
   |> List.flatten
 
+let available_homes state =
+  Array.fold_left
+    (fun acc row ->
+      Array.fold_left
+        (fun acc cell ->
+          match cell with
+          | Building b when b.name = "house" -> b :: acc
+          | _ -> acc)
+        [] row
+      :: acc)
+    [] state.cells
+  |> List.flatten
+
 let update_housing state =
   let housing_capacity =
     List.fold_left
@@ -243,7 +256,13 @@ let update_happiness state =
     -. homelessness_score
 
 let update_population state =
-  if state.tick mod 60 = 0 then state.population <- state.population + 5
+  if state.tick mod 5 = 0 then
+    state.population <-
+      state.population
+      + 1
+        * List.fold_left
+            (fun acc _ -> 1 + acc)
+            0 (available_homes state)
 
 let update_starvation_counter state =
   if state.food < 0 then
@@ -254,7 +273,7 @@ let update_starvation_counter state =
 let update_deficit_counter state =
   if state.money < 0 then
     state.deficit_counter <- state.deficit_counter + 1
-  else if state.deficit_counter > 0 then
+  else if state.deficit_counter > 0 && state.money > 0 then
     state.deficit_counter <- state.deficit_counter - 1
 
 let update_revolt_counter state =
@@ -264,16 +283,16 @@ let update_revolt_counter state =
     state.revolt_counter <- state.revolt_counter - 1
 
 let update_is_out_of_time state =
-  state.is_out_of_time <- state.tick < time_limit
+  state.is_out_of_time <- state.tick > time_limit
 
 let update_is_in_starvation state =
-  state.is_in_starvation <- state.starvation_counter < starvation_limit
+  state.is_in_starvation <- state.starvation_counter > starvation_limit
 
 let update_is_in_deficit state =
-  state.is_in_deficit <- state.deficit_counter < deficit_limit
+  state.is_in_deficit <- state.deficit_counter > deficit_limit
 
 let update_is_in_revolt state =
-  state.is_in_revolt <- state.revolt_counter < revolt_limit
+  state.is_in_revolt <- state.revolt_counter > revolt_limit
 
 let update_is_game_over state =
   if
@@ -284,13 +303,12 @@ let update_is_game_over state =
 
 let update_game_over_text state =
   let message =
-    if not state.is_in_deficit then "Your city is bankrupted."
-    else if not state.is_in_starvation then "Your city is starved."
-    else if not state.is_out_of_time then "You ran out of time."
-    else if not state.is_in_revolt then
-      "Your city is destroyed by revolts."
-    else if not state.is_defeated then "You have been defeated."
-    else if not state.is_final_building_placed then "You won."
+    if state.is_in_deficit then "Your city is bankrupted."
+    else if state.is_in_starvation then "Your city is starved."
+    else if state.is_out_of_time then "You ran out of time."
+    else if state.is_in_revolt then "Your city is destroyed by revolts."
+    else if state.is_defeated then "You have been defeated."
+    else if state.is_final_building_placed then "You won."
     else ""
   in
   if state.is_game_over then state.game_over_message <- message
@@ -566,21 +584,19 @@ let load_events =
 
 (** [merge_stockpile s1 s2] is [s2] after adding or subtracting
     resources from [s1]. *)
-let merge_stockpile s1 s2 =
-  (* function | [] -> stockpile | h :: t -> let resource_name =
-     resource_name h in let resource_amount = resource_amount h in let
-     filter_resource (name, value) = if name = resource_name then (name,
-     value + resource_amount) else (name, value) in merge_stock
-     (List.map filter_resource stockpile) t *)
-  List.fold_left
-    (fun acc resource ->
-      List.map
-        (fun (name, value) ->
-          if name = resource_name resource then
-            (name, value + resource_amount resource)
-          else (name, value))
-        acc)
-    s2 s1
+let rec merge_stockpile stockpile = function
+  | [] -> stockpile
+  | h :: t ->
+      let resource_name = resource_name h in
+      let resource_amount = resource_amount h in
+      let filter_resource (name, value) =
+        if name = resource_name then (name, value + resource_amount)
+        else (name, value)
+      in
+      merge_stockpile (List.map filter_resource stockpile) t
+(* List.fold_left (fun acc resource -> List.map (fun (name, value) -> if
+   name = resource_name resource then (name, value + resource_amount
+   resource) else (name, value)) acc) s2 s1 *)
 
 (** [update_cells arr def] updates [cells] by decreasing defense levels
     of all building by [defense_change] and removes buildings with zero
@@ -660,28 +676,30 @@ let place_building state name x y =
       state.stockpile <- stockpile
 
 let next_state state =
-  update_is_game_over state;
-  update_game_over_text state;
-  if not state.is_game_over then begin
-    state.tick <- state.tick + 1;
-    update_population state;
-    state.stockpile <-
-      update_stockpile (available_buildings state) state.stockpile;
-    update_food state;
-    consume_food state;
-    update_housing state;
-    update_defense state;
-    update_happiness state;
-    update_starvation_counter state;
-    update_deficit_counter state;
-    update_revolt_counter state;
-    update_is_out_of_time state;
-    update_is_in_starvation state;
-    update_is_in_deficit state;
-    update_is_in_revolt state;
-    if Random.int 100 = 0 then (
-      let t, s, c = generate_event state in
-      state.text <- t;
-      state.stockpile <- s;
-      update_cells state.cells c)
+  if not state.is_paused then begin
+    update_is_game_over state;
+    update_game_over_text state;
+    if not state.is_game_over then begin
+      state.tick <- state.tick + 1;
+      update_population state;
+      state.stockpile <-
+        update_stockpile (available_buildings state) state.stockpile;
+      update_food state;
+      consume_food state;
+      update_housing state;
+      update_defense state;
+      update_happiness state;
+      update_starvation_counter state;
+      update_deficit_counter state;
+      update_revolt_counter state;
+      update_is_out_of_time state;
+      update_is_in_starvation state;
+      update_is_in_deficit state;
+      update_is_in_revolt state;
+      if Random.int 200 = 0 then (
+        let t, s, c = generate_event state in
+        state.text <- t;
+        state.stockpile <- s;
+        update_cells state.cells c)
+    end
   end

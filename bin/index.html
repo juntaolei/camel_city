@@ -22,8 +22,10 @@
             <div class="navbar-end">
               <div class="navbar-item">
                 <div class="buttons" id="navbar_buttons">
-                  <button class="button is-primary" id="save_button">
-                    <strong>Save</strong>
+                  <button class="button is-primary has-text-weight-bold" id="pause_button">
+                  </button>
+                  <button class="button is-primary has-text-weight-bold" id="save_button">
+                    Save
                   </button>
                 </div>
               </div>
@@ -61,15 +63,21 @@
           </div>
         </div>
       </div>
+
       <div class="container container has-text-centered" id="game">
         <div class="block my-3 tags are-medium" id="stats">
           <span class="tag is-info" id="tick">Tick: </span>
+          <span class="tag is-info" id="population">Population: </span>
           <span class="tag is-info" id="money">Money: </span>
           <span class="tag is-info" id="food">Food: </span>
           <span class="tag is-info" id="electricity">Electricity: </span>
           <span class="tag is-info" id="iron">Iron: </span>
           <span class="tag is-info" id="coal">Coal: </span>
           <span class="tag is-info" id="info"></span>
+          <div class="notification" id="notification">
+            <button class="delete" id="close_notificaation"></button>
+            <p id="notification_content"></p>
+          </div>
         </div>
         <div class="block is-flex is-justify-content-center is-align-items-center">
           <div class="my-3" id="gui" style="height: 750px; width: 1200px;">

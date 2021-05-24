@@ -6,9 +6,11 @@ let default_stockpile =
   [
     ("money", 200);
     ("electricity", 0);
-    ("food", 0);
+    ("food", 100);
     ("iron", 0);
     ("coal", 0);
+    ("steel", 0);
+    ("canned oats", 0)
   ]
 
 (** [deficit_limit] is the maximum number of ticks before resource deficiency

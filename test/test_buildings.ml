@@ -45,7 +45,9 @@ let building_tests =
       assert_equal plantation_building.resource_dependency [] );
     ( "building name of mine is \"mine\"" >:: fun _ ->
       assert_equal mine_building.name "mine" );
-    ("cost of min is 30" >:: fun _ -> assert_equal mine_building.cost 30);
+    ("cost of mine is 30" >:: fun _ -> assert_equal mine_building.cost 30);
+    ("mine is not a final building" >:: fun _ ->
+      assert_equal mine_building.is_final_building false);
     ( "mine requires 3 units of electricity" >:: fun _ ->
       assert_equal mine_building.resource_dependency
         [ electricity_resource ] );

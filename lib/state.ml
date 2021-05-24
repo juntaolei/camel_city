@@ -11,11 +11,11 @@ let default_stockpile =
     ("coal", 0);
   ]
 
-let deficit_limit = 200
+let deficit_limit = 10
 
 let starvation_limit = 10
 
-let time_limit = 10
+let time_limit = 200
 
 type cell =
   | Building of building

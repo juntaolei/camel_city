@@ -21,14 +21,14 @@ type state = {
   mutable cells : cell array array;
   mutable selected_cell : int;
   mutable housing_capacity : int;
-  mutable military_strength : int;
+  (*mutable military_strength : int;*)
   mutable population : int;
   mutable unemployed : int;
   mutable food : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
   mutable revolt_counter : int;
-  mutable happiness : float;
+  (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
   mutable condition : int;
@@ -42,14 +42,14 @@ type state = {
 val new_state :
   ?tick:int ->
   ?housing_capacity:int ->
-  ?military_strength:int ->
+  (*?military_strength:int ->*)
   ?population:int ->
   ?unemployed:int ->
   ?food:int ->
   ?deficit_counter:int ->
   ?starvation_counter:int ->
   ?revolt_counter:int ->
-  ?happiness:float ->
+  (*?happiness:float ->*)
   ?is_paused:bool ->
   ?is_game_over:bool ->
   ?condition:int->
@@ -88,4 +88,7 @@ val from_string : string -> state
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
 
+(** [place_building st name x y] places building with name [name] inside 
+    [state] by its [x] and [y] coordinates if it satisfies requirements in 
+    cost and workforce. *)
 val place_building : state -> string -> int -> int -> unit

@@ -6,10 +6,10 @@ type building = {
   income : int;
   defense : int;
   resource_dependency : (string * int) list;
-  happiness : int;
+  (*happiness : int;*)
   population_dependency : int;
   housing : int;
-  entertainment : int;
+  (*entertainment : int;*)
   is_final_building : bool;
 }
 
@@ -29,10 +29,10 @@ let new_building
     income
     defense
     resource_dependency
-    happiness
+    (*happiness*)
     population_dependency
     housing
-    entertainment
+    (*entertainment*)
     is_final_building =
   {
     name;
@@ -42,10 +42,10 @@ let new_building
     income;
     defense;
     resource_dependency;
-    happiness;
+    (*happiness;*)
     population_dependency;
     housing;
-    entertainment;
+    (*entertainment;*)
     is_final_building;
   }
 

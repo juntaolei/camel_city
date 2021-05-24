@@ -9,10 +9,10 @@ type building = {
   income : int;
   defense : int;
   resource_dependency : (string * int) list;
-  happiness : int;
+  (*happiness : int;*)
   population_dependency : int;
   housing : int;
-  entertainment : int;
+  (*entertainment : int;*)
   is_final_building : bool;
 }
 
@@ -28,10 +28,10 @@ val new_building :
   int ->
   int ->
   (string * int) list ->
+  (*int ->*)
   int ->
   int ->
-  int ->
-  int ->
+  (*int ->*)
   bool ->
   building
 

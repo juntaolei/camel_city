@@ -5,7 +5,7 @@
             "cost": 50,
             "maintenance": 0,
             "output": {},
-            "tax": 0,
+            "tax": 10,
             "defense": 1,
             "resource_dependency": [],
             "happiness": 0,
@@ -20,14 +20,14 @@
             "maintenance": 0,
             "output": {
                 "amount": 10,
-                "name": "oat"
+                "name": "food"
             },
-            "tax": 0,
+            "tax": 5,
             "defense": 1,
             "resource_dependency": [],
             "happiness": 0,
-            "population_dependency": 0,
-            "housing": 0,
+            "population_dependency": 3,
+            "housing": 5,
             "entertainment": 0,
             "is_final_building": false
         },
@@ -36,15 +36,15 @@
             "cost": 200,
             "maintenance": 0,
             "output": {
-                "amount": 2,
+                "amount": 5,
                 "name": "electricity"
             },
-            "tax": 0,
+            "tax": 5,
             "defense": 3,
             "resource_dependency": [],
             "happiness": 0,
-            "population_dependency": 0,
-            "housing": 0,
+            "population_dependency": 5,
+            "housing": 9,
             "entertainment": 0,
             "is_final_building": false
         },
@@ -53,7 +53,7 @@
             "cost": 200,
             "maintenance": 0,
             "output": {
-                "amount": 1,
+                "amount": 5,
                 "name": "iron"
             },
             "tax": 0,
@@ -64,9 +64,9 @@
                     "name": "electricity"
                 }
             ],
-            "happiness": 0,
-            "population_dependency": 0,
-            "housing": 0,
+            "happiness": 10,
+            "population_dependency": 10,
+            "housing": 20,
             "entertainment": 0,
             "is_final_building": false
         },
@@ -81,9 +81,9 @@
             "tax": 0,
             "defense": 20,
             "resource_dependency": [],
-            "happiness": 0,
-            "population_dependency": 0,
-            "housing": 0,
+            "happiness": 10,
+            "population_dependency": 10,
+            "housing": 20,
             "entertainment": 0,
             "is_final_building": false
         }

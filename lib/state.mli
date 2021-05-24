@@ -23,19 +23,15 @@ type state = {
   mutable housing_capacity : int;
   mutable military_strength : int;
   mutable population : int;
+  mutable unemployed : int;
   mutable food : int;
-  mutable money : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
   mutable revolt_counter : int;
   mutable happiness : float;
   mutable is_paused : bool;
   mutable is_game_over : bool;
-  mutable is_in_deficit : bool;
-  mutable is_in_starvation : bool;
-  mutable is_out_of_time : bool;
-  mutable is_in_revolt : bool;
-  mutable is_defeated : bool;
+  mutable condition : int;
   mutable is_final_building_placed : bool;
   mutable game_over_message : string;
   mutable stockpile : (string * int) list;
@@ -48,19 +44,15 @@ val new_state :
   ?housing_capacity:int ->
   ?military_strength:int ->
   ?population:int ->
+  ?unemployed:int ->
   ?food:int ->
-  ?money:int ->
   ?deficit_counter:int ->
   ?starvation_counter:int ->
   ?revolt_counter:int ->
   ?happiness:float ->
   ?is_paused:bool ->
   ?is_game_over:bool ->
-  ?is_in_deficit:bool ->
-  ?is_in_starvation:bool ->
-  ?is_out_of_time:bool ->
-  ?is_in_revolt:bool ->
-  ?is_defeated:bool ->
+  ?condition:int->
   ?is_final_building_placed:bool ->
   int ->
   int ->

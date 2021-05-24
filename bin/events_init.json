@@ -4,8 +4,8 @@
             "text": "The camel farmers have collected 50 extra units of oat for harvest season.",
             "resource": [
                 {
-                    "amount": 50,
-                    "name": "oat"
+                    "amount": 10,
+                    "name": "food"
                 }
             ],
             "defense": 0
@@ -24,7 +24,7 @@
             "text": "An Earthquake has caused power plant leaks and the city lost 50 units of electricity.",
             "resource": [
                 {
-                    "amount": -50,
+                    "amount": -20,
                     "name": "electricity"
                 }
             ],
@@ -57,7 +57,7 @@
             "resource": [
                 {
                     "amount": -300,
-                    "name": "oat"
+                    "name": "food"
                 }
             ],
             "defense": 0

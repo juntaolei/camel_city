@@ -20,7 +20,13 @@ This assumes that the user is using the same OCaml switch as cs3110-2021sp.
 Install the required dependencies:
 
 ```bash
-opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx
+make install
+```
+
+*in case make does not work, use the following to install all required dependencies:
+
+```bash
+opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx js_of_ocaml-lwt odoc ounit yojson
 ```
 
 Compiling to JavaScript:

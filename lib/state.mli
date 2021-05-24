@@ -27,7 +27,7 @@ type state = {
   mutable food : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  mutable revolt_counter : int;
+  (*mutable revolt_counter : int;*)
   (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
@@ -48,7 +48,7 @@ val new_state :
   ?food:int ->
   ?deficit_counter:int ->
   ?starvation_counter:int ->
-  ?revolt_counter:int ->
+  (*?revolt_counter:int ->*)
   (*?happiness:float ->*)
   ?is_paused:bool ->
   ?is_game_over:bool ->

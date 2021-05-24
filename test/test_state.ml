@@ -16,7 +16,7 @@ let read_file_as_string filename =
 let state_0 = new_state 1000 900 10 128 64
 
 (** [state_1] is the state extracted from file [map1.json]. *)
-let state_1 = from_string (read_file_as_string "map_2.json")
+let state_1 = from_string (read_file_as_string "map_1.json")
 
 (** [expected_cell_array_0]is the expected cell array array extracted
     from state_0. *)

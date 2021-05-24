@@ -13,14 +13,14 @@ let default_stockpile =
 
 (** [deficit_limit] is the maximum number of ticks before resource deficiency
     causes the game to end. *)
-let deficit_limit = 10
+let deficit_limit = 20
 
 (** [starvation_limit] is the maximum number of ticks before food deficiency
     causes the game to end. *)
-let starvation_limit = 10
+let starvation_limit = 20
 
 (** [time_limit] is the maximum number of ticks before the game ends. *)
-let time_limit = 200
+let time_limit = 400
 
 type cell =
   | Building of building
@@ -45,7 +45,7 @@ type state = {
   mutable food : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  mutable revolt_counter : int;
+  (*mutable revolt_counter : int;*)
   (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
@@ -130,7 +130,7 @@ let new_state
     ?(food = 0)
     ?(deficit_counter = 0)
     ?(starvation_counter = 0)
-    ?(revolt_counter = 0)
+    (*?(revolt_counter = 0)*)
     (*?(happiness = 0.)*)
     ?(is_paused = true)
     ?(is_game_over = false)
@@ -160,7 +160,7 @@ let new_state
     (*happiness;*)
     deficit_counter;
     starvation_counter;
-    revolt_counter;
+    (*revolt_counter;*)
     is_paused;
     is_game_over;
     condition;
@@ -452,10 +452,11 @@ let from_string file_string =
       ~housing_capacity:(int_of_member "housing_capacity")
       (*~military_strength:(int_of_member "military_strength")*)
       ~population:(int_of_member "population")
+      ~unemployed:(int_of_member "unemployed")
       ~food:(int_of_member "food")
       ~deficit_counter:(int_of_member "deficit_counter")
       ~starvation_counter:(int_of_member "starvation_counter")
-      ~revolt_counter:(int_of_member "revolt_counter")
+      (*~revolt_counter:(int_of_member "revolt_counter")*)
       (*~happiness:(float_of_member "happiness")*)
       ~is_paused:true
       ~is_game_over:(bool_of_member "is_game_over")
@@ -498,11 +499,12 @@ let save_state state =
       ("housing_capacity", `Int state.housing_capacity);
       (*("military_strength", `Int state.military_strength);*)
       ("population", `Int state.population);
+      ("unemployed", `Int state.unemployed);
       ("food", `Int state.food);
       (*("happiness", `Float state.happiness);*)
       ("deficit_counter", `Int state.deficit_counter);
       ("starvation_counter", `Int state.starvation_counter);
-      ("revolt_counter", `Int state.revolt_counter);
+      (*("revolt_counter", `Int state.revolt_counter);*)
       ("is_paused", `Bool state.is_paused);
       ("is_game_over", `Bool state.is_game_over);
       ("condition", `Int state.condition);
@@ -643,6 +645,8 @@ let place_building state name x y =
         x y;
       state.stockpile <- stockpile;
       state.unemployed <- state.unemployed - building.population_dependency
+      + building.housing;
+      state.population <- state.population + building.housing;
     end
 
 let next_state state =
@@ -655,7 +659,7 @@ let next_state state =
       state.stockpile <-
         update_stockpile (available_buildings state) state.stockpile;
       update_food state;
-      update_housing state;
+      (*update_housing state;*)
       update_starvation_counter state;
       update_deficit_counter state;
       update_is_out_of_time state;

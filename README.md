@@ -49,10 +49,20 @@ Create a zip of the source code:
 make zip
 ```
 
+Create documentation
+
+```bash
+make doc
+```
+
 ## Running the Game in the Browser
 
 Build the project as instructed above.
 
-Open _build/default/bin/index.html in a browser.
+Open ./_build/default/bin/index.html in a browser.
 
 Note: The GUI is primarily tested with Firefox.
+
+## Reading the Documentation
+
+Open ./_build/default/_doc/_html/index.html in a browser.

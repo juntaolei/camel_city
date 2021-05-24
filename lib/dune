@@ -1,5 +1,6 @@
 (library
  (name lib)
+ (public_name camel_city)
  (libraries yojson unix)
  (preprocess
   (pps js_of_ocaml-ppx)))
@@ -8,3 +9,5 @@
  (dev
   (flags
    (:standard -warn-error -A))))
+
+(documentation)

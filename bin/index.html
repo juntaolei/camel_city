@@ -65,15 +65,23 @@
       </div>
 
       <div class="container container has-text-centered" id="game">
-        <div class="block my-3 tags are-medium" id="stats">
-          <span class="tag is-info" id="tick">Tick: </span>
-          <span class="tag is-info" id="population">Population: </span>
-          <span class="tag is-info" id="money">Money: </span>
-          <span class="tag is-info" id="food">Food: </span>
-          <span class="tag is-info" id="electricity">Electricity: </span>
-          <span class="tag is-info" id="iron">Iron: </span>
-          <span class="tag is-info" id="coal">Coal: </span>
-          <span class="tag is-info" id="info"></span>
+        <div class="columns my-3 tags are-medium" id="stats">
+          <div class="column block is-three-quarters">
+            <span class="tag is-info" id="tick">Tick: </span>
+            <span class="tag is-info" id="population">Population: </span>
+            <span class="tag is-info" id="money">Money: </span>
+            <span class="tag is-info" id="food">Food: </span>
+            <span class="tag is-info" id="electricity">Electricity: </span>
+            <span class="tag is-info" id="iron">Iron: </span>
+            <span class="tag is-info" id="coal">Coal: </span>
+            <span class="tag is-info" id="deficit">Deficit Counter: </span>
+            <span class="tag is-info" id="starvation">Starvation Counter: </span>
+          </div>
+          <div class="column" id="info_container">
+            <div class="block" id="info"></div>
+          </div>
+        </div>
+        <div class="container" id="notification_container">
           <div class="notification" id="notification">
             <button class="delete" id="close_notificaation"></button>
             <p id="notification_content"></p>

@@ -282,10 +282,14 @@ let update_is_game_over state =
 let update_game_over_text state =
   let message =
     let cond = state.condition in
-    if cond = 1 then "You ran out of time."
-    else if cond = 2 then "Your city is starved."
-    else if cond = 3 then "Your city is bankrupted."
-    else if state.is_final_building_placed then "You won."
+    if cond = 1 then "You have taken too long and the camel people have had enough of your leadership and
+     they have all abandoned you."
+    else if cond = 2 then "Without food your people have starved to death. 
+      Camel City now lies abandoned; littered with skeletons"
+    else if cond = 3 then "Your city is bankrupted. In desperate need to pay off the debt, you sold 
+      Camel City to the nation of Java Cafe, whose upper classes use it as a source of cheap exploitable labor."
+    else if state.is_final_building_placed then "By building the wonder you have resurected the great camel prophet, 
+      The Clarkson. He shall now lead your people to victory against the Python Empire. You have won and saved camelkind"
     else ""
   in
   if state.is_game_over then state.game_over_message <- message

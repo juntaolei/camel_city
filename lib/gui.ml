@@ -281,7 +281,7 @@ let update_info state x y =
   let cells = state.cells in
   let cell = cells.(x).(y) in
   match cell with
-  | None -> info_div##.innerHTML := Js.string (string_of_int state.unemployed)
+  | None -> info_div##.innerHTML := Js.string "Sand"
   | Road _ -> info_div##.innerHTML := Js.string "Road"
   | Building building ->
       let name = building.name in

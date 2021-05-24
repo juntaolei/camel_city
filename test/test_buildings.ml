@@ -1,8 +1,8 @@
-open OUnit2
-open Lib.Buildings
-
 (* This test suite covers the most basic commands in [buildings.ml]
    including functions for resources, roads, and buildings. *)
+
+open OUnit2
+open Lib.Buildings
 let water = new_resource "water" 1
 
 let road = new_road 1 2

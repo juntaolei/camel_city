@@ -1,6 +1,6 @@
 open Buildings
 
-(* * The type [cell] represents the most basic unit in construction that
+(** The type [cell] represents the most basic unit in construction that
    holds either a building, a road, or nothing. *)
 type cell =
   | Building of Buildings.building
@@ -77,7 +77,7 @@ val str_of_cell : cell -> string
 val place_cell : state -> cell -> int -> int -> unit
 
 (** [next_state state update] is the new state by updating the existing
-    [state ] with [update]. *)
+    [state] with [update]. *)
 val next_state : state -> unit
 
 (** [from_json string] is the state read from the string with name

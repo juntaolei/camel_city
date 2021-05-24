@@ -26,7 +26,7 @@ make install
 *in case make does not work, use the following to install all required dependencies:
 
 ```bash
-opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx js_of_ocaml-lwt odoc ounit yojson
+opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx odoc ounit yojson
 ```
 
 Compiling to JavaScript:

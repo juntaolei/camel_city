@@ -28,24 +28,21 @@ let expected_cell_array_1 =
   let empty = Array.make_matrix 9 9 None in
   empty.(3).(0) <-
     Building
-      (new_building "power_plant" 200 0 ("electricity", 5) 5 3 [] 0 5 9
-          0 false);
+      (new_building "power_plant" 200 0 ("electricity", 5) 5 3 [] 5 0 false);
   empty.(4).(0) <-
-    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 0 0 0 false);
+    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 5 false);
   empty.(5).(0) <-
-    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 0 0 0 false);
+    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 5 false);
   empty.(6).(0) <-
-    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 0 0 0 false);
+    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 5 false);
   empty.(7).(0) <-
-    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 0 0 0 false);
+    Building (new_building "house" 50 0 ("", 0) 10 1 [] 0 5 false);
   empty.(7).(1) <-
     Building
-      (new_building "oats_plantation" 50 0 ("food", 10) 5 1 [] 0 3 5 0
-         false);
+      (new_building "oats_plantation" 50 0 ("food", 10) 5 1 [] 3 0 false);
   empty.(8).(0) <-
     Building
-      (new_building "oats_plantation" 50 0 ("food", 10) 5 1 [] 0 3 5 0
-         false);
+      (new_building "oats_plantation" 50 0 ("food", 10) 5 1 [] 3 0 false);
   empty
 
 let init_stockpile =

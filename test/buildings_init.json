@@ -8,10 +8,8 @@
             "tax": 10,
             "defense": 1,
             "resource_dependency": [],
-            "happiness": 0,
             "population_dependency": 0,
-            "housing": 0,
-            "entertainment": 0,
+            "housing": 5,
             "is_final_building": false
         },
         {
@@ -25,10 +23,8 @@
             "tax": 5,
             "defense": 1,
             "resource_dependency": [],
-            "happiness": 0,
             "population_dependency": 3,
-            "housing": 5,
-            "entertainment": 0,
+            "housing": 0,
             "is_final_building": false
         },
         {
@@ -42,10 +38,8 @@
             "tax": 5,
             "defense": 3,
             "resource_dependency": [],
-            "happiness": 0,
             "population_dependency": 5,
-            "housing": 9,
-            "entertainment": 0,
+            "housing": 0,
             "is_final_building": false
         },
         {
@@ -64,10 +58,8 @@
                     "name": "electricity"
                 }
             ],
-            "happiness": 10,
             "population_dependency": 10,
-            "housing": 20,
-            "entertainment": 0,
+            "housing": 0,
             "is_final_building": false
         },
         {
@@ -81,10 +73,8 @@
             "tax": 0,
             "defense": 20,
             "resource_dependency": [],
-            "happiness": 10,
             "population_dependency": 10,
-            "housing": 20,
-            "entertainment": 0,
+            "housing": 0,
             "is_final_building": false
         }
     ]

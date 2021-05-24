@@ -8,10 +8,10 @@ let water = new_resource "water" 1
 let road = new_road 1 2
 
 let plantation_building =
-  new_building "oat plantation" 10 5 ("oat", 5) 6 7 [] 0 0 0 0 false
+  new_building "oat plantation" 10 5 ("oat", 5) 6 7 [] 0 0 false
 
 let mine_building =
-  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ] 0 0
+  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ]
     0 0 false
 
 let electricity_resource = new_resource "electricity" 3

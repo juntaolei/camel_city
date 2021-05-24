@@ -9,13 +9,15 @@ type building = {
   income : int;
   defense : int;
   resource_dependency : (string * int) list;
-  happiness : int;
+  (*happiness : int;*)
   population_dependency : int;
   housing : int;
-  entertainment : int;
+  (*entertainment : int;*)
   is_final_building : bool;
 }
 
+(** [road] is a type of basic construction unit in the map that serves as a 
+    decoration element to connect buildings. *)
 type road = int * int
 
 (** [new_building name cost maint out_a out_n inc defense res_a res_n]
@@ -28,13 +30,14 @@ val new_building :
   int ->
   int ->
   (string * int) list ->
+  (*int ->*)
   int ->
   int ->
-  int ->
-  int ->
+  (*int ->*)
   bool ->
   building
-
+(** [new_road x y] is the road at the location specified by coordinates [x]
+    and [y]. *)
 val new_road : int -> int -> road
 
 (** [new_resource string int] makes a new resource [resource].*)

@@ -2,62 +2,80 @@
     "buildings": [
         {
             "name": "house",
-            "cost": 0,
+            "cost": 50,
             "maintenance": 0,
             "output": {},
-            "tax": 0,
-            "defense": 0,
-            "resource_dependency": []
+            "tax": 10,
+            "defense": 1,
+            "resource_dependency": [],
+            "population_dependency": 0,
+            "housing": 5,
+            "is_final_building": false
         },
         {
             "name": "oats_plantation",
-            "cost": 0,
+            "cost": 50,
             "maintenance": 0,
             "output": {
                 "amount": 10,
-                "name": "oat"
+                "name": "food"
             },
-            "tax": 0,
-            "defense": 0,
-            "resource_dependency": []
+            "tax": 5,
+            "defense": 1,
+            "resource_dependency": [],
+            "population_dependency": 3,
+            "housing": 0,
+            "is_final_building": false
         },
         {
             "name": "power_plant",
-            "cost": 0,
+            "cost": 200,
             "maintenance": 0,
             "output": {
                 "amount": 5,
                 "name": "electricity"
             },
-            "tax": 0,
-            "defense": 0,
-            "resource_dependency": []
+            "tax": 5,
+            "defense": 3,
+            "resource_dependency": [],
+            "population_dependency": 5,
+            "housing": 0,
+            "is_final_building": false
         },
         {
             "name": "mine",
-            "cost": 0,
+            "cost": 200,
             "maintenance": 0,
             "output": {
-                "amount": 1,
+                "amount": 5,
                 "name": "iron"
             },
             "tax": 0,
-            "defense": 0,
+            "defense": 5,
             "resource_dependency": [
                 {
                     "amount": 5,
                     "name": "electricity"
                 }
-            ]
+            ],
+            "population_dependency": 10,
+            "housing": 0,
+            "is_final_building": false
         },
         {
             "name": "barrack",
-            "cost": 0,
+            "cost": 50,
             "maintenance": 0,
-            "output": {},
+            "output": {
+                "amount": 50,
+                "name": "money"
+            },
             "tax": 0,
-            "defense": 0,
-            "resource_dependency": []
+            "defense": 20,
+            "resource_dependency": [],
+            "population_dependency": 10,
+            "housing": 0,
+            "is_final_building": false
         }
     ]
 }

@@ -11,13 +11,16 @@ let default_stockpile =
     ("coal", 0);
   ]
 
-let deficit_limit = 180
+(** [deficit_limit] is the maximum number of ticks before resource deficiency
+    causes the game to end. *)
+let deficit_limit = 20
 
-let starvation_limit = 120
+(** [starvation_limit] is the maximum number of ticks before food deficiency
+    causes the game to end. *)
+let starvation_limit = 20
 
-let revolt_limit = 300
-
-let time_limit = 7200
+(** [time_limit] is the maximum number of ticks before the game ends. *)
+let time_limit = 400
 
 type cell =
   | Building of building
@@ -36,29 +39,26 @@ type state = {
   mutable cells : cell array array;
   mutable selected_cell : int;
   mutable housing_capacity : int;
-  mutable military_strength : int;
+  (*mutable military_strength : int;*)
   mutable population : int;
+  mutable unemployed :int;
   mutable food : int;
-  mutable money : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  mutable revolt_counter : int;
-  mutable happiness : float;
+  (*mutable revolt_counter : int;*)
+  (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
-  mutable is_in_deficit : bool;
-  mutable is_in_starvation : bool;
-  mutable is_out_of_time : bool;
-  mutable is_in_revolt : bool;
-  mutable is_defeated : bool;
+  mutable condition : int;
   mutable is_final_building_placed : bool;
   mutable game_over_message : string;
   mutable stockpile : (string * int) list;
 }
 
-(** [build_cell_lst width height] is an two dimensional array with
-    [width] and [height]. *)
-let build_cell_lst width height = Array.make_matrix width height None
+let str_of_cell = function
+  | None -> ""
+  | Road _ -> "road"
+  | Building b -> b.name
 
 let select_cell state i = state.selected_cell <- i
 
@@ -66,10 +66,9 @@ let is_selected state = state.selected_cell >= 0
 
 let place_cell state cell x y = state.cells.(x).(y) <- cell
 
-let str_of_cell = function
-  | None -> ""
-  | Road _ -> "road"
-  | Building b -> b.name
+(** [build_cell_lst width height] is an two dimensional array with
+    [width] and [height]. *)
+let build_cell_lst width height = Array.make_matrix width height None
 
 (** [iter_buildings acc json] is the list of initialized [buildings]
     extracted from the json object [json]. *)
@@ -101,18 +100,18 @@ let iter_buildings json =
                ( pair |> member "name" |> to_string,
                  pair |> member "amount" |> to_int ))
       in
-      let happiness = int_of_member "happiness" in
+      (*let happiness = int_of_member "happiness" in*)
       let population_dependency =
         int_of_member "population_dependency"
       in
       let housing = int_of_member "housing" in
-      let entertainment = int_of_member "entertainment" in
+      (*let entertainment = int_of_member "entertainment" in*)
       let is_final_building =
         building |> member "is_final_building" |> to_bool
       in
       new_building name cost maintenance output tax defense
-        resource_dependency happiness population_dependency housing
-        entertainment is_final_building
+        resource_dependency population_dependency housing
+        is_final_building
       :: acc)
     [] json
 
@@ -125,21 +124,17 @@ let default_buildings =
 let new_state
     ?(tick = 1)
     ?(housing_capacity = 0)
-    ?(military_strength = 0)
+    (*?(military_strength = 0)*)
     ?(population = 0)
+    ?(unemployed = 0)
     ?(food = 0)
-    ?(money = 0)
     ?(deficit_counter = 0)
     ?(starvation_counter = 0)
-    ?(revolt_counter = 0)
-    ?(happiness = 0.)
+    (*?(revolt_counter = 0)*)
+    (*?(happiness = 0.)*)
     ?(is_paused = true)
     ?(is_game_over = false)
-    ?(is_in_deficit = false)
-    ?(is_in_starvation = false)
-    ?(is_out_of_time = false)
-    ?(is_in_revolt = false)
-    ?(is_defeated = false)
+    ?(condition = 0)
     ?(is_final_building_placed = false)
     canvas_width
     canvas_height
@@ -158,21 +153,17 @@ let new_state
     cells = build_cell_lst map_length map_length;
     selected_cell = -1;
     housing_capacity;
-    military_strength;
+    (*military_strength;*)
     population;
+    unemployed;
     food;
-    money;
-    happiness;
+    (*happiness;*)
     deficit_counter;
     starvation_counter;
-    revolt_counter;
+    (*revolt_counter;*)
     is_paused;
     is_game_over;
-    is_in_deficit;
-    is_in_starvation;
-    is_out_of_time;
-    is_in_revolt;
-    is_defeated;
+    condition;
     is_final_building_placed;
     game_over_message = "";
     stockpile = default_stockpile;
@@ -191,123 +182,107 @@ let available_buildings state =
     [] state.cells
   |> List.flatten
 
+(** [availabel_homes st] is the population capacity in [st]. *)
 let available_homes state =
   Array.fold_left
     (fun acc row ->
       Array.fold_left
         (fun acc cell ->
           match cell with
-          | Building b when b.name = "house" -> b :: acc
+          | Building b when b.name = "house" -> b.housing + acc
           | _ -> acc)
-        [] row
-      :: acc)
-    [] state.cells
-  |> List.flatten
+        0 row
+      + acc)
+    0 state.cells
 
-let update_housing state =
+let update_housing state = (* not sure if this is used anymore *)
   let housing_capacity =
     List.fold_left
-      (fun acc building -> building.housing + acc)
-      0
+      (fun acc building -> building.housing + acc) 0
       (available_buildings state)
   in
   state.housing_capacity <- housing_capacity
 
-let update_defense state =
-  let happiness_effect =
-    if state.happiness < 30. then -20
-    else if state.happiness < 40. then -10
-    else if state.happiness < 60. then 10
-    else 20
-  in
-  let defense_score =
-    List.fold_left
-      (fun acc building -> building.defense + acc)
-      0
-      (available_buildings state)
-  in
-  state.military_strength <- defense_score + happiness_effect
-
+(** [update_food st] updates the amount of food after the camel population
+    consumes their daily requirements. Each unit of camel consumes one unit
+    of food every day/tick. *)
 let update_food state =
+  state.stockpile <- List.map
+  (fun res ->
+    if resource_name res = "food"
+    then new_resource "food" (resource_amount res - state.population)
+    else res) 
+    state.stockpile;
   state.food <-
     List.find (fun (name, _) -> name = "food") state.stockpile
     |> resource_amount
 
-let consume_food state = state.food <- state.food - state.population
-
-let update_happiness state =
-  let buildings = state |> available_buildings in
-  let entertainment_happiness =
-    List.fold_left
-      (fun acc (building : building) -> building.happiness + acc)
-      0 buildings
-    |> float_of_int
-  in
-  let homelessness_score =
-    (let homeless_camels = state.population - state.housing_capacity in
-     if state.housing_capacity < 1 then 0 else homeless_camels)
-    |> float_of_int
-  in
-  let population_score =
-    state.population |> float_of_int |> ( *. ) 0.1
-  in
-  state.happiness <-
-    50.0 +. entertainment_happiness +. population_score
-    -. homelessness_score
-
+(** [update_population st] updates the [population] and [unemployed] parameters
+    in state [st]. Natural rate of population growth is [0.2]. *)
 let update_population state =
   if state.tick mod 5 = 0 then
-    state.population <-
-      state.population
-      + 1
-        * List.fold_left
-            (fun acc _ -> 1 + acc)
-            0 (available_homes state)
+    let homes = available_homes state in
+    let incr = int_of_float (0.2 *. float_of_int homes) in
+    state.population <- state.population + incr;
+    state.unemployed <- state.unemployed + incr
+    (*
+    let homes = List.length (available_homes state) in
+    state.population <- state.population + homes;
+    state.unemployed <- state.unemployed + homes;
+    *)
 
+(** [update_starvation_counter st] updates the [starvation_counter] of [st]. *)
 let update_starvation_counter state =
   if state.food < 0 then
     state.starvation_counter <- state.starvation_counter + 1
   else if state.starvation_counter > 0 then
-    state.starvation_counter <- state.starvation_counter - 1
+    state.starvation_counter <- 0
+    
+(** [check_resource_deficiency lst] checks if any resource if [lst], expect
+    food, has reached a negative value. *)
+let rec check_resource_deficiency = function
+| [] -> true
+| h :: t -> if resource_amount h < 0 && resource_name h <> "food" then false 
+  else check_resource_deficiency t
 
+(** [update_deficit_counter st] updates the [deficit_counter] of [st]. *)
 let update_deficit_counter state =
-  if state.money < 0 then
+  if not (check_resource_deficiency state.stockpile) then
     state.deficit_counter <- state.deficit_counter + 1
-  else if state.deficit_counter > 0 && state.money > 0 then
-    state.deficit_counter <- state.deficit_counter - 1
+  else if state.deficit_counter > 0 then
+    state.deficit_counter <- 0
 
-let update_revolt_counter state =
-  if state.happiness < 30. then
-    state.revolt_counter <- state.revolt_counter + 1
-  else if state.revolt_counter > 0 then
-    state.revolt_counter <- state.revolt_counter - 1
-
+(** [update_is_out_of_time state] updates the [condition] of [state] if tick 
+    has exceed the time limit. *)
 let update_is_out_of_time state =
-  state.is_out_of_time <- state.tick > time_limit
+   if state.tick > time_limit then state.condition <- 1
 
+(** [update_is_int_starvation state] updates the [condition] of [state] if 
+    [starvation_counter] has exceeded its limit. *)
 let update_is_in_starvation state =
-  state.is_in_starvation <- state.starvation_counter > starvation_limit
+  if state.starvation_counter > starvation_limit then 
+    state.condition <- 2
 
+(** [update_is_in_decific state] updates the [condition] of [state] if 
+    [deficit_counter] has exceeded its limit. *)
 let update_is_in_deficit state =
-  state.is_in_deficit <- state.deficit_counter > deficit_limit
+  if state.deficit_counter > deficit_limit then 
+    state.condition <- 3
 
-let update_is_in_revolt state =
-  state.is_in_revolt <- state.revolt_counter > revolt_limit
-
+(** [update_is_game_over state] updates the [is_game_over] parameter of 
+    [state]. *)
 let update_is_game_over state =
-  if
-    state.is_in_deficit || state.is_in_starvation
-    || state.is_out_of_time || state.is_in_revolt || state.is_defeated
-    || state.is_final_building_placed
+  if state.condition <> 0
   then state.is_game_over <- true
 
+(** [update_game_over_text state] updates [text] of [state] corresponding to
+    different types of game over situations. *)
 let update_game_over_text state =
   let message =
-    if state.is_in_deficit then "Your city is bankrupted."
-    else if state.is_in_starvation then "Your city is starved."
-    else if state.is_out_of_time then "You ran out of time."
-    else if state.is_in_revolt then "Your city is destroyed by revolts."
-    else if state.is_defeated then "You have been defeated."
+    let cond = state.condition in
+    if cond = 1 then "You ran out of time."
+    else if cond = 2 then "Your city is starved."
+    else if cond = 3 then "Your city is bankrupted."
     else if state.is_final_building_placed then "You won."
     else ""
   in
@@ -470,25 +445,22 @@ let from_string file_string =
     json |> member name |> member coordinate |> to_int
   in
   let int_of_member name = json |> member name |> to_int in
-  let float_of_member name = json |> member name |> to_float in
+  (*let float_of_member name = json |> member name |> to_float in*)
   let bool_of_member name = json |> member name |> to_bool in
   let init_state =
     new_state ~tick:(int_of_member "tick")
       ~housing_capacity:(int_of_member "housing_capacity")
-      ~military_strength:(int_of_member "military_strength")
+      (*~military_strength:(int_of_member "military_strength")*)
       ~population:(int_of_member "population")
-      ~food:(int_of_member "food") ~money:(int_of_member "money")
+      ~unemployed:(int_of_member "unemployed")
+      ~food:(int_of_member "food")
       ~deficit_counter:(int_of_member "deficit_counter")
       ~starvation_counter:(int_of_member "starvation_counter")
-      ~revolt_counter:(int_of_member "revolt_counter")
-      ~happiness:(float_of_member "happiness")
+      (*~revolt_counter:(int_of_member "revolt_counter")*)
+      (*~happiness:(float_of_member "happiness")*)
       ~is_paused:true
       ~is_game_over:(bool_of_member "is_game_over")
-      ~is_in_deficit:(bool_of_member "is_in_deficit")
-      ~is_in_starvation:(bool_of_member "is_in_starvation")
-      ~is_out_of_time:(bool_of_member "is_out_of_time")
-      ~is_in_revolt:(bool_of_member "is_in_revolt")
-      ~is_defeated:(bool_of_member "is_defeated")
+      ~condition:(int_of_member "condition")
       ~is_final_building_placed:
         (bool_of_member "is_final_building_placed")
       (get_field "canvas_size" "x")
@@ -525,21 +497,17 @@ let save_state state =
           ] );
       ("cells", `List (generate_cell_lst state.cells));
       ("housing_capacity", `Int state.housing_capacity);
-      ("military_strength", `Int state.military_strength);
+      (*("military_strength", `Int state.military_strength);*)
       ("population", `Int state.population);
+      ("unemployed", `Int state.unemployed);
       ("food", `Int state.food);
-      ("money", `Int state.money);
-      ("happiness", `Float state.happiness);
+      (*("happiness", `Float state.happiness);*)
       ("deficit_counter", `Int state.deficit_counter);
       ("starvation_counter", `Int state.starvation_counter);
-      ("revolt_counter", `Int state.revolt_counter);
+      (*("revolt_counter", `Int state.revolt_counter);*)
       ("is_paused", `Bool state.is_paused);
       ("is_game_over", `Bool state.is_game_over);
-      ("is_in_deficit", `Bool state.is_in_deficit);
-      ("is_in_starvation", `Bool state.is_in_starvation);
-      ("is_out_of_time", `Bool state.is_out_of_time);
-      ("is_in_revolt", `Bool state.is_in_revolt);
-      ("is_defeated", `Bool state.is_defeated);
+      ("condition", `Int state.condition);
       ("is_final_building_placed", `Bool state.is_final_building_placed);
       ("stockpile", `List (json_of_assoc_lst [] state.stockpile));
     ]
@@ -594,19 +562,12 @@ let rec merge_stockpile stockpile = function
         else (name, value)
       in
       merge_stockpile (List.map filter_resource stockpile) t
-(* List.fold_left (fun acc resource -> List.map (fun (name, value) -> if
-   name = resource_name resource then (name, value + resource_amount
-   resource) else (name, value)) acc) s2 s1 *)
+
 
 (** [update_cells arr def] updates [cells] by decreasing defense levels
     of all building by [defense_change] and removes buildings with zero
     defense. *)
 let update_cells cells defense_change =
-  (* for i = 0 to Array.length arr - 1 do for j = 0 to Array.length
-     arr.(0) - 1 do match arr.(i).(j) with | Building b -> let curr =
-     defense b in if curr > def then arr.(i).(j) <- Building
-     (decrease_defense b def) else arr.(i).(j) <- None | _ -> () done
-     done *)
   Array.iteri
     (fun i row ->
       Array.iteri
@@ -621,6 +582,8 @@ let update_cells cells defense_change =
         row)
     cells
 
+(** [generate_event st] is the [text] displayed in the event, the updated 
+    [stockpile], and the updated [cells] if any buildings are demolished. *)
 let generate_event state =
   let events = load_events in
   let level = List.assoc "money" state.stockpile in
@@ -635,13 +598,14 @@ let generate_event state =
   in
   (f, merge_stockpile state.stockpile s, t)
 
+(** [minus_cost stockpile cost] is [None] if [cost] exceeds quantity stored in
+    [stockpile], or [Some s] where [s] is the updated [stockpile] after 
+    subtracting [cost] in [stockpile]. *)
 let minus_cost stockpile cost : (string * int) list option =
   let is_sufficient =
     List.fold_left
       (fun acc resource ->
-        if
-          resource_name resource = "money"
-          && resource_amount resource >= cost
+        if resource_name resource = "money" && resource_amount resource >= cost
         then false && acc
         else true && acc)
       true stockpile
@@ -659,6 +623,11 @@ let minus_cost stockpile cost : (string * int) list option =
              else r :: acc)
            [] stockpile)
 
+(** [enough_workforce st bld] is whether the availabel workforce in [st] is 
+    enough for [bld]. *)
+let enough_workforce state bld = 
+  bld.population_dependency <= state.unemployed 
+
 let place_building state name x y =
   let building =
     List.find (fun building -> building.name = name) state.buildings
@@ -667,13 +636,18 @@ let place_building state name x y =
   match minus_cost state.stockpile cost with
   | None -> ()
   | Some stockpile ->
+    if enough_workforce state building then begin
       place_cell state
         (Building
            (List.find
               (fun building -> building.name = name)
               state.buildings))
         x y;
-      state.stockpile <- stockpile
+      state.stockpile <- stockpile;
+      state.unemployed <- state.unemployed - building.population_dependency
+      + building.housing;
+      state.population <- state.population + building.housing;
+    end
 
 let next_state state =
   if not state.is_paused then begin
@@ -685,18 +659,13 @@ let next_state state =
       state.stockpile <-
         update_stockpile (available_buildings state) state.stockpile;
       update_food state;
-      consume_food state;
-      update_housing state;
-      update_defense state;
-      update_happiness state;
+      (*update_housing state;*)
       update_starvation_counter state;
       update_deficit_counter state;
-      update_revolt_counter state;
       update_is_out_of_time state;
       update_is_in_starvation state;
       update_is_in_deficit state;
-      update_is_in_revolt state;
-      if Random.int 200 = 0 then (
+      if Random.int 15 = 0 then (
         let t, s, c = generate_event state in
         state.text <- t;
         state.stockpile <- s;

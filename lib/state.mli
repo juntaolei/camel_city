@@ -1,6 +1,6 @@
 open Buildings
 
-(* * The type [cell] represents the most basic unit in construction that
+(** The type [cell] represents the most basic unit in construction that
    holds either a building, a road, or nothing. *)
 type cell =
   | Building of Buildings.building
@@ -21,21 +21,17 @@ type state = {
   mutable cells : cell array array;
   mutable selected_cell : int;
   mutable housing_capacity : int;
-  mutable military_strength : int;
+  (*mutable military_strength : int;*)
   mutable population : int;
+  mutable unemployed : int;
   mutable food : int;
-  mutable money : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  mutable revolt_counter : int;
-  mutable happiness : float;
+  (*mutable revolt_counter : int;*)
+  (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
-  mutable is_in_deficit : bool;
-  mutable is_in_starvation : bool;
-  mutable is_out_of_time : bool;
-  mutable is_in_revolt : bool;
-  mutable is_defeated : bool;
+  mutable condition : int;
   mutable is_final_building_placed : bool;
   mutable game_over_message : string;
   mutable stockpile : (string * int) list;
@@ -46,21 +42,17 @@ type state = {
 val new_state :
   ?tick:int ->
   ?housing_capacity:int ->
-  ?military_strength:int ->
+  (*?military_strength:int ->*)
   ?population:int ->
+  ?unemployed:int ->
   ?food:int ->
-  ?money:int ->
   ?deficit_counter:int ->
   ?starvation_counter:int ->
-  ?revolt_counter:int ->
-  ?happiness:float ->
+  (*?revolt_counter:int ->*)
+  (*?happiness:float ->*)
   ?is_paused:bool ->
   ?is_game_over:bool ->
-  ?is_in_deficit:bool ->
-  ?is_in_starvation:bool ->
-  ?is_out_of_time:bool ->
-  ?is_in_revolt:bool ->
-  ?is_defeated:bool ->
+  ?condition:int->
   ?is_final_building_placed:bool ->
   int ->
   int ->
@@ -85,7 +77,7 @@ val str_of_cell : cell -> string
 val place_cell : state -> cell -> int -> int -> unit
 
 (** [next_state state update] is the new state by updating the existing
-    [state ] with [update]. *)
+    [state] with [update]. *)
 val next_state : state -> unit
 
 (** [from_json string] is the state read from the string with name
@@ -96,4 +88,7 @@ val from_string : string -> state
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
 
+(** [place_building st name x y] places building with name [name] inside 
+    [state] by its [x] and [y] coordinates if it satisfies requirements in 
+    cost and workforce. *)
 val place_building : state -> string -> int -> int -> unit

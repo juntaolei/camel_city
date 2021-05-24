@@ -1,17 +1,17 @@
-open OUnit2
-open Lib.Buildings
-
 (* This test suite covers the most basic commands in [buildings.ml]
    including functions for resources, roads, and buildings. *)
+
+open OUnit2
+open Lib.Buildings
 let water = new_resource "water" 1
 
 let road = new_road 1 2
 
 let plantation_building =
-  new_building "oat plantation" 10 5 ("oat", 5) 6 7 [] 0 0 0 0 false
+  new_building "oat plantation" 10 5 ("oat", 5) 6 7 [] 0 0 false
 
 let mine_building =
-  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ] 0 0
+  new_building "mine" 30 30 ("iron", 20) 5 4 [ ("electricity", 3) ]
     0 0 false
 
 let electricity_resource = new_resource "electricity" 3
@@ -45,7 +45,9 @@ let building_tests =
       assert_equal plantation_building.resource_dependency [] );
     ( "building name of mine is \"mine\"" >:: fun _ ->
       assert_equal mine_building.name "mine" );
-    ("cost of min is 30" >:: fun _ -> assert_equal mine_building.cost 30);
+    ("cost of mine is 30" >:: fun _ -> assert_equal mine_building.cost 30);
+    ("mine is not a final building" >:: fun _ ->
+      assert_equal mine_building.is_final_building false);
     ( "mine requires 3 units of electricity" >:: fun _ ->
       assert_equal mine_building.resource_dependency
         [ electricity_resource ] );

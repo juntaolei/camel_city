@@ -1,4 +1,4 @@
-open Buildings
+open Cells
 open Js_of_ocaml
 open State
 module Html = Dom_html
@@ -22,81 +22,108 @@ let fg_canvas = get_element_by_id "fg" Html.CoerceTo.canvas
 (** Module wide value for the 2D context of the foreground canvas. *)
 let fg_ctx = fg_canvas##getContext Html._2d_
 
+(** Module wide value for the HTML Div element with ID "main". *)
 let main_div = Html.getElementById "main"
 
+(** Module wide value for the HTML Div element with ID "startup". *)
 let startup_div = Html.getElementById "startup"
 
+(** Module wide value for the HTML Div element with ID "game". *)
 let game_div = Html.getElementById "game"
 
+(** Module wide value for the HTML Div element with ID "navbar_buttons". *)
 let navbar_buttons_div = Html.getElementById "navbar_buttons"
 
+(** Module wide value for the HTML Div element with ID "notification". *)
 let notification_div = Html.getElementById "notification"
 
-let notification_content = Html.getElementById "notification_content"
-
-let notification_button =
-  get_element_by_id "close_notificaation" Html.CoerceTo.button
-
-let stats_div = Html.getElementById "stats"
-
-(** Module wide value for the HTML div element for showing the amount of
-    tick. *)
-let tick_div = Html.getElementById "tick"
-
-let population_div = Html.getElementById "population"
-
-(** Module wide value for the HTML div element for showing the amount of
-    money. *)
-let money_div = Html.getElementById "money"
-
-(** Module wide value for the HTML div element for showing the amount of
-    food. *)
-let food_div = Html.getElementById "food"
-
-(** Module wide value for the HTML div element for showing the amount of
-    electricity. *)
-let electricity_div = Html.getElementById "electricity"
-
-(** Module wide value for the HTML div element for showing the amount of
-    iron. *)
-let iron_div = Html.getElementById "iron"
-
-(** Module wide value for the HTML div element for showing the amount of
-    coal. *)
-let coal_div = Html.getElementById "coal"
-
-(** Module wide value for the HTML div element for showing cell info. *)
+(** Module wide value for the HTML Div element with ID "info". *)
 let info_div = Html.getElementById "info"
 
-(** Module wide value for the HTML input element for saving a game state
-    to JSON. *)
-let save_button = get_element_by_id "save_button" Html.CoerceTo.button
+(** Module wide value for the HTML Div element with ID "info_container". *)
+let info_container_div = Html.getElementById "info_container"
 
-let pause_button = get_element_by_id "pause_button" Html.CoerceTo.button
+(** Module wide value for the HTML Div element with ID
+    "notification_container". *)
+let notification_container_div =
+  Html.getElementById "notification_container"
 
 (** Module wide value for the HTML div element for showing the selection
     of buildings available to be placed. *)
-let building_selection = Html.getElementById "building_selection"
+let selection_div = Html.getElementById "building_selection"
 
-(** Module wide value for the HTML input element for submitting setup
+(** Module wide value for the HTML Span element for showing the amount
+    of tick. *)
+let tick_span = Html.getElementById "tick"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of population. *)
+let population_span = Html.getElementById "population"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of money. *)
+let money_span = Html.getElementById "money"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of food. *)
+let food_span = Html.getElementById "food"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of electricity. *)
+let electricity_span = Html.getElementById "electricity"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of iron. *)
+let iron_span = Html.getElementById "iron"
+
+(** Module wide value for the HTML Span element for showing the amount
+    of coal. *)
+let coal_span = Html.getElementById "coal"
+
+(** Module wide value for the HTML Span element for showing the deficit
+    counter. *)
+let deficit_span = Html.getElementById "deficit"
+
+(** Module wide value for the HTML Span element for showing the
+    starvation counter. *)
+let starvation_span = Html.getElementById "starvation"
+
+(** Module wide value for the HTML P element for showing any event
+    notification. *)
+let notification_content = Html.getElementById "notification_content"
+
+(** Module wide value for the HTML Button element for saving a game
+    state to JSON. *)
+let save_button = get_element_by_id "save_button" Html.CoerceTo.button
+
+(** Module wide value for the HTML Button element for pausing or
+    unpausing the game. *)
+let pause_button = get_element_by_id "pause_button" Html.CoerceTo.button
+
+(** Module wide value for the HTML Button element for closing the event
+    notification. *)
+let notification_button =
+  get_element_by_id "close_notificaation" Html.CoerceTo.button
+
+(** Module wide value for the HTML Input element for submitting setup
     for a game session. *)
 let submit = get_element_by_id "submit" Html.CoerceTo.input
 
-(** Module wide value for the HTML label element for showing the
-    currently selected cell size in game setup. *)
-let label = get_element_by_id "cell_size_label" Html.CoerceTo.label
-
-(** Module wide value for the HTML input element for selecting cell size
+(** Module wide value for the HTML Input element for selecting cell size
     in game setup. *)
 let slider = get_element_by_id "cell_size" Html.CoerceTo.input
 
-(** Module wide value for the HTML input element for uploading the
+(** Module wide value for the HTML Input element for uploading the
     current game save. *)
 let game_save = get_element_by_id "game_save" Html.CoerceTo.input
 
-(** Module wide value for the HTML input element for starting the
+(** Module wide value for the HTML Input element for starting the
     current game save. *)
 let start_save = get_element_by_id "start_save" Html.CoerceTo.input
+
+(** Module wide value for the HTML Label element for showing the
+    currently selected cell size in game setup. *)
+let label = get_element_by_id "cell_size_label" Html.CoerceTo.label
 
 (** List of texture names to be used in the GUI. *)
 let texture_names =
@@ -116,7 +143,7 @@ let create_img filename =
   img##.src := Js.string ("textures/" ^ filename ^ ".png");
   img
 
-(** List of loaded textures to be used in the GUI. *)
+(** [textures] is the list of loaded textures to be used in the GUI. *)
 let textures = List.map (fun x -> (x, create_img x)) texture_names
 
 (** [find_texture name] is the loaded texture given by the texture
@@ -126,7 +153,7 @@ let find_texture name =
 
 (** [set_progress_bar state element name] changes the attributes of
     [element] to show some statistics about state. *)
-let set_div state element name =
+let set_span state element name =
   let attribute_value =
     List.find (fun (k, _) -> k = name) state.stockpile |> snd
   in
@@ -136,41 +163,59 @@ let set_div state element name =
   in
   element##.innerHTML := inner_html
 
-(** [set_tick_div state] changes the attributes of the div HTML element
-    to show tick. *)
-let set_tick_div state =
+(** [set_tick_span state] changes the attributes of the HTML Span
+    element to show tick. *)
+let set_tick_span state =
   let string_value = state.tick |> string_of_int in
   let inner_html = "Tick: " ^ string_value |> Js.string in
-  tick_div##.innerHTML := inner_html
+  tick_span##.innerHTML := inner_html
 
-let set_population_div state =
+(** [set_population_span state] changes the attributes of the HTML Span
+    element to show tick. *)
+let set_population_span state =
   let string_value = state.population |> string_of_int in
   let inner_html = "Population: " ^ string_value |> Js.string in
-  population_div##.innerHTML := inner_html
+  population_span##.innerHTML := inner_html
 
-(** [set_money_div state] changes the attributes of the div HTML element
-    to show money. *)
-let set_money_div state = set_div state money_div "money"
+(** [set_money_div state] changes the attributes of the HTML Span
+    element to show money. *)
+let set_money_span state = set_span state money_span "money"
 
-(** [set_food_div state] changes the attributes of the div HTML element
+(** [set_food_div state] changes the attributes of the HTML Span element
     to show food. *)
-let set_food_div state = set_div state food_div "food"
+let set_food_span state = set_span state food_span "food"
 
-(** [set_electricity_div state] changes the attributes of the div HTML
+(** [set_electricity_div state] changes the attributes of the HTML Span
     element to show food. *)
-let set_electricity_div state =
-  set_div state electricity_div "electricity"
+let set_electricity_span state =
+  set_span state electricity_span "electricity"
 
-(** [set_iron_div state] changes the attributes of the div HTML element
+(** [set_iron_div state] changes the attributes of the HTML Span element
     to show food. *)
-let set_iron_div state = set_div state iron_div "iron"
+let set_iron_span state = set_span state iron_span "iron"
 
-(** [set_coal_div state] changes the attributes of the div HTML element
+(** [set_coal_div state] changes the attributes of the HTML Span element
     to show food. *)
-let set_coal_div state = set_div state coal_div "coal"
+let set_coal_span state = set_span state coal_span "coal"
 
+(** [set_deficit_counter state] changes the attributes of the HTML Span
+    element to the deficit counter. *)
+let set_deficit_counter state =
+  let string_value = state.deficit_counter |> string_of_int in
+  let inner_html = "Deficit Counter: " ^ string_value |> Js.string in
+  deficit_span##.innerHTML := inner_html
+
+(** [set_starvation_counter state] changes the attributes of the HTML
+    Span element to show the starvation counter. *)
+let set_starvation_counter state =
+  let string_value = state.starvation_counter |> string_of_int in
+  let inner_html = "Starvation Counter: " ^ string_value |> Js.string in
+  starvation_span##.innerHTML := inner_html
+
+(** [set_pause_button state] changes the inner HTML of the pause button
+    to show if the game is in paused or unpaused state. *)
 let set_pause_button state =
-  let string_value = if state.is_paused then "Unpause" else "Paused" in
+  let string_value = if state.is_paused then "Resume" else "Pause" in
   let inner_html = string_value |> Js.string in
   pause_button##.innerHTML := inner_html
 
@@ -200,7 +245,7 @@ let setup_canvas state =
 
 (** [draw_cell state x y color] colors a cell of indices [x] and [y] in
     [state] with [color] on the foreground canvas. *)
-let draw_cell state x y color =
+let draw_cell state (x, y) color =
   let cell_width = state.cell_size |> fst in
   let cell_height = state.cell_size |> snd in
   fg_ctx##save;
@@ -275,35 +320,77 @@ let cell_positions state (event : Html.mouseEvent Js.t) =
   let y = (mouse_y -. (cell_height *. 2.)) /. cell_height in
   (y -. x |> floor |> int_of_float, y +. x |> floor |> int_of_float)
 
-(** [update_info state x y] updates the text information in the info div
+(** [clean_info] clears the information section. *)
+let clean_info =
+  while info_div##hasChildNodes |> Js.to_bool do
+    print_endline "yes";
+    Dom.removeChild info_div
+      (Js.Opt.get info_div##.firstChild (fun _ -> raise Not_found))
+  done
+
+(** [set_info state (x, y)] updates the text information in the info div
     when highlighting a cell in [state] with coordinates ([x], [y]). *)
-let update_info state x y =
-  let cells = state.cells in
-  let cell = cells.(x).(y) in
-  match cell with
-  | None -> info_div##.innerHTML := Js.string "Sand"
-  | Road _ -> info_div##.innerHTML := Js.string "Road"
+let set_info state (x, y) =
+  while info_div##hasChildNodes |> Js.to_bool do
+    Dom.removeChild info_div
+      (Js.Opt.get info_div##.firstChild (fun _ -> raise Not_found))
+  done;
+  let bold_name = Html.createDiv Html.document in
+  bold_name##.className := Js.string "has-text-bold";
+  match state.cells.(x).(y) with
+  | None ->
+      bold_name##.innerHTML := Js.string "Sand";
+      Dom.appendChild info_div bold_name;
+      Dom.appendChild info_container_div info_div
+  | Road _ ->
+      bold_name##.innerHTML := Js.string "Road";
+      Dom.appendChild info_div bold_name;
+      Dom.appendChild info_container_div info_div
   | Building building ->
-      let name = building.name in
-      let output = building.output in
-      let output_name = resource_name output in
-      let output_amount = resource_amount output in
-      let resource_dependency = building.resource_dependency in
-      let resource_dependency_prettier =
-        List.fold_left
-          (fun acc (k, v) ->
-            acc ^ "(Dependency: " ^ k ^ ", Amount: " ^ string_of_int v
-            ^ ") | ")
-          "" resource_dependency
+      let output_name_div = Html.createDiv Html.document in
+      let output_amount_div = Html.createDiv Html.document in
+      let income_amount_div = Html.createDiv Html.document in
+      let defense_amount_div = Html.createDiv Html.document in
+      let maintenance_amount_div = Html.createDiv Html.document in
+      let elements =
+        [
+          output_name_div;
+          output_amount_div;
+          income_amount_div;
+          defense_amount_div;
+          maintenance_amount_div;
+        ]
       in
-      let info =
-        Js.string
-          ("Name: " ^ name ^ " | Output: " ^ output_name
-         ^ " | Output Amount: "
-          ^ string_of_int output_amount
-          ^ "| " ^ resource_dependency_prettier)
-      in
-      info_div##.innerHTML := info
+      List.iter
+        (fun element -> element##.className := Js.string "is-size-7")
+        elements;
+      bold_name##.innerHTML :=
+        building.name |> String.capitalize_ascii |> Js.string;
+      output_name_div##.innerHTML
+      := building.output |> resource_name
+         |> ( ^ ) "Output Resource: "
+         |> Js.string;
+      output_amount_div##.innerHTML
+      := building.output |> resource_amount |> string_of_int
+         |> ( ^ ) "Output Amount: " |> Js.string;
+      income_amount_div##.innerHTML
+      := building.income |> string_of_int |> ( ^ ) "Income: "
+         |> Js.string;
+      defense_amount_div##.innerHTML
+      := building.defense |> string_of_int |> ( ^ ) "Defense: "
+         |> Js.string;
+      maintenance_amount_div##.innerHTML
+      := building.maintenance |> string_of_int |> ( ^ ) "Maintenance: "
+         |> Js.string;
+      Dom.appendChild info_div bold_name;
+      if building.output |> resource_name <> "" then begin
+        Dom.appendChild info_div output_name_div;
+        Dom.appendChild info_div output_amount_div
+      end;
+      Dom.appendChild info_div income_amount_div;
+      Dom.appendChild info_div defense_amount_div;
+      Dom.appendChild info_div maintenance_amount_div;
+      Dom.appendChild info_container_div info_div
 
 (** [highlight state event] highlights a cell in [state] by calculating
     its positions with [event]. *)
@@ -322,16 +409,12 @@ let highlight state (event : Html.mouseEvent Js.t) =
     && fst positions < map_length
     && snd positions >= 0
     && snd positions < map_length
-  then
-    draw_cell state (fst positions) (snd positions)
-      "hsla(60, 100%, 50%, 0.25)";
-  if
-    fst positions >= 0
-    && fst positions < map_length
-    && snd positions >= 0
-    && snd positions < map_length
-  then update_info state (fst positions) (snd positions)
-  else info_div##.innerHTML := Js.string "";
+  then begin
+    Firebug.console##log positions;
+    draw_cell state positions "hsla(60, 100%, 50%, 0.25)";
+    set_info state positions
+  end
+  else clean_info;
   Js._true
 
 (** [add_highlight_listener state] adds an event listener to the
@@ -375,9 +458,9 @@ let find_cost lst name =
   try (List.find (fun b -> b.name = name) lst).cost |> string_of_int
   with Not_found -> "0"
 
-(** [draw_building_selections] draw the list of available buildings that
-    can be plotted on the GUI. *)
-let draw_building_selections lst =
+(** [draw_selections] draw the list of available buildings that can be
+    plotted on the GUI. *)
+let draw_selections lst =
   List.mapi
     (fun i (name, img) ->
       let box = Html.createDiv Html.document in
@@ -395,7 +478,7 @@ let draw_building_selections lst =
       box##.style##.borderRadius := Js.string "5px";
       img##.id := i |> string_of_int |> Js.string;
       img##.className := Js.string "image is-64x64";
-      Dom.appendChild building_selection box;
+      Dom.appendChild selection_div box;
       Dom.appendChild box img;
       Dom.appendChild box span)
     textures
@@ -447,9 +530,9 @@ let save_game state _ =
   let modal_button = Html.createButton Html.document in
   let new_link = Html.createA Html.document in
   let encode_url =
-    "data:text/json;charset=utf-8,"
-    ^ Js.to_string
-        (Js.encodeURIComponent (Js.string (save_state state)))
+    state |> save_state |> Js.string |> Js.encodeURIComponent
+    |> Js.to_string
+    |> ( ^ ) "data:text/json;charset=utf-8,"
   in
   modal##.className := Js.string "modal is-active";
   modal_background##.className := Js.string "modal-background";
@@ -475,14 +558,16 @@ let save_game state _ =
   Dom.appendChild main_div modal;
   Js._true
 
-(** [add_save_button_listener] adds an event listener to the save game
-    button when being clicked. *)
+(** [add_save_button_listener state] adds an event listener to the save
+    game button when being clicked. *)
 let add_save_button_listener state =
   Html.addEventListener save_button Html.Event.click
     (Dom.handler (save_game state))
     Js._false
   |> ignore
 
+(** [add_pause_button_listener state] adds an event listener to the
+    pause game button when being clicked. *)
 let add_pause_button_listener state =
   Html.addEventListener pause_button Html.Event.click
     (Dom.handler (fun _ ->
@@ -491,21 +576,29 @@ let add_pause_button_listener state =
     Js._false
   |> ignore
 
+(** [delete_notification] removes the HTML elements related to showing
+    the event notification. *)
 let delete_notification =
   Dom.removeChild notification_div notification_button;
   Dom.removeChild notification_div notification_content;
-  Dom.removeChild stats_div notification_div
+  Dom.removeChild notification_container_div notification_div
 
+(** [draw_notification state] draws the HTML elements related to event
+    notification. *)
 let draw_notification state =
   let notification_handler _ =
-    if state.text <> "" then Dom.removeChild stats_div notification_div;
+    if state.text <> "" then begin
+      Dom.removeChild notification_div notification_button;
+      Dom.removeChild notification_div notification_content;
+      Dom.removeChild notification_container_div notification_div
+    end;
     state.text <- "";
     Js._true
   in
   notification_content##.innerHTML := Js.string state.text;
   Dom.appendChild notification_div notification_button;
   Dom.appendChild notification_div notification_content;
-  Dom.appendChild stats_div notification_div;
+  Dom.appendChild notification_container_div notification_div;
   Html.addEventListener notification_button Html.Event.click
     (Dom.handler notification_handler)
     Js._false
@@ -521,8 +614,8 @@ let update_slider_label =
   in
   slider##.onchange := Dom.handler onchange_handler
 
-(** [toggle_game is_hidden] hides the game session based on if it
-    [is_hidden]. *)
+(** [toggle_game is_shown] hides the game session based on if it
+    [is_shown]. *)
 let toggle_game is_shown =
   if is_shown then begin
     Dom.appendChild navbar_buttons_div pause_button;
@@ -535,8 +628,8 @@ let toggle_game is_shown =
     Dom.removeChild main_div game_div
   end
 
-(** [toggle_startup is_hidden] hides the game setup screen based on if
-    it [is_hidden]. *)
+(** [toggle_startup is_shown] hides the game setup screen based on if it
+    [is_shown]. *)
 let toggle_startup is_shown =
   if is_shown then Dom.appendChild main_div startup_div
   else Dom.removeChild main_div startup_div
@@ -560,13 +653,15 @@ let draw_setup =
     game GUI. *)
 let update_statistics state =
   set_pause_button state;
-  set_tick_div state;
-  set_population_div state;
-  set_money_div state;
-  set_food_div state;
-  set_electricity_div state;
-  set_iron_div state;
-  set_coal_div state;
+  set_tick_span state;
+  set_population_span state;
+  set_money_span state;
+  set_food_span state;
+  set_electricity_span state;
+  set_iron_span state;
+  set_coal_span state;
+  set_deficit_counter state;
+  set_starvation_counter state;
   if String.length state.text <> 0 then draw_map state
 
 (** [setup_gui state] setups the game session based on the [state]. *)
@@ -574,10 +669,12 @@ let setup_gui state =
   reset_canvas state;
   setup_canvas state;
   update_statistics state;
-  draw_building_selections state.buildings;
+  draw_selections state.buildings;
   add_event_listeners state;
   draw_map state
 
+(** [draw_game_over state] draws the game over screen for the user when
+    the game is over according to [state]. *)
 let draw_game_over state =
   let modal = Html.createDiv Html.document in
   let modal_background = Html.createDiv Html.document in
@@ -587,10 +684,15 @@ let draw_game_over state =
   modal##.className := Js.string "modal is-active";
   modal_background##.className := Js.string "modal-background";
   modal_content##.className
-  := Js.string "modal-content is-flex is-justify-content-center";
+  := Js.string
+       "modal-content is-flex is-justify-content-center has-text-light";
   modal_button##.className := Js.string "modal-close is-large";
-  (* Html.addEventListener modal_button Html.Event.click (Dom.handler
-     (fun _ -> Js._true)) Js._false |> ignore; *)
+  Html.addEventListener modal_button Html.Event.click
+    (Dom.handler (fun _ ->
+         Html.window##.location##reload;
+         Js._true))
+    Js._false
+  |> ignore;
   message##.innerHTML := Js.string state.game_over_message;
   Dom.appendChild modal modal_background;
   Dom.appendChild modal modal_content;
@@ -598,16 +700,16 @@ let draw_game_over state =
   Dom.appendChild modal_content message;
   Dom.appendChild main_div modal
 
-let next_state_timer state =
-  let update_time = state.last_updated +. state.interval_time in
-  let current_time = Unix.gettimeofday () in
-  let is_next_state = current_time > update_time in
-  if is_next_state then next_state state;
-  if is_next_state then state.last_updated <- current_time
-
 (** [game_loop state] is the main recursive game loop in which parts of
     the GUI is updated when the [state] is updated. *)
 let rec game_loop state =
+  let next_state_timer state =
+    let update_time = state.last_updated +. state.interval_time in
+    let current_time = Unix.gettimeofday () in
+    let is_next_state = current_time > update_time in
+    if is_next_state then next_state state;
+    if is_next_state then state.last_updated <- current_time
+  in
   if not state.is_game_over then begin
     update_statistics state;
     next_state_timer state;
@@ -618,51 +720,43 @@ let rec game_loop state =
   end
   else draw_game_over state
 
+let trigger_game_loop state =
+  toggle_startup false;
+  toggle_game true;
+  setup_gui state;
+  delete_notification;
+  game_loop state
+
 (** [handle_start_from_file _] starts the game session from an user
     provided save file. *)
 let handle_start_from_file _ =
+  let opt_get opt_value =
+    Js.Opt.get opt_value (fun _ -> raise Not_found)
+  in
   let file_lst =
     Js.Optdef.get game_save##.files (fun _ -> raise Not_found)
   in
-  let normal_process =
-    let file =
-      Js.Opt.get (file_lst##item 0) (fun _ -> raise Not_found)
-    in
+  if file_lst##.length > 0 then begin
+    let file = opt_get (file_lst##item 0) in
     let file_reader = new%js File.fileReader in
-    let file_load_handler e =
-      let evt = Js.Opt.get e##.target (fun _ -> raise Not_found) in
-      let result = evt##.result in
-      let file_string =
-        Js.Opt.get (File.CoerceTo.string result) (fun _ ->
-            raise Not_found)
-      in
-      let state = file_string |> Js.to_string |> from_string in
-      toggle_startup false;
-      toggle_game true;
-      setup_gui state;
-      delete_notification;
-      game_loop state;
+    let file_load_handler event =
+      let event_target = opt_get event##.target in
+      event_target##.result |> File.CoerceTo.string |> opt_get
+      |> Js.to_string |> from_string |> trigger_game_loop;
       Js._true
     in
     file_reader##.onload := Dom.handler file_load_handler;
     file_reader##readAsText file
-  in
-  if file_lst##.length > 0 then normal_process;
+  end;
   Js._true
 
 (** [handle_start_from_setup _] starts the game session from the user
     provided settings. *)
 let handle_start_from_setup _ =
-  let state =
-    new_state 1200 750
-      (slider##.value |> Js.to_string |> int_of_string)
-      128 64
-  in
-  toggle_startup false;
-  toggle_game true;
-  setup_gui state;
-  delete_notification;
-  game_loop state;
+  new_state 1200 750
+    (slider##.value |> Js.to_string |> int_of_string)
+    128 64
+  |> trigger_game_loop;
   Js._true
 
 (** [start_game] registers the two main event handler that starts the

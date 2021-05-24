@@ -1,10 +1,8 @@
-open Buildings
-
 (** The type [cell] represents the most basic unit in construction that
-   holds either a building, a road, or nothing. *)
+    holds either a building, a road, or nothing. *)
 type cell =
-  | Building of Buildings.building
-  | Road of Buildings.road
+  | Building of Cells.building
+  | Road of Cells.road
   | None
 
 (** The type [state] records condition of the game at a certain instance
@@ -17,9 +15,10 @@ type state = {
   mutable canvas_size : int * int;
   mutable map_length : int;
   mutable cell_size : int * int;
-  mutable buildings : building list;
+  mutable buildings : Cells.building list;
   mutable cells : cell array array;
   mutable selected_cell : int;
+  mutable is_highlighted : bool;
   mutable housing_capacity : int;
   (*mutable military_strength : int;*)
   mutable population : int;
@@ -52,7 +51,7 @@ val new_state :
   (*?happiness:float ->*)
   ?is_paused:bool ->
   ?is_game_over:bool ->
-  ?condition:int->
+  ?condition:int ->
   ?is_final_building_placed:bool ->
   int ->
   int ->
@@ -84,11 +83,11 @@ val next_state : state -> unit
     [string]. [string] must be a valid JSON. *)
 val from_string : string -> state
 
-(** [save_state st] saves the state [st] into a json file in the same
+(** [save_state state] saves the state [st] into a json file in the same
     directory. If the file already exists, contents will be overwritten. *)
 val save_state : state -> string
 
-(** [place_building st name x y] places building with name [name] inside 
-    [state] by its [x] and [y] coordinates if it satisfies requirements in 
-    cost and workforce. *)
+(** [place_building satte name x y] places building with name [name]
+    inside [state] by its [x] and [y] coordinates if it satisfies
+    requirements in cost and workforce. *)
 val place_building : state -> string -> int -> int -> unit

@@ -1,7 +1,7 @@
 {
     "buildings": [
         {
-            "name": "apartment",
+            "name": "House",
             "cost": 50,
             "maintenance": 0,
             "output": {},
@@ -13,7 +13,7 @@
             "is_final_building": false
         },
         {
-            "name": "nice apartment",
+            "name": "Nice apartment",
             "cost": 150,
             "maintenance": 0,
             "output": {},
@@ -30,7 +30,7 @@
             "is_final_building": false
         },
         {
-            "name": "oats_plantation",
+            "name": "Oats plantation",
             "cost": 50,
             "maintenance": 0,
             "output": {
@@ -45,7 +45,7 @@
             "is_final_building": false
         },
         {
-            "name": "coal mine",
+            "name": "Coal mine",
             "cost": 200,
             "maintenance": 0,
             "output": {
@@ -60,7 +60,7 @@
             "is_final_building": false
         },
         {
-            "name": "power_plant",
+            "name": "Power plant",
             "cost": 200,
             "maintenance": 5,
             "output": {
@@ -80,7 +80,7 @@
             "is_final_building": false
         },
         {
-            "name": "mine",
+            "name": "Mine",
             "cost": 200,
             "maintenance": 0,
             "output": {
@@ -100,7 +100,7 @@
             "is_final_building": false
         },
         {
-            "name": "steel mill",
+            "name": "Steel mill",
             "cost": 50,
             "maintenance": 5,
             "output": {
@@ -128,7 +128,7 @@
             "is_final_building": false
         },
         {
-            "name": "canned oat factory",
+            "name": "Canned oat factory",
             "cost": 50,
             "maintenance": 10,
             "output": {
@@ -152,7 +152,7 @@
             "is_final_building": false
         },
         {
-            "name": "steel market",
+            "name": "Steel market",
             "cost": 200,
             "maintenance": 5,
             "output": {
@@ -172,7 +172,7 @@
             "is_final_building": false
         },
         {
-            "name": "iorn market",
+            "name": "Iorn market",
             "cost": 100,
             "maintenance": 3,
             "output": {
@@ -192,7 +192,7 @@
             "is_final_building": false
         },
         {
-            "name": "canned oats market",
+            "name": "Canned oats market",
             "cost": 150,
             "maintenance": 5,
             "output": {
@@ -212,7 +212,7 @@
             "is_final_building": false
         },
         {
-            "name": "barracks",
+            "name": "Barracks",
             "cost": 200,
             "maintenance": 5,
             "output": {
@@ -232,7 +232,7 @@
             "is_final_building": false
         },
         {
-            "name": "the wonder",
+            "name": "The wonder",
             "cost": 20000,
             "maintenance": 0,
             "output": {

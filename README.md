@@ -5,13 +5,13 @@
 * [x] Beautify GUI
 * [ ] Finalizing GUI inputs and displays
 * [x] Random Events (e.g. Random Attacks, Nature Disasters, etc...)
-* [ ] Add Happiness
+* [x] Add Happiness
 * [ ] Refine Building Attributes
 * [ ] Update Documentation
 * [ ] Add More Test Cases
-* [ ] Add Game Pausing
+* [x] Add Game Pausing
 * [ ] Add Endgame Building
-* [ ] Add Gameover States
+* [x] Add Gameover States
 
 ## Instruction
 

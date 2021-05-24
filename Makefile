@@ -14,7 +14,7 @@ docs:
 	dune build @doc
 
 install:
-	opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx js_of_ocaml-lwt odoc ounit yojson
+	opam install -y dune js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx odoc ounit yojson
 
 linecount:
 	cloc --by-file --include-lang=OCaml .

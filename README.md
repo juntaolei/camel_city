@@ -62,4 +62,4 @@ Open ./_build/default/_doc/_html/index.html in a browser.
 
 ## Acknowledgement and Credit
 
-The textures in this project embed Font Awesome icons. [Credit](https://fontawesome.com/license)
+The textures in this project embed Font Awesome icons. [Link to Font Awesome License](https://fontawesome.com/license)

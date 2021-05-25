@@ -100,12 +100,10 @@ let iter_buildings json =
                ( pair |> member "name" |> to_string,
                  pair |> member "amount" |> to_int ))
       in
-      (*let happiness = int_of_member "happiness" in*)
       let population_dependency =
         int_of_member "population_dependency"
       in
       let housing = int_of_member "housing" in
-      (*let entertainment = int_of_member "entertainment" in*)
       let is_final_building =
         building |> member "is_final_building" |> to_bool
       in
@@ -262,7 +260,8 @@ let update_is_in_deficit state =
 (** [update_is_game_over state] updates the [is_game_over] parameter of
     [state]. *)
 let update_is_game_over state =
-  if state.condition <> 0 then state.is_game_over <- true
+  if state.condition <> 0 || state.is_final_building_placed then
+    state.is_game_over <- true
 
 (** [update_game_over_text state] updates [text] of [state]
     corresponding to different types of game over situations. *)

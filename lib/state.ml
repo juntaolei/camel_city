@@ -634,12 +634,14 @@ let place_building state name x y =
   | None -> ()
   | Some stockpile ->
       if is_sufficient_workforce state building then begin
-        place_cell state
-          (Building
-             (List.find
-                (fun building -> building.name = name)
-                state.buildings))
-          x y;
+        let building =
+          List.find
+            (fun building -> building.name = name)
+            state.buildings
+        in
+        place_cell state (Building building) x y;
+        if building.is_final_building then
+          state.is_final_building_placed <- true;
         state.stockpile <- stockpile;
         state.unemployed <-
           state.unemployed - building.population_dependency

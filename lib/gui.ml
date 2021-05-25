@@ -106,8 +106,12 @@ let notification_button =
   get_element_by_id "close_notificaation" Html.CoerceTo.button
 
 (** Module wide value for the HTML Input element for submitting setup
-    for a game session. *)
+    for a normal game session. *)
 let submit = get_element_by_id "submit" Html.CoerceTo.input
+
+(** Module wide value for the HTML Input element for submitting setup
+    for a sandbox game session. *)
+let sandbox = get_element_by_id "sandbox" Html.CoerceTo.input
 
 (** Module wide value for the HTML Input element for selecting cell size
     in game setup. *)
@@ -128,13 +132,21 @@ let label = get_element_by_id "cell_size_label" Html.CoerceTo.label
 (** List of texture names to be used in the GUI. *)
 let texture_names =
   [
-    "sand";
-    "road";
-    "house";
-    "oats_plantation";
-    "power_plant";
-    "mine";
-    "barrack";
+    "Sand";
+    "Road";
+    "House";
+    "Oats Plantation";
+    "Power Plant";
+    "Mine";
+    "Barrack";
+    "Nice Apartment";
+    "Steel Mill";
+    "Canned Oats Factory";
+    "Steel Market";
+    "Iron Market";
+    "Canned Oats Market";
+    "The Wonder";
+    "Coal Mine";
   ]
 
 (** [create_img filename] is the image loaded based on a [filename]. *)
@@ -289,9 +301,9 @@ let draw_map state =
       Array.iteri (fun j c ->
           let texture =
             match c with
-            | Road _ -> find_texture "road"
+            | Road _ -> find_texture "Road"
             | Building building -> find_texture building.name
-            | None -> find_texture "sand"
+            | None -> find_texture "Sand"
           in
           draw_img state i j texture))
     state.cells
@@ -410,7 +422,6 @@ let highlight state (event : Html.mouseEvent Js.t) =
     && snd positions >= 0
     && snd positions < map_length
   then begin
-    Firebug.console##log positions;
     draw_cell state positions "hsla(60, 100%, 50%, 0.25)";
     set_info state positions
   end
@@ -759,11 +770,26 @@ let handle_start_from_setup _ =
   |> trigger_game_loop;
   Js._true
 
+(** [handle_start_from_setup_sandbox _] starts the game session in
+    sandbox mode from the user provided settings. *)
+let handle_start_from_setup_sandbox _ =
+  let state =
+    new_state ~is_sandbox:true 1200 750
+      (slider##.value |> Js.to_string |> int_of_string)
+      128 64
+  in
+  state.stockpile <-
+    ("money", 1000000)
+    :: List.filter (fun (k, _) -> k <> "money") state.stockpile;
+  state |> trigger_game_loop;
+  Js._true
+
 (** [start_game] registers the two main event handler that starts the
     game. *)
 let start_game =
   start_save##.onclick := Dom.handler handle_start_from_file;
-  submit##.onclick := Dom.handler handle_start_from_setup
+  submit##.onclick := Dom.handler handle_start_from_setup;
+  sandbox##.onclick := Dom.handler handle_start_from_setup_sandbox
 
 let main =
   draw_setup;

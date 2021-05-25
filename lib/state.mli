@@ -8,6 +8,7 @@ type cell =
 (** The type [state] records condition of the game at a certain instance
     of time. *)
 type state = {
+  mutable is_sandbox : bool;
   mutable tick : int;
   mutable interval_time : float;
   mutable last_updated : float;
@@ -20,14 +21,11 @@ type state = {
   mutable selected_cell : int;
   mutable is_highlighted : bool;
   mutable housing_capacity : int;
-  (*mutable military_strength : int;*)
   mutable population : int;
   mutable unemployed : int;
   mutable food : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  (*mutable revolt_counter : int;*)
-  (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
   mutable condition : int;
@@ -39,16 +37,14 @@ type state = {
 (** [new_state canvas_width canvas_height map_length cell_width cell_height]
     initializes a new [state]. Requires: *)
 val new_state :
+  ?is_sandbox:bool ->
   ?tick:int ->
   ?housing_capacity:int ->
-  (*?military_strength:int ->*)
   ?population:int ->
   ?unemployed:int ->
   ?food:int ->
   ?deficit_counter:int ->
   ?starvation_counter:int ->
-  (*?revolt_counter:int ->*)
-  (*?happiness:float ->*)
   ?is_paused:bool ->
   ?is_game_over:bool ->
   ?condition:int ->

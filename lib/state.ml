@@ -30,6 +30,7 @@ type cell =
   | None
 
 type state = {
+  mutable is_sandbox : bool;
   mutable tick : int;
   mutable interval_time : float;
   mutable last_updated : float;
@@ -42,14 +43,11 @@ type state = {
   mutable selected_cell : int;
   mutable is_highlighted : bool;
   mutable housing_capacity : int;
-  (*mutable military_strength : int;*)
   mutable population : int;
   mutable unemployed : int;
   mutable food : int;
   mutable deficit_counter : int;
   mutable starvation_counter : int;
-  (*mutable revolt_counter : int;*)
-  (*mutable happiness : float;*)
   mutable is_paused : bool;
   mutable is_game_over : bool;
   mutable condition : int;
@@ -125,17 +123,15 @@ let default_buildings =
   |> to_list |> iter_buildings
 
 let new_state
+    ?(is_sandbox = false)
     ?(tick = 1)
     ?(housing_capacity = 0)
-    ?((*?(military_strength = 0)*)
-    population = 0)
+    ?(population = 0)
     ?(unemployed = 0)
     ?(food = 0)
     ?(deficit_counter = 0)
     ?(starvation_counter = 0)
-    ?((*?(revolt_counter = 0)*)
-      (*?(happiness = 0.)*)
-    is_paused = true)
+    ?(is_paused = true)
     ?(is_game_over = false)
     ?(condition = 0)
     ?(is_final_building_placed = false)
@@ -145,6 +141,7 @@ let new_state
     cell_width
     cell_height =
   {
+    is_sandbox;
     tick;
     interval_time = 1.;
     last_updated = 0.;
@@ -157,14 +154,11 @@ let new_state
     selected_cell = -1;
     is_highlighted = false;
     housing_capacity;
-    (*military_strength;*)
     population;
     unemployed;
     food;
-    (*happiness;*)
     deficit_counter;
     starvation_counter;
-    (*revolt_counter;*)
     is_paused;
     is_game_over;
     condition;
@@ -457,18 +451,15 @@ let from_string file_string =
   (*let float_of_member name = json |> member name |> to_float in*)
   let bool_of_member name = json |> member name |> to_bool in
   let init_state =
-    new_state ~tick:(int_of_member "tick")
-      ~housing_capacity:
-        (int_of_member "housing_capacity")
-        (*~military_strength:(int_of_member "military_strength")*)
+    new_state
+      ~is_sandbox:(bool_of_member "is_sandbox")
+      ~tick:(int_of_member "tick")
+      ~housing_capacity:(int_of_member "housing_capacity")
       ~population:(int_of_member "population")
       ~unemployed:(int_of_member "unemployed")
       ~food:(int_of_member "food")
       ~deficit_counter:(int_of_member "deficit_counter")
-      ~starvation_counter:
-        (int_of_member "starvation_counter")
-        (*~revolt_counter:(int_of_member "revolt_counter")*)
-        (*~happiness:(float_of_member "happiness")*)
+      ~starvation_counter:(int_of_member "starvation_counter")
       ~is_paused:true
       ~is_game_over:(bool_of_member "is_game_over")
       ~condition:(int_of_member "condition")
@@ -492,6 +483,7 @@ let from_string file_string =
 let save_state state =
   `Assoc
     [
+      ("is_sandbox", `Bool state.is_sandbox);
       ("tick", `Int state.tick);
       ( "canvas_size",
         `Assoc
@@ -508,14 +500,11 @@ let save_state state =
           ] );
       ("cells", `List (generate_cell_lst state.cells));
       ("housing_capacity", `Int state.housing_capacity);
-      (*("military_strength", `Int state.military_strength);*)
       ("population", `Int state.population);
       ("unemployed", `Int state.unemployed);
       ("food", `Int state.food);
-      (*("happiness", `Float state.happiness);*)
       ("deficit_counter", `Int state.deficit_counter);
       ("starvation_counter", `Int state.starvation_counter);
-      (*("revolt_counter", `Int state.revolt_counter);*)
       ("is_paused", `Bool state.is_paused);
       ("is_game_over", `Bool state.is_game_over);
       ("condition", `Int state.condition);
@@ -663,21 +652,28 @@ let place_building state name x y =
 
 let next_state state =
   if not state.is_paused then begin
-    update_is_game_over state;
-    update_game_over_text state;
+    if state.is_sandbox |> not then begin
+      update_is_game_over state;
+      update_game_over_text state
+    end;
     if not state.is_game_over then begin
-      state.tick <- state.tick + 1;
+      state.tick <- state.tick |> succ;
       update_population state;
       state.stockpile <-
-        update_stockpile (available_buildings state) state.stockpile;
+        state.stockpile |> update_stockpile (available_buildings state);
       update_food state;
-      (*update_housing state;*)
-      update_starvation_counter state;
-      update_deficit_counter state;
-      update_is_out_of_time state;
-      update_is_in_starvation state;
-      update_is_in_deficit state;
-      if Random.int 50 = 0 then (
+      if state.is_sandbox then
+        state.stockpile <-
+          ("money", 1000000)
+          :: List.filter (fun (k, _) -> k <> "money") state.stockpile
+      else begin
+        update_starvation_counter state;
+        update_deficit_counter state;
+        update_is_out_of_time state;
+        update_is_in_starvation state;
+        update_is_in_deficit state
+      end;
+      if Random.int 200 = 0 && state.is_sandbox |> not then (
         let t, s, c = generate_event state in
         state.text <- t;
         state.stockpile <- s;

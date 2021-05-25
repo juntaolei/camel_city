@@ -15,3 +15,7 @@ html, body {
 #game {
   height: 100%;
 }
+
+#stats {
+  height: 300px;
+}

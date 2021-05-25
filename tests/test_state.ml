@@ -184,7 +184,6 @@ let init_stockpile =
     new_resource "iron" 0;
     new_resource "coal" 0;
     new_resource "steel" 0;
-    new_resource "canned oats" 0;
   ]
 
 (** [expected_stockpile_1] is the expected stockpile extracted from file
@@ -197,7 +196,6 @@ let expected_stockpile_1 =
     new_resource "iron" 0;
     new_resource "coal" 0;
     new_resource "steel" 0;
-    new_resource "canned oats" 0;
   ]
 
 (** [expected_stockpile_2] is the stockpile of state_1 after placing a
@@ -210,7 +208,6 @@ let expected_stockpile_2 =
     new_resource "iron" 0;
     new_resource "coal" 0;
     new_resource "steel" 0;
-    new_resource "canned oats" 0;
   ]
 
 (** [lst_of_array_array a] is the cell list list represented by the cell

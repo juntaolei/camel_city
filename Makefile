@@ -19,8 +19,8 @@ install:
 linecount:
 	cloc --by-file --include-lang=OCaml .
 
-runtest:
-	make build && dune runtest
+test:
+	make build-release && dune runtest
 
 zip:
 	zip -r camel_city.zip bin lib test .ocamlformat dune-project Makefile README.md

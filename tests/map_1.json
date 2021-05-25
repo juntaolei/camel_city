@@ -1,4 +1,5 @@
 {
+  "is_sandbox": false,
   "tick": 20,
   "canvas_size": {
     "x": 1200,
@@ -449,10 +450,6 @@
     },
     {
       "name": "steel",
-      "amount": 0
-    },
-    {
-      "name": "canned oats",
       "amount": 0
     }
   ]

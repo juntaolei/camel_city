@@ -24,6 +24,12 @@ For production:
 make
 ```
 
+or
+
+```bash
+make build-release
+```
+
 For development:
 
 ```bash

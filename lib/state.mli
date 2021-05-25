@@ -1,3 +1,9 @@
+(** The State module defines all type definition for state-related
+    things and the state logic. Most of the game logic is defined with
+    this module, but they are not exposed to the user of this module.
+    The type [state] is exposed to the user of this module as it is
+    easier for using the fields of the record. *)
+
 (** The type [cell] represents the most basic unit in construction that
     holds either a building, a road, or nothing. *)
 type cell =

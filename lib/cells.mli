@@ -1,3 +1,8 @@
+(** The Cells module defines all type definition for cell-related types
+    and relevant functions for creating or getting cells. The module
+    primarily defines the two types [building] and [road], which are
+    critical in the game. *)
+
 (** [building] is a type of basic construction unit in the map that is
     able to produce resources, tax, and some requires resources as
     input. Need money to purchase. *)
@@ -9,15 +14,13 @@ type building = {
   income : int;
   defense : int;
   resource_dependency : (string * int) list;
-  (*happiness : int;*)
   population_dependency : int;
   housing : int;
-  (*entertainment : int;*)
   is_final_building : bool;
 }
 
-(** [road] is a type of basic construction unit in the map that serves as a 
-    decoration element to connect buildings. *)
+(** [road] is a type of basic construction unit in the map that serves
+    as a decoration element to connect buildings. *)
 type road = int * int
 
 (** [new_building name cost maint out_a out_n inc defense res_a res_n]
@@ -36,8 +39,9 @@ val new_building :
   (*int ->*)
   bool ->
   building
-(** [new_road x y] is the road at the location specified by coordinates [x]
-    and [y]. *)
+
+(** [new_road x y] is the road at the location specified by coordinates
+    [x] and [y]. *)
 val new_road : int -> int -> road
 
 (** [new_resource string int] makes a new resource [resource].*)

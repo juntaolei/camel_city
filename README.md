@@ -59,3 +59,7 @@ Note: The GUI is primarily tested with Firefox.
 ## Reading the Documentation
 
 Open ./_build/default/_doc/_html/index.html in a browser.
+
+## Acknowledgement and Credit
+
+The textures in this project embed Font Awesome icons. (Credit)[https://fontawesome.com/license]

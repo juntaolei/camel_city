@@ -10,7 +10,6 @@ let default_stockpile =
     ("iron", 0);
     ("coal", 0);
     ("steel", 0);
-    ("canned oats", 0);
   ]
 
 (** [deficit_limit] is the maximum number of ticks before resource
@@ -187,44 +186,40 @@ let available_homes state =
       Array.fold_left
         (fun acc cell ->
           match cell with
-          | Building b when b.name = "house" -> b.housing + acc
+          | Building b
+            when b.name = "House" || b.name = "Nice Apartment" ->
+              b.housing + acc
           | _ -> acc)
         0 row
       + acc)
     0 state.cells
-
-(* let update_housing state = (* not sure if this is used anymore *) let
-   housing_capacity = List.fold_left (fun acc building ->
-   building.housing + acc) 0 (available_buildings state) in
-   state.housing_capacity <- housing_capacity *)
 
 (** [update_food st] updates the amount of food after the camel
     population consumes their daily requirements. Each unit of camel
     consumes one unit of food every day/tick. *)
 let update_food state =
   state.stockpile <-
-    state.stockpile
-    |> List.map (fun res ->
-           if resource_name res = "food" then
-             new_resource "food" (resource_amount res - state.population)
-           else res);
+    List.map
+      (fun (k, v) ->
+        if k = "food" then
+          (k, v - int_of_float (0.25 *. float_of_int state.population))
+        else (k, v))
+      state.stockpile;
   state.food <-
     state.stockpile
     |> List.find (fun (name, _) -> name = "food")
     |> resource_amount
+    |> ( + ) (-int_of_float (0.25 *. float_of_int state.population))
 
 (** [update_population st] updates the [population] and [unemployed]
     parameters in state [st]. Natural rate of population growth is
     [0.2]. *)
 let update_population state =
-  if state.tick mod 5 = 0 then (
+  if state.tick mod 3 = 0 then (
     let homes = available_homes state in
-    let increase = int_of_float (0.2 *. float_of_int homes) in
+    let increase = 0.5 *. float_of_int homes |> int_of_float in
     state.population <- state.population + increase;
     state.unemployed <- state.unemployed + increase)
-(* let homes = List.length (available_homes state) in state.population
-   <- state.population + homes; state.unemployed <- state.unemployed +
-   homes; *)
 
 (** [update_starvation_counter st] updates the [starvation_counter] of
     [st]. *)
@@ -301,7 +296,9 @@ let is_stockpile_sufficient building stockpile : bool =
        (fun acc dependency ->
          let name = resource_name dependency in
          let amount = resource_amount dependency in
-         let new_amount = List.assoc name stockpile - amount in
+         let new_amount =
+           try List.assoc name stockpile - amount with Not_found -> -1
+         in
          if new_amount >= 0 then acc && true else acc && false)
        true
 
@@ -658,9 +655,9 @@ let next_state state =
     end;
     if not state.is_game_over then begin
       state.tick <- state.tick |> succ;
-      update_population state;
       state.stockpile <-
         state.stockpile |> update_stockpile (available_buildings state);
+      update_population state;
       update_food state;
       if state.is_sandbox then
         state.stockpile <-

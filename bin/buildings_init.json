@@ -116,7 +116,7 @@
                 },
                 {
                     "amount": 5,
-                    "name": "iorn"
+                    "name": "iron"
                 },
                 {
                     "amount": 5,
@@ -132,8 +132,8 @@
             "cost": 50,
             "maintenance": 10,
             "output": {
-                "amount": 10,
-                "name": "canned oats"
+                "amount": 30,
+                "name": "food"
             },
             "tax": 0,
             "defense": 0,
@@ -184,7 +184,7 @@
             "resource_dependency": [
                 {
                     "amount": 5,
-                    "name": "iorn"
+                    "name": "iron"
                 }
             ],
             "population_dependency": 5,
@@ -204,7 +204,7 @@
             "resource_dependency": [
                 {
                     "amount": 5,
-                    "name": "canned oats"
+                    "name": "food"
                 }
             ],
             "population_dependency": 5,

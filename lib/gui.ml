@@ -80,6 +80,10 @@ let iron_span = Html.getElementById "iron"
     of coal. *)
 let coal_span = Html.getElementById "coal"
 
+(** Module wide value for the HTML Span element for showing the amount
+    of steel. *)
+let steel_span = Html.getElementById "steel"
+
 (** Module wide value for the HTML Span element for showing the deficit
     counter. *)
 let deficit_span = Html.getElementById "deficit"
@@ -209,6 +213,10 @@ let set_iron_span state = set_span state iron_span "iron"
 (** [set_coal_div state] changes the attributes of the HTML Span element
     to show food. *)
 let set_coal_span state = set_span state coal_span "coal"
+
+(** [set_steel_div state] changes the attributes of the HTML Span
+    element to show food. *)
+let set_steel_div state = set_span state steel_span "steel"
 
 (** [set_deficit_counter state] changes the attributes of the HTML Span
     element to the deficit counter. *)
@@ -442,17 +450,33 @@ let add_highlight_listener state =
 let plot_cell state (event : Html.mouseEvent Js.t) =
   let positions = cell_positions state event in
   let name =
-    if not (is_selected state) then "sand"
+    if not (is_selected state) then "Sand"
     else List.nth textures state.selected_cell |> fst
   in
-  if is_selected state && name <> "road" && name <> "sand" then
-    place_building state name (fst positions) (snd positions);
-  if is_selected state && name = "road" then
+  if
+    is_selected state && name <> "Road" && name <> "Sand"
+    && fst positions >= 0
+    && fst positions < state.map_length
+    && snd positions >= 0
+    && snd positions < state.map_length
+  then place_building state name (fst positions) (snd positions);
+  if
+    is_selected state && name = "Road"
+    && fst positions >= 0
+    && fst positions < state.map_length
+    && snd positions >= 0
+    && snd positions < state.map_length
+  then
     place_cell state
       (Road (new_road (fst positions) (snd positions)))
       (fst positions) (snd positions);
-  if is_selected state && name = "sand" then
-    place_cell state None (fst positions) (snd positions);
+  if
+    is_selected state && name = "Sand"
+    && fst positions >= 0
+    && fst positions < state.map_length
+    && snd positions >= 0
+    && snd positions < state.map_length
+  then place_cell state None (fst positions) (snd positions);
   draw_map state;
   Js._true
 
@@ -545,6 +569,7 @@ let save_game state _ =
     |> Js.to_string
     |> ( ^ ) "data:text/json;charset=utf-8,"
   in
+  state.is_paused <- true;
   modal##.className := Js.string "modal is-active";
   modal_background##.className := Js.string "modal-background";
   modal_content##.className
@@ -583,6 +608,24 @@ let add_pause_button_listener state =
   Html.addEventListener pause_button Html.Event.click
     (Dom.handler (fun _ ->
          state.is_paused <- not state.is_paused;
+         Js._true))
+    Js._false
+  |> ignore
+
+(** [add_retrieve_file_name_listener state] changes the filename in the
+    textbox for uploaded game save file name.. *)
+let add_retrieve_file_name_listener =
+  Html.addEventListener game_save Html.Event.change
+    (Dom.handler (fun _ ->
+         let textbox = Html.getElementById "save_file_name" in
+         let file_lst =
+           Js.Optdef.get game_save##.files (fun _ -> raise Not_found)
+         in
+         (if file_lst##.length > 0 then
+          let file =
+            Js.Opt.get (file_lst##item 0) (fun _ -> raise Not_found)
+          in
+          textbox##.innerHTML := file##.name);
          Js._true))
     Js._false
   |> ignore
@@ -652,7 +695,8 @@ let add_event_listeners state =
   add_plot_listener state;
   add_building_selection_listener state;
   add_save_button_listener state;
-  add_pause_button_listener state
+  add_pause_button_listener state;
+  add_retrieve_file_name_listener
 
 (** [draw_setup] creates the initial game setup screen. *)
 let draw_setup =
@@ -671,6 +715,7 @@ let update_statistics state =
   set_electricity_span state;
   set_iron_span state;
   set_coal_span state;
+  set_steel_div state;
   set_deficit_counter state;
   set_starvation_counter state;
   if String.length state.text <> 0 then draw_map state

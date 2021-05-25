@@ -23,4 +23,4 @@ test:
 	make build-release && dune runtest
 
 zip:
-	zip -r camel_city.zip bin lib test .gitignore .ocamlformat dune-project Makefile README.md
+	zip -r camel_city.zip bin lib tests .gitignore .ocamlformat dune-project Makefile README.md

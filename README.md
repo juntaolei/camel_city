@@ -1,18 +1,5 @@
 # Camel City
 
-## TODO: Features
-
-* [x] Beautify GUI
-* [ ] Finalizing GUI inputs and displays
-* [x] Random Events (e.g. Random Attacks, Nature Disasters, etc...)
-* [x] Add Happiness
-* [ ] Refine Building Attributes
-* [ ] Update Documentation
-* [ ] Add More Test Cases
-* [x] Add Game Pausing
-* [ ] Add Endgame Building
-* [x] Add Gameover States
-
 ## Instruction
 
 This assumes that the user is using the same OCaml switch as cs3110-2021sp.
@@ -72,3 +59,7 @@ Note: The GUI is primarily tested with Firefox.
 ## Reading the Documentation
 
 Open ./_build/default/_doc/_html/index.html in a browser.
+
+## Acknowledgement and Credit
+
+The textures in this project embed Font Awesome icons. [Link to Font Awesome License](https://fontawesome.com/license)

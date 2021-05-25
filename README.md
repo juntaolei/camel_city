@@ -33,7 +33,7 @@ make build
 Run tests:
 
 ```bash
-make runtest
+make test
 ```
 
 Create a zip of the source code:
@@ -45,7 +45,7 @@ make zip
 Create documentation
 
 ```bash
-make doc
+make docs
 ```
 
 ## Running the Game in the Browser

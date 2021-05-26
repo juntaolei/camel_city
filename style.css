@@ -1,0 +1,21 @@
+*, *::after, *::before {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.selected {
+  opacity: 0.6;
+}
+
+#game {
+  height: 100%;
+}
+
+#stats {
+  height: 300px;
+}

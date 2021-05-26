@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+  <title>Camel City</title>
+</head>
+
+<body>
+  <section class="hero is-fullheight is-white">
+    <div class="hero-head">
+      <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+        <div class="container">
+          <div class="navbar-brand">
+            <span class="navbar-item is-size-5 has-text-weight-bold">Camel City</span>
+          </div>
+          <div class="navbar-menu">
+            <div class="navbar-end">
+              <div class="navbar-item">
+                <div class="buttons" id="navbar_buttons">
+                  <button class="button is-primary has-text-weight-bold" id="pause_button">
+                  </button>
+                  <button class="button is-primary has-text-weight-bold" id="save_button">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div class="hero-body p-1" id="main">
+      <div class="container container has-text-centered" id="startup">
+        <div class="field">
+          <label class="label" id="cell_size_label">Cell Size: 9</label>
+          <div class="control mb-3">
+            <input type="range" name="cell_size" id="cell_size" min="5" max="9" value="9">
+          </div>
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Normal Mode" name="submit" id="submit">
+            <input class="button is-primary" type="submit" value="Sandbox Mode" name="submit" id="sandbox">
+          </div>
+        </div>
+        <hr class="has-background-light">
+        <div class="field">
+          <div class="control mb-3">
+            <div class="file is-normal is-centered has-name">
+              <label class="file-label">
+                <input class="file-input" type="file" name="game_save" id="game_save">
+                <span class="file-cta">
+                  <span class="file-label">Choose a file...</span>
+                </span>
+                <span class="file-name" id="save_file_name"></span>
+              </label>
+            </div>
+          </div>
+          <div class="control">
+            <input class="button is-primary" type="submit" value="Restore Game Save" name="start_save" id="start_save">
+          </div>
+        </div>
+      </div>
+
+      <div class="container container has-text-centered" id="game">
+        <div class="columns my-3 tags are-medium" id="stats">
+          <div class="column block is-three-quarters">
+            <span class="tag is-info" id="tick">Tick: </span>
+            <span class="tag is-info" id="population">Population: </span>
+            <span class="tag is-info" id="money">Money: </span>
+            <span class="tag is-info" id="food">Food: </span>
+            <span class="tag is-info" id="electricity">Electricity: </span>
+            <span class="tag is-info" id="iron">Iron: </span>
+            <span class="tag is-info" id="steel">Steel: </span>
+            <span class="tag is-info" id="coal">Coal: </span>
+            <span class="tag is-info" id="deficit">Deficit Counter: </span>
+            <span class="tag is-info" id="starvation">Starvation Counter: </span>
+          </div>
+          <div class="column" id="info_container">
+            <div class="box" id="info"></div>
+          </div>
+        </div>
+        <div class="container" id="notification_container">
+          <div class="notification" id="notification">
+            <button class="delete" id="close_notificaation"></button>
+            <p id="notification_content"></p>
+          </div>
+        </div>
+        <div class="block is-flex is-justify-content-center is-align-items-center">
+          <div class="my-3" id="gui" style="height: 750px; width: 1200px;">
+            <canvas class="is-block" id="bg" style="position: absolute;"></canvas>
+            <canvas class="is-block" id="fg" style="position: absolute;"></canvas>
+          </div>
+        </div>
+        <div class="block is-flex is-flex-direction-row is-justify-content-space-between" id="building_selection"
+          style="overflow-x: auto;">
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-foot p-6">
+      <div class="container has-text-centered">
+        <a class="has-text-weight-light has-text-link" href="https://github.com/juntaolei/camel_city">GitHub</a>
+      </div>
+    </div>
+  </section>
+  <script text="text/javascript" src="main.js"></script>
+</body>
+
+</html>
